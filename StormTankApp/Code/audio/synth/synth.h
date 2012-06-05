@@ -3,6 +3,8 @@
 #include "lfo/lfo.h"
 
 double sgn(double d);
+
+namespace audio {
 namespace synth {
 
 const int note_count = 127;
@@ -149,4 +151,15 @@ class BasicGenerator {
   double tick;
 };
 
+
+class Synth {
+ public:
+  Synth() : osc1(44100) {
+  }
+  ~Synth() {
+  }
+  LFO osc1;
+};
+
+}
 }

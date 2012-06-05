@@ -33,13 +33,16 @@
     <ClCompile Include="Code\scenes\loading_scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\audio\sonant\player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Code\audio\sonant\sonant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Code\audio\output\directsound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\audio\synth\player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\audio\sonant\sonant_player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,9 +80,6 @@
     <ClInclude Include="Code\song\song2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\audio\sonant\player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\audio\sonant\sonant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -90,6 +90,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\output\output.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\sonant\sonant_player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

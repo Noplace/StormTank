@@ -64,6 +64,9 @@ void MainWindow::Initialize() {
   player_.set_audio_interface(audio_interface_);
   player_.Initialize();
 
+  player2_.set_audio_interface(audio_interface_);
+  player2_.Initialize();
+
   //loading_scene.Initialize(this);
   //intro_scene.Initialize(this);
   //current_scene = &loading_scene;
@@ -108,12 +111,12 @@ void MainWindow::Step() {
     timing.fps_counter = 0;
     timing.fps_time_span = 0;
 
-    char caption[256];
+    //char caption[256];
     //sprintf(caption,"Freq : %0.2f MHz",nes.frequency_mhz());
     //sprintf(caption,"CPS: %llu ",nes.cycles_per_second());
     
-    sprintf_s(caption,"FPS: %02d",timing.fps);
-    SetWindowText(handle(),caption);
+    //sprintf_s(caption,"FPS: %02d",timing.fps);
+    //SetWindowText(handle(),caption);
  
   }
   
@@ -128,6 +131,7 @@ int MainWindow::OnDestroy(WPARAM wParam,LPARAM lParam) {
   //intro_scene.Deinitialize();
   //loading_scene.Deinitialize();
   SwitchScene(nullptr);
+  player2_.Deinitialize();
   player_.Deinitialize();
   audio_interface_->Deinitialize();
   SafeDelete(&audio_interface_);

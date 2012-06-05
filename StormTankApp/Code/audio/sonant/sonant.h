@@ -70,6 +70,6 @@ typedef struct {
 
 short* sonant_init(song& songdata,int rowlen,int endpattern,int* progress_var);
 
-#include "player.h"
+#include "sonant_player.h"
 
 #endif

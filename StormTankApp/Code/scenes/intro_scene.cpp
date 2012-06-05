@@ -63,7 +63,8 @@ DWORD WINAPI IntroScene::playMusic(LPVOID lpThreadParameter) {
    
 
 int IntroScene::Initialize(MainWindow* win) {
-  Scene::Initialize(win->gfx());
+  graphics::Scene::Initialize(win->gfx());
+  BaseScene::Initialize(win);
   gfx = (graphics::ContextD3D9*)context_;
 
 
@@ -269,5 +270,12 @@ int IntroScene::Draw() {
 
   gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&arc1.world());
   arc1.Draw();
+
+
+  char caption[255];
+  sprintf_s(caption,"Song Time: %04.03f sec",win->player2().GetPlaybackSeconds());
+  SetWindowText(this->win->handle(),caption);
+  
+
   return S_OK;
 }

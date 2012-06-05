@@ -19,17 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Code\audio\synth\player.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
     <ClCompile Include="Code\audio\output\directsound.cpp" />
     <ClCompile Include="Code\audio\synth\lfo\lfo.cpp" />
-    <ClCompile Include="Code\audio\sonant\player.cpp" />
+    <ClCompile Include="Code\audio\sonant\sonant_player.cpp" />
     <ClCompile Include="Code\audio\sonant\sonant.cpp" />
     <ClCompile Include="Code\audio\synth\synth.cpp" />
     <ClCompile Include="Code\winmain.cpp" />
     <ClCompile Include="Code\scenes\loading_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\audio\synth\player.h" />
     <ClInclude Include="Code\main_window.h" />
     <ClInclude Include="Code\ptg\generators.h" />
     <ClInclude Include="Code\ptg\layers.h" />
@@ -42,7 +44,7 @@
     <ClInclude Include="Code\audio\output\audio_output_interface.h" />
     <ClInclude Include="Code\audio\output\directsound.h" />
     <ClInclude Include="Code\audio\synth\lfo\lfo.h" />
-    <ClInclude Include="Code\audio\sonant\player.h" />
+    <ClInclude Include="Code\audio\sonant\sonant_player.h" />
     <ClInclude Include="Code\audio\sonant\sonant.h" />
     <ClInclude Include="Code\song\song1.h" />
     <ClInclude Include="Code\audio\synth\synth.h" />

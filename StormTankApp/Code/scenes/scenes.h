@@ -6,7 +6,10 @@ struct GfxVertex {
 
 class BaseScene : public graphics::Scene {
  public:
-  virtual int Initialize(MainWindow* win) = 0;
+  virtual int Initialize(MainWindow* win) {
+    this->win = win;
+    return S_OK;
+  }
   virtual int Deinitialize() = 0;
   virtual int Update(double dt) = 0;
   virtual int Draw() = 0;

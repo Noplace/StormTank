@@ -12,6 +12,7 @@ class SonantPlayer {
   void Play();
   void Pause();
   void Stop();
+  double GetPlaybackSeconds();
   void set_audio_interface(audio::AudioOutputInterface* audio_interface) { audio_interface_ = (audio::AudioOutputInterface*)audio_interface; }
  private:
   static DWORD WINAPI PlayThread(LPVOID lpThreadParameter);
@@ -19,6 +20,7 @@ class SonantPlayer {
   short* row_buffer,*output_buffer;
   audio::AudioOutputInterface* audio_interface_;
   double row_time;
+  double song_time;
   HANDLE thread_handle,event1;
   DWORD thread_id;
   int state;

@@ -1,7 +1,6 @@
 #ifndef LFO_H
 #define LFO_H
 
-#include <string>
 
 //==============================================================================
 /**
@@ -50,15 +49,9 @@ public:
    */
   void setWaveform(waveform_t index);
 
-  /** @return the waveform's name as a std::string*/
-  const std::string getWaveformName(long index){return waveNames[index];}
 
-  /** @return the waveform's name as a C-string (char *) */
-  const char * get_C_WaveformName(long index){return waveNames[index].c_str();}
 
 private:
-  /** names of the waveforms for display purpose*/
-  static const std::string waveNames[kNumWave];
 
   float samplerate;
   

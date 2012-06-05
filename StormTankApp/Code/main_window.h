@@ -37,6 +37,7 @@ class MainWindow: public core::windows::Window {
     graphics::ContextD3D9* gfx() { return gfx_; }
     audio::DirectSound* audio_interface() { return audio_interface_; }
     SonantPlayer& player() { return player_; }
+    audio::synth::Player& player2() { return player2_; }
     utilities::Timer<double>& timer() { return timer_; }
    protected:
     int OnCreate(WPARAM wParam,LPARAM lParam);
@@ -48,6 +49,7 @@ class MainWindow: public core::windows::Window {
     BaseScene*                current_scene;
     graphics::InputLayout     input_layout;
     SonantPlayer              player_;
+    audio::synth::Player      player2_;
     utilities::Timer<double>  timer_;
     struct {
       uint64_t extra_cycles;

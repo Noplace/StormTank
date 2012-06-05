@@ -32,7 +32,7 @@ void SonantPlayer::Initialize() {
   initialized_ = true;
 
 
-  
+  state = 0;
 
     /*offset = 0;
     channels = 2;
@@ -61,6 +61,8 @@ void SonantPlayer::Deinitialize() {
 }
 
 void SonantPlayer::LoadSong(song* song_data,int rowlen,int endpattern,int* progress_var) {
+  if (state != 0)
+    return;
   memcpy(this->song_data,song_data,sizeof(song));
   this->rowlen = rowlen;
   this->endpattern = endpattern;
@@ -71,6 +73,7 @@ void SonantPlayer::LoadSong(song* song_data,int rowlen,int endpattern,int* progr
   sonantInit();
   SafeDeleteArray(&output_buffer);
   output_buffer = sonant_init(*song_data,rowlen,endpattern,progress_var);
+  song_time = 0;
 }
 
 void SonantPlayer::Play() {
@@ -85,9 +88,12 @@ void SonantPlayer::Stop() {
   PostThreadMessage(thread_id,WM_SP_STOP,0,0);
   current_row = 0;
   current_pattern = 0;
+  song_time = 0;
 }
 
-
+double SonantPlayer::GetPlaybackSeconds() {
+  return song_time * (1 / 1000.0);
+}
 
 DWORD WINAPI SonantPlayer::PlayThread(LPVOID lpThreadParameter) {
   auto self = (SonantPlayer*)lpThreadParameter;
@@ -125,11 +131,13 @@ DWORD WINAPI SonantPlayer::PlayThread(LPVOID lpThreadParameter) {
       double time_span =  (current_cycles - prev_cycles) * timer.resolution();
       if (time_span >= 250.0)
         time_span = 250.0;
-      span_accumulator += time_span;
-      while (span_accumulator >= dt) {
-        span_accumulator -= dt;
-        uint32_t buffer_size = (double(update_time) / 1000.0) * 44100 * 2 * 2;
-        if (time_lapse >= update_time) {//self->row_time) {
+      
+      //while (span_accumulator >= dt) {
+        //span_accumulator -= dt;
+
+        
+        if (span_accumulator >= update_time) {//self->row_time) {
+          uint32_t buffer_size = (double(span_accumulator) / 1000.0) * 44100 * 2 * 2;
           /*
           auto samples = track1_synth.SamplesPerTimeMS(time_lapse);
           double freq = track1_synth.NoteFreq((synth::Notes)note);
@@ -160,16 +168,19 @@ DWORD WINAPI SonantPlayer::PlayThread(LPVOID lpThreadParameter) {
 
           self->audio_interface_->Write(ob_ptr,buffer_size);
           ob_ptr += buffer_size>>1;
-
+          self->song_time += span_accumulator;
           time_lapse = 0;
+          span_accumulator = 0;
+          Sleep(10);
         }
         time_lapse += dt;
+        span_accumulator += time_span;
 
       }
       prev_cycles = current_cycles;
-    } else {
-      Sleep(20);
-    }
+    //} else {
+    //  Sleep(20);
+    //}
   
   }
  

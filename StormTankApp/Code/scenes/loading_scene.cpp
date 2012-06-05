@@ -5,8 +5,8 @@
    
 
 int LoadingScene::Initialize(MainWindow* win) {
-  Scene::Initialize(win->gfx());
-  this->win = win;
+  graphics::Scene::Initialize(win->gfx());
+  BaseScene::Initialize(win);
   gfx = (graphics::ContextD3D9*)context_;
 
   camera_.Initialize(gfx);
@@ -110,6 +110,7 @@ int LoadingScene::Draw() {
   arc1.Draw();
   gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&loading_bar.world());
   loading_bar.Draw();
+
   return S_OK;
 }
 
@@ -117,13 +118,14 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
   auto self = (LoadingScene*)lpThreadParameter;
 
   ResetEvent(self->event1);
-  self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
-  self->win->player().Play();
+  //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
+  //self->win->player().Play();
   self->loading_progress = 0;
-  //for (int i=0;i<100;++i) {
-    //self->loading_progress++;
-    //Sleep(10);
-  //}
+  for (int i=0;i<100;++i) {
+    self->loading_progress++;
+    Sleep(10);
+  }
+  self->win->player2().Play();
   SetEvent(self->event1);
 
   return S_OK;

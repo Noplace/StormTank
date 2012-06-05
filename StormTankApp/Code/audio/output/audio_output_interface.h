@@ -11,6 +11,7 @@ class AudioOutputInterface {
   virtual int Stop() = 0;
   virtual uint32_t GetBytesBuffered() = 0;
   virtual int Write(void*, uint32_t) = 0;
+  const WAVEFORMATEX& wave_format() { return wave_format_; }
  protected:
   WAVEFORMATEX wave_format_;
 };

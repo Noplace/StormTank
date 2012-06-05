@@ -10,7 +10,6 @@
 #include <cmath>
 #include "LFO.h"
 
-const std::string LFO::waveNames[] = {"triangle", "sinus", "sawtooth", "square", "exponent"};
 
 LFO::LFO(float samplerate)
   : samplerate(samplerate),
