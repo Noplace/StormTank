@@ -45,6 +45,9 @@
     <ClCompile Include="Code\audio\sonant\sonant_player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Code\audio\midi\midi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\stormtankapp.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\sonant\sonant_player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\midi\midi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

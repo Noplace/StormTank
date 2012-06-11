@@ -103,7 +103,6 @@ DWORD WINAPI Player::PlayThread(LPVOID lpThreadParameter) {
           uint32_t samples_to_render = (double(span_accumulator) / 1000.0) * 44100;
           uint32_t buffer_size = samples_to_render * 2 * sizeof(short);
 
-
           auto buffer = new short[samples_to_render*2];
           for (int i=0;i<samples_to_render*2;i+=2) {
             float left_sample,right_sample;
@@ -116,17 +115,17 @@ DWORD WINAPI Player::PlayThread(LPVOID lpThreadParameter) {
 
           self->audio_interface_->Write(buffer,buffer_size);
           delete [] buffer;
-
           samples_rendered += samples_to_render;
 
           //ob_ptr += buffer_size>>1;
-          self->song_time += span_accumulator;
+          
           time_lapse = 0;
           span_accumulator = 0;
           Sleep(10);
         }
         time_lapse += dt;
         span_accumulator += time_span;
+        self->song_time += time_span;
         prev_cycles = current_cycles;
       }
       

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Code\audio\midi\midi.cpp" />
     <ClCompile Include="Code\audio\synth\player.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
@@ -31,6 +32,7 @@
     <ClCompile Include="Code\scenes\loading_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\audio\midi\midi.h" />
     <ClInclude Include="Code\audio\synth\player.h" />
     <ClInclude Include="Code\main_window.h" />
     <ClInclude Include="Code\ptg\generators.h" />
@@ -150,7 +152,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <Profile>false</Profile>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

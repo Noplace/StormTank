@@ -1,6 +1,6 @@
 #include "../stormtankapp.h"
 #include "../song/song2.h"
-
+#include "../audio/midi/midi.h"
 
    
 
@@ -118,6 +118,7 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
   auto self = (LoadingScene*)lpThreadParameter;
 
   ResetEvent(self->event1);
+  ReadMidiFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
   //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
   //self->win->player().Play();
   self->loading_progress = 0;

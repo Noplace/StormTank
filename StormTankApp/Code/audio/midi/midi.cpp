@@ -1,54 +1,6 @@
 #include <WinCore/windows/windows.h>
 #include <stdio.h>
 
-union be_uint32_t {
-  struct {
-    uint8_t bytes[4];
-  };
-  uint32_t raw;
-  uint32_t value() {
-    return (bytes[0]<<24) |  (bytes[1]<<16) |  (bytes[2]<<8) |  bytes[3];
-  }
-  uint32_t operator=(const be_uint32_t& other) {
-    raw = other.raw;
-    return value();
-  }
-};
-
-union be_uint16_t {
-  struct {
-    uint8_t bytes[2];
-  };
-  uint16_t raw;
-  uint16_t value() {
-    return (bytes[0]<<8) |  bytes[1];
-  }
-  uint16_t operator=(const be_uint16_t& other) {
-    raw = other.raw;
-    return value();
-  }
-
-
-};
-
-#define MThd 0x4d546864
-#define MTrk 0x4d54726b
-
-#pragma pack(push)
-#pragma pack(1)
-struct HeaderChunk {
-  uint32_t tag;
-  uint32_t length;
-  uint16_t fileformat;
-  uint16_t track_count;
-  uint16_t dttpqn;
-};
-
-struct TrackChunk {
-  uint32_t tag;
-  uint32_t length;
-};
-#pragma pack(pop)
 
 class FileReader {
  public:
@@ -82,7 +34,99 @@ class FileReader {
   
 };
 
+
+#define MThd 0x4d546864
+#define MTrk 0x4d54726b
+
+#pragma pack(push)
+#pragma pack(1)
+struct HeaderChunk {
+  uint32_t tag;
+  uint32_t length;
+  uint16_t fileformat;
+  uint16_t track_count;
+  uint16_t time_divison;
+};
+
+struct TrackChunk {
+  uint32_t tag;
+  uint32_t length;
+};
+#pragma pack(pop)
+
+
+
+
+
+struct Event {
+  Event() : data(nullptr),time(0),command(0),channel(0),next(nullptr),prev(nullptr) {
+
+  }
+  ~Event() {
+    if (data != nullptr) {
+      delete [] data;
+      data = nullptr;
+    }
+  }
+  int time;
+  int command;
+  int channel;
+  int type;
+  uint8_t* data;
+
+  bool IsSignature() {
+    return (command == 0xFF) && (data[0] == 0x58);
+  }
+  bool IsTempo() {
+    return (command == 0xFF) && (type == 0x51);
+  }
+  bool IsNoteOn() {
+    return (command == 0x90);
+  }
+  bool IsNoteOff() {
+    return (command == 0x90);
+  }
+  bool IsProgramChange() {
+    return (command == 0x90);
+  }
+
+  int GetNote() {
+    return data[0];
+  }
+
+  int GetVelocity() {
+    return data[1];
+  }
+
+  int GetProgram() {
+    return data[0];
+  }
+
+  double GetTempo() {
+    int microseconds_pet_qnote = *((uint32_t*)&data[0]);
+    return 60000000.0 / microseconds_pet_qnote;
+  }
+
+  Event* next;
+  Event* prev;
+};
+
+
+Event* head;
+
+
+void DeleteEvents() {
+  auto* ptr = head;
+  while (ptr != nullptr) {
+    auto* next = ptr->next;
+    delete ptr;
+    ptr = next;
+  }
+}
+
+
 void ReadMidiFile(char* filename) {
+  int error = 0;
   FILE* fp = fopen(filename,"rb");
   FileReader fr;
   fr.fp = fp;
@@ -90,15 +134,25 @@ void ReadMidiFile(char* filename) {
   HeaderChunk header;
   header.tag = fr.ReadNumber(4);
   if (header.tag != MThd) {
-    //fail 1
+    error = 1;
+    return;
   }
   header.length = fr.ReadNumber(4);
   if (header.length < 6) {
-    //fail 2
+    error = 2;
+    return;
   }
   header.fileformat = fr.ReadNumber(2);
   header.track_count = fr.ReadNumber(2);
-  header.dttpqn = fr.ReadNumber(2);
+  header.time_divison = fr.ReadNumber(2);
+  int fps = 0;
+  int ticks_per_beat = 0;
+  if (header.time_divison & 0x8000) {
+    fps = header.time_divison & 0x7FFF;
+  } else {
+    ticks_per_beat = header.time_divison & 0x7FFF;
+  }
+
   //if (incorrect) {
     //fail 3
   //}
@@ -107,36 +161,118 @@ void ReadMidiFile(char* filename) {
   }
   
   TrackChunk tc;
-  uint32_t track_time=0;
-  tc.tag = fr.ReadNumber(4);
-  if (tc.tag != MTrk) {
-    //fail 4
-  }
-  tc.length = fr.ReadNumber(4);
-  if (tc.length < 0) {
-    //fail 5
-  }
 
-  auto fpos = fseek(fp,0,SEEK_CUR);
-  bool read_track = (fseek(fp,0,SEEK_CUR) - fpos <= 19);
-  //while (read_track == true)
+
+  bool new_track = true;
+  bool read_track;
+  uint32_t track_time = 0;
+
+  head = new Event();
+
+  auto* event_ptr = head;
+
+  do
   {
+    if (new_track == true) {
+      tc.tag = fr.ReadNumber(4);
+      if (tc.tag != MTrk) {
+        error = 4;
+        break;
+      }
+      tc.length = fr.ReadNumber(4);
+      if (tc.length < 0) {
+        error = 5;
+        break;
+      }
+      //read tc.length bytes
+
+      new_track = false;
+    }
+
     auto event_time = fr.ReadNumber(0);
+    event_ptr->time = event_time;
     track_time += event_time;
-    uint8_t command = fr.ReadNumber(1);
+    uint8_t meta = fr.ReadNumber(1);
+    uint8_t command = meta & 0xF0;
+    uint8_t channel = meta & 0x0F;
+    event_ptr->command = command;
+    event_ptr->channel = channel;
+    event_ptr->type = 0;
     switch (command) {
+      case 0x90: {
+        event_ptr->data = new uint8_t[2];
+        event_ptr->data[0] = fr.ReadNumber(1);
+        event_ptr->data[1] = fr.ReadNumber(1);
+        //int note = fr.ReadNumber(1);
+        //int velocity = fr.ReadNumber(1);
+      }
+      break;
+      case 0xC0: {
+        //int prog = fr.ReadNumber(1);
+        //int unused = fr.ReadNumber(1);
+        event_ptr->data = new uint8_t[1];
+        event_ptr->data[0] = fr.ReadNumber(1);
+        fr.ReadNumber(1);
+      }
+      break;
+    }
+    switch (meta) {
       case 0xFF:{
-        auto v1 = fr.ReadNumber(1);
-        if (v1 < 0) {
-          //fail
+        event_ptr->type = fr.ReadNumber(1);
+        event_ptr->command = meta;
+        event_ptr->channel = 0;
+        if (event_ptr->type >= 1 && event_ptr->type <= 5) { //text events
+          int strlen = fr.ReadNumber(1);
+          char* str = new char[strlen+1];
+          char* strp = str;
+          for (int i=0;i<strlen;++i)
+            *strp++ = fgetc(fp);
+            *strp++ = '\0';
+          event_ptr->data = (uint8_t*)str;
+          int a = 1;
+        }
+        if (event_ptr->type == 0x2F) {
+          int len = fr.ReadNumber(1);
+          new_track = true;
+        }
+        if (event_ptr->type == 0x51) {
+          event_ptr->data = new uint8_t[4];
+          fr.ReadNumber(1); //len
+          uint32_t temp = fr.ReadNumber(3);
+          memcpy(event_ptr->data,&temp,sizeof(temp));
+          event_ptr->GetTempo();
+          //int len = fr.ReadNumber(1);
+          //int microseconds_pet_qnote = fr.ReadNumber(3);
+          //double bpm = 60000000.0 / microseconds_pet_qnote;
+          //int a = 1;
+        }
+        if (event_ptr->type == 0x58) {
+          event_ptr->data = new uint8_t[4];
+          fr.ReadNumber(1);
+          event_ptr->data[0] = fr.ReadNumber(1);
+          event_ptr->data[1] = fr.ReadNumber(1);
+          event_ptr->data[2] = fr.ReadNumber(1);
+          event_ptr->data[3] = fr.ReadNumber(1);
+          //int len = fr.ReadNumber(1);
+          //int num = fr.ReadNumber(1);
+          //int den = 1 << fr.ReadNumber(1);
+          //int metro_pulse = fr.ReadNumber(1);
+          //int _32notes_per_qnote = fr.ReadNumber(1);
         }
       } 
       break;
     }
-    read_track = (fseek(fp,0,SEEK_CUR) - fpos <= 19);
-  }
 
+    read_track = !feof(fp);
+    if (new_track == false) { //override the end of track event
+      event_ptr->next = new Event();
+      event_ptr->next->prev = event_ptr;
+      event_ptr = event_ptr->next;
+    }
+  } while (read_track == true);
+  event_ptr->next = nullptr;
 
+  DeleteEvents();
 
   fclose(fp);
 }

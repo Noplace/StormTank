@@ -2,6 +2,7 @@
 
 class MainWindow;
 
+#include <WinCore/memory/memory.h>
 #include <WinCore/windows/windows.h>
 #include <WinCore/timer/timer2.h>
 #include <VisualEssence/Code/ve.h>

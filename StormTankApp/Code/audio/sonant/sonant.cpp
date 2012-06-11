@@ -303,7 +303,7 @@ bool sonantRender(song& songdata,int row,int pattern,int rowlen,int endpattern,s
 
 // Init/play audio
 short* sonant_init(song& songdata,int rowlen,int endpattern,int* progress_var) {
-
+  
     float* lbuffer = new float[WAVE_SIZE*2];
     float* rbuffer = new float[WAVE_SIZE*2];
     short* wave_buffer = new short[WAVE_SIZE * WAVE_CHAN];

@@ -1,4 +1,4 @@
-#include <WinCore/windows/windows.h>
+#include <WinCore/windows/base.h>
 #include <WinCore/timer/timer2.h>
 #include <xnamath.h>
 #include "../output/output.h"

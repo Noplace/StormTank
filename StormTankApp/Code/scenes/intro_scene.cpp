@@ -150,7 +150,7 @@ int IntroScene::Initialize(MainWindow* win) {
     //blit_sawtooth(freq,samples,audio_buffer);
    // audio_interface_->Write(audio::output_buffer,samples*2*sizeof(short));
 
-    //ReadMidiFile("D:\\Personal\\Projects\\StormTank\\Solution\\StormTankApp\\Content\\sample.mid");
+    
 
    /* {
       MidiFile  inputfile;

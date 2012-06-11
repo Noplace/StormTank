@@ -22,15 +22,14 @@ class StormTankApp : public core::windows::Application {
  public: 
    MainWindow win;
    StormTankApp(HINSTANCE instance , LPSTR command_line, int show_command) : Application() {
-    unsigned old_fp_state;
-    #ifndef _M_X64 
-      _controlfp_s(&old_fp_state, _PC_53, _MCW_PC);
-    #endif
     if (RanBefore("StormTankApp") == true) {
       MessageBox(nullptr,"App already running","Error",MB_ICONWARNING|MB_OK);
       exit(0);
     }
-
+    unsigned old_fp_state;
+    #ifndef _M_X64 
+      _controlfp_s(&old_fp_state, _PC_53, _MCW_PC);
+    #endif
     win.Initialize();
    }
   ~StormTankApp() {
@@ -54,6 +53,5 @@ class StormTankApp : public core::windows::Application {
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
   StormTankApp app(hInstance,lpCmdLine,nShowCmd);
- 
   return app.Run();
 }
