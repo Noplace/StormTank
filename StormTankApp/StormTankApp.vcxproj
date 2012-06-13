@@ -20,20 +20,34 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\audio\midi\midi.cpp" />
+    <ClCompile Include="Code\audio\midi\sig\Array.cpp" />
+    <ClCompile Include="Code\audio\midi\sig\FileIO.cpp" />
+    <ClCompile Include="Code\audio\midi\sig\MidiFile.cpp" />
+    <ClCompile Include="Code\audio\midi\sig\SigCollection.cpp" />
+    <ClCompile Include="Code\audio\synth\oscillators\sine_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\player.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
     <ClCompile Include="Code\audio\output\directsound.cpp" />
     <ClCompile Include="Code\audio\synth\lfo\lfo.cpp" />
-    <ClCompile Include="Code\audio\sonant\sonant_player.cpp" />
-    <ClCompile Include="Code\audio\sonant\sonant.cpp" />
     <ClCompile Include="Code\audio\synth\synth.cpp" />
     <ClCompile Include="Code\winmain.cpp" />
     <ClCompile Include="Code\scenes\loading_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\audio\midi\midi.h" />
+    <ClInclude Include="Code\audio\midi\sig\Array.h" />
+    <ClInclude Include="Code\audio\midi\sig\FileIO.h" />
+    <ClInclude Include="Code\audio\midi\sig\MidiFile.h" />
+    <ClInclude Include="Code\audio\midi\sig\SigCollection.h" />
+    <ClInclude Include="Code\audio\synth\channel.h" />
+    <ClInclude Include="Code\audio\synth\component.h" />
+    <ClInclude Include="Code\audio\synth\effects\delay.h" />
+    <ClInclude Include="Code\audio\synth\instruments\instrument.h" />
+    <ClInclude Include="Code\audio\synth\instruments\sine_wave.h" />
+    <ClInclude Include="Code\audio\synth\oscillators\sine_oscillator.h" />
     <ClInclude Include="Code\audio\synth\player.h" />
+    <ClInclude Include="Code\audio\synth\util.h" />
     <ClInclude Include="Code\main_window.h" />
     <ClInclude Include="Code\ptg\generators.h" />
     <ClInclude Include="Code\ptg\layers.h" />
@@ -46,8 +60,6 @@
     <ClInclude Include="Code\audio\output\audio_output_interface.h" />
     <ClInclude Include="Code\audio\output\directsound.h" />
     <ClInclude Include="Code\audio\synth\lfo\lfo.h" />
-    <ClInclude Include="Code\audio\sonant\sonant_player.h" />
-    <ClInclude Include="Code\audio\sonant\sonant.h" />
     <ClInclude Include="Code\song\song1.h" />
     <ClInclude Include="Code\audio\synth\synth.h" />
   </ItemGroup>
@@ -110,8 +122,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)..\Output\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\Output\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -120,8 +132,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)..\Output\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\Output\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -132,6 +144,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

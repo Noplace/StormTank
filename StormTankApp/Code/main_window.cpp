@@ -61,8 +61,8 @@ void MainWindow::Initialize() {
   audio_interface_->Initialize(44100,2,16);
 
 
-  player_.set_audio_interface(audio_interface_);
-  player_.Initialize();
+  //player_.set_audio_interface(audio_interface_);
+  //player_.Initialize();
 
   player2_.set_audio_interface(audio_interface_);
   player2_.Initialize();
@@ -73,6 +73,7 @@ void MainWindow::Initialize() {
   SwitchScene(&loading_scene);
   Show();
   timing.prev_cycles = timer_.GetCurrentCycles();
+  //SetThreadAffinityMask(GetCurrentThread(),
 }
 
 void MainWindow::Step() {
@@ -93,7 +94,7 @@ void MainWindow::Step() {
   timing.total_cycles += timing.current_cycles-timing.prev_cycles;
   timing.prev_cycles = timing.current_cycles;
 
-  
+   
   if (timing.render_time_span >= 16.667) {
     gfx_->ClearTarget();
     gfx_->Begin();
@@ -132,7 +133,7 @@ int MainWindow::OnDestroy(WPARAM wParam,LPARAM lParam) {
   //loading_scene.Deinitialize();
   SwitchScene(nullptr);
   player2_.Deinitialize();
-  player_.Deinitialize();
+  //player_.Deinitialize();
   audio_interface_->Deinitialize();
   SafeDelete(&audio_interface_);
   gfx_->DestoryInputLayout(input_layout);
@@ -143,5 +144,14 @@ int MainWindow::OnDestroy(WPARAM wParam,LPARAM lParam) {
 }
 
 int MainWindow::OnCommand(WPARAM wParam,LPARAM lParam) {
+  return 0;
+}
+
+int MainWindow::OnActivate(WPARAM wParam,LPARAM lParam) {
+  if ((wParam&0xFFFF) == WA_INACTIVE) {
+
+  } else {
+
+  }
   return 0;
 }

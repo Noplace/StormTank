@@ -192,13 +192,13 @@ void ReadMidiFile(char* filename) {
     auto event_time = fr.ReadNumber(0);
     event_ptr->time = event_time;
     track_time += event_time;
-    uint8_t meta = fr.ReadNumber(1);
-    uint8_t command = meta & 0xF0;
-    uint8_t channel = meta & 0x0F;
+
+    uint8_t command = fr.ReadNumber(1);
+    uint8_t channel = command & 0x0F;
     event_ptr->command = command;
     event_ptr->channel = channel;
     event_ptr->type = 0;
-    switch (command) {
+    switch (command & 0xF0) {
       case 0x90: {
         event_ptr->data = new uint8_t[2];
         event_ptr->data[0] = fr.ReadNumber(1);
@@ -212,14 +212,10 @@ void ReadMidiFile(char* filename) {
         //int unused = fr.ReadNumber(1);
         event_ptr->data = new uint8_t[1];
         event_ptr->data[0] = fr.ReadNumber(1);
-        fr.ReadNumber(1);
       }
       break;
-    }
-    switch (meta) {
-      case 0xFF:{
+      case 0xF0:{
         event_ptr->type = fr.ReadNumber(1);
-        event_ptr->command = meta;
         event_ptr->channel = 0;
         if (event_ptr->type >= 1 && event_ptr->type <= 5) { //text events
           int strlen = fr.ReadNumber(1);
@@ -240,11 +236,6 @@ void ReadMidiFile(char* filename) {
           fr.ReadNumber(1); //len
           uint32_t temp = fr.ReadNumber(3);
           memcpy(event_ptr->data,&temp,sizeof(temp));
-          event_ptr->GetTempo();
-          //int len = fr.ReadNumber(1);
-          //int microseconds_pet_qnote = fr.ReadNumber(3);
-          //double bpm = 60000000.0 / microseconds_pet_qnote;
-          //int a = 1;
         }
         if (event_ptr->type == 0x58) {
           event_ptr->data = new uint8_t[4];

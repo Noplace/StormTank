@@ -118,14 +118,22 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
   auto self = (LoadingScene*)lpThreadParameter;
 
   ResetEvent(self->event1);
-  ReadMidiFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
-  //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
-  //self->win->player().Play();
+  
+  //ReadMidiFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
+  
+  MidiFile  inputfile;
   self->loading_progress = 0;
-  for (int i=0;i<100;++i) {
-    self->loading_progress++;
-    Sleep(10);
-  }
+  inputfile.read("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
+  self->loading_progress += 10;
+  inputfile.absoluteTime();
+  self->loading_progress += 20;
+  inputfile.joinTracks();
+  self->loading_progress += 20;
+  self->win->player2().LoadMidi(&inputfile);
+  
+
+  //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
+
   self->win->player2().Play();
   SetEvent(self->event1);
 

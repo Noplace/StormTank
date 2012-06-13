@@ -136,7 +136,7 @@ int DirectSound::Write(void* data_pointer, uint32_t size_bytes) {
   while(dw) {*lpSD++=*lpSS++;dw--;}
 
   if(buf_ptr2)  {
-    auto lpSD=(uint8_t*)buf_ptr2;
+    lpSD=(uint8_t*)buf_ptr2;
     dw=buf_size2;
     while(dw) {*lpSD++=*lpSS++;dw--;}
   }

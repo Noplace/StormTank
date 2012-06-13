@@ -33,19 +33,28 @@
     <ClCompile Include="Code\scenes\loading_scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\audio\sonant\sonant.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Code\audio\output\directsound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Code\audio\synth\player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\audio\sonant\sonant_player.cpp">
+    <ClCompile Include="Code\audio\midi\midi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\audio\midi\midi.cpp">
+    <ClCompile Include="Code\audio\synth\oscillators\sine_oscillator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\audio\midi\sig\Array.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\audio\midi\sig\MidiFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\audio\midi\sig\FileIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\audio\midi\sig\SigCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,9 +92,6 @@
     <ClInclude Include="Code\song\song2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\audio\sonant\sonant.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\audio\output\directsound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -98,10 +104,40 @@
     <ClInclude Include="Code\audio\synth\player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\audio\sonant\sonant_player.h">
+    <ClInclude Include="Code\audio\midi\midi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\audio\midi\midi.h">
+    <ClInclude Include="Code\audio\synth\effects\delay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\component.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\oscillators\sine_oscillator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\midi\sig\Array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\midi\sig\FileIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\midi\sig\MidiFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\midi\sig\SigCollection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\channel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\instruments\instrument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\instruments\sine_wave.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -25,24 +25,24 @@ public:
   typedef enum {triangle, sinus, sawtooth, square, exponent, kNumWave} waveform_t;
   
   /** phase type */
-  typedef unsigned int phase_t;
+  typedef unsigned __int64 phase_t;
 
 
   /**  @param samplerate the samplerate in Hz */
-  LFO(float samplerate);
-  virtual ~LFO() {}
+  LFO();
+  virtual ~LFO();
 
   /** increments the phase and outputs the new LFO value.
       @return the new LFO value between [-1;+1] */ 
-  float tick();
+  double tick();
 
   /** change the current rate
       @param rate new rate in Hz */
-  void setRate(const float rate);
+  void setRate(const double rate);
 
   /** change the current samplerate
       @param samplerate new samplerate in Hz */
-  void setSampleRate(const float samplerate_) {samplerate = (samplerate_>0.0) ? samplerate : 44100.0f;}
+  void setSampleRate(const double samplerate_) {samplerate = (samplerate_>0.0) ? samplerate_ : 44100.0;}
 
   /** select the desired waveform for the LFO
       @param index tag of the waveform
@@ -53,7 +53,7 @@ public:
 
 private:
 
-  float samplerate;
+  double samplerate;
   
   /** phase and phase increment
       the 8 Most Significant Bits represent the integer part,
@@ -69,7 +69,7 @@ private:
       \f[ val = (1-frac)*u[n] + frac*u[n+1] \f]
       even with n = 255.
       For n higher than 255, n is automatically  wrapped to 0-255*/
-  float table[257]; 
+  double* table;//[257]; 
 };
 
 #endif	// #ifndef LFO_H

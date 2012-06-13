@@ -51,6 +51,7 @@ void SonantPlayer::Deinitialize() {
   if (initialized_ == false)
     return;
   SafeDeleteArray(&row_buffer);
+  ResetEvent(event1);
   PostThreadMessage(thread_id,WM_SP_QUIT,0,0);
   WaitForSingleObject(event1,INFINITE);
   CloseHandle(thread_handle);
@@ -113,7 +114,6 @@ DWORD WINAPI SonantPlayer::PlayThread(LPVOID lpThreadParameter) {
   while (1) {
     if (PeekMessage(&msg, NULL, WM_USER, WM_USER+10, PM_REMOVE)) {
       if (msg.message == WM_SP_QUIT) {
-        ResetEvent(self->event1);
         break;
       } else if (msg.message == WM_SP_PLAY) {
         prev_cycles = timer.GetCurrentCycles();

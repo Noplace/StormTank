@@ -8,7 +8,7 @@ class MainWindow;
 #include <VisualEssence/Code/ve.h>
 #include "ptg/pgt.h"
 #include "audio/output/output.h"
-#include "audio/sonant/sonant.h"
-#include "audio/synth/player.h"
+//#include "audio/sonant/sonant.h"
+#include "audio/synth/synth.h"
 #include "scenes/scenes.h"
 #include "main_window.h"
