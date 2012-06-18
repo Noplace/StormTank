@@ -1,1 +1,0 @@
-void ReadMidiFile(char* filename);

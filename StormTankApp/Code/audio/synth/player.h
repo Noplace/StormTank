@@ -2,26 +2,26 @@
 namespace audio {
 namespace synth {
 
+struct NoteEventData {
+  double frequency;
+  uint8_t note;
+  uint8_t velocity;
+};
+
+struct InstrumentEventData {
+  uint8_t instrument;
+  uint8_t unused[5];
+};
 
 struct Event {
   double pos_ms;
   int channel;
   int command;
-  Notes note;
-
-  /*union {
-    struct {
-      uint8_t note_on:1; 
-      uint8_t note_off:1;
-      uint8_t tempo:1;
-      uint8_t prog_change:1;
-      uint8_t etc1:1;
-      uint8_t etc2:1;
-      uint8_t etc3:1;
-      uint8_t etc4:1;
-    };
-    uint8_t raw;
-  } type;*/
+  
+  struct {
+    NoteEventData note;
+    InstrumentEventData instrument;
+  } data;
 };
 
 
@@ -35,7 +35,7 @@ class Player {
   }
   void Initialize();
   void Deinitialize();
-  void LoadMidi(MidiFile* midi);
+  void LoadMidi(char* filename);
   void Play();
   void Pause();
   void Stop();
@@ -44,17 +44,26 @@ class Player {
  private:
   static DWORD WINAPI PlayThread(LPVOID lpThreadParameter);
   audio::AudioOutputInterface* audio_interface_;
-  instruments::SineWave* sine_instr[16];
+  instruments::Instrument* instr[128];
   Channel* channels[16];
-  Event* event_sequence;
+  short* output_buffer;
+  struct {
+    Event* event_sequence;
+    uint32_t event_index,event_count;
+    Event* getCurrentEvent() {
+      return &event_sequence[event_index];
+    }
+  }tracks[16];
+
   HANDLE thread_handle,tc_event;
-  double song_pos_ms,song_length_ms;
+  double song_pos_ms,song_length_ms, song_counter_ms;
+  double sample_time_ms;
   Util util;
   DWORD thread_id;
-  uint32_t event_index,event_count;
+  
   int state;
   bool initialized_;
-
+  void RenderSamples(uint32_t samples_count);
   void MixChannels(double& output_left,double& output_right);
 };
 

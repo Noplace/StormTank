@@ -19,33 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Code\audio\midi\midi.cpp" />
-    <ClCompile Include="Code\audio\midi\sig\Array.cpp" />
-    <ClCompile Include="Code\audio\midi\sig\FileIO.cpp" />
-    <ClCompile Include="Code\audio\midi\sig\MidiFile.cpp" />
-    <ClCompile Include="Code\audio\midi\sig\SigCollection.cpp" />
+    <ClCompile Include="Code\audio\midi\midi2.cpp" />
+    <ClCompile Include="Code\audio\synth\oscillators\exp_oscillator.cpp" />
+    <ClCompile Include="Code\audio\synth\oscillators\sawtooth_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\sine_oscillator.cpp" />
+    <ClCompile Include="Code\audio\synth\oscillators\square_oscillator.cpp" />
+    <ClCompile Include="Code\audio\synth\oscillators\triangle_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\player.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
     <ClCompile Include="Code\audio\output\directsound.cpp" />
-    <ClCompile Include="Code\audio\synth\lfo\lfo.cpp" />
     <ClCompile Include="Code\audio\synth\synth.cpp" />
     <ClCompile Include="Code\winmain.cpp" />
     <ClCompile Include="Code\scenes\loading_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\audio\midi\midi.h" />
-    <ClInclude Include="Code\audio\midi\sig\Array.h" />
-    <ClInclude Include="Code\audio\midi\sig\FileIO.h" />
-    <ClInclude Include="Code\audio\midi\sig\MidiFile.h" />
-    <ClInclude Include="Code\audio\midi\sig\SigCollection.h" />
+    <ClInclude Include="Code\audio\midi\midi2.h" />
     <ClInclude Include="Code\audio\synth\channel.h" />
     <ClInclude Include="Code\audio\synth\component.h" />
     <ClInclude Include="Code\audio\synth\effects\delay.h" />
+    <ClInclude Include="Code\audio\synth\filters\lowpass.h" />
     <ClInclude Include="Code\audio\synth\instruments\instrument.h" />
-    <ClInclude Include="Code\audio\synth\instruments\sine_wave.h" />
+    <ClInclude Include="Code\audio\synth\instruments\osc_wave.h" />
+    <ClInclude Include="Code\audio\synth\oscillators\exp_oscillator.h" />
+    <ClInclude Include="Code\audio\synth\oscillators\oscillator.h" />
+    <ClInclude Include="Code\audio\synth\oscillators\sawtooth_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\sine_oscillator.h" />
+    <ClInclude Include="Code\audio\synth\oscillators\square_oscillator.h" />
+    <ClInclude Include="Code\audio\synth\oscillators\triangle_oscillator.h" />
     <ClInclude Include="Code\audio\synth\player.h" />
     <ClInclude Include="Code\audio\synth\util.h" />
     <ClInclude Include="Code\main_window.h" />
@@ -59,7 +60,6 @@
     <ClInclude Include="Code\audio\output\output.h" />
     <ClInclude Include="Code\audio\output\audio_output_interface.h" />
     <ClInclude Include="Code\audio\output\directsound.h" />
-    <ClInclude Include="Code\audio\synth\lfo\lfo.h" />
     <ClInclude Include="Code\song\song1.h" />
     <ClInclude Include="Code\audio\synth\synth.h" />
   </ItemGroup>
@@ -145,11 +145,20 @@
       <ExceptionHandling>false</ExceptionHandling>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <EnablePREfast>false</EnablePREfast>
+      <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <Profile>true</Profile>
+      <Profile>false</Profile>
+      <StackReserveSize>
+      </StackReserveSize>
+      <HeapReserveSize>
+      </HeapReserveSize>
+      <HeapCommitSize>
+      </HeapCommitSize>
+      <StackCommitSize>
+      </StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

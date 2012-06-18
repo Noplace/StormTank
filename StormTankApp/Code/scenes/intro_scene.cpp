@@ -264,12 +264,12 @@ int IntroScene::Draw() {
   gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
   gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&world_mat);
   gfx->device()->SetTexture(0,(IDirect3DTexture9*)texture.data_pointer);
-  gfx->Draw(4,0);
+  //gfx->Draw(4,0);
   gfx->device()->SetTexture(0,nullptr);
-  gfx->Draw(4,4);
+  //gfx->Draw(4,4);
 
   gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&arc1.world());
-  arc1.Draw();
+  //arc1.Draw();
 
 
   char caption[255];

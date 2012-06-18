@@ -1,16 +1,21 @@
 #include <WinCore/windows/base.h>
 #include <WinCore/timer/timer2.h>
 #include <xnamath.h>
-#include "../midi/sig/MidiFile.h"
+#include "../midi/midi2.h"
 #include "../output/output.h"
 #include "component.h"
 #include "util.h"
+#include "oscillators/oscillator.h"
 #include "oscillators/sine_oscillator.h"
+#include "oscillators/square_oscillator.h"
+#include "oscillators/triangle_oscillator.h"
+#include "oscillators/sawtooth_oscillator.h"
+#include "oscillators/exp_oscillator.h"
 #include "instruments/instrument.h"
-#include "instruments/sine_wave.h"
-#include "channel.h"
-#include "lfo/lfo.h"
+#include "instruments/osc_wave.h"
+#include "filters/lowpass.h"
 #include "effects/delay.h"
+#include "channel.h"
 #include "player.h"
 
 double sgn(double d);

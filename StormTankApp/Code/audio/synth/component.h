@@ -10,17 +10,6 @@ class Component {
   uint32_t sample_rate_;
 };
 
-class Synth : public Component {
- public:
-  Synth() : Component(), frequency_(0.0) {}
-  virtual ~Synth() {}
-  virtual double Tick() = 0;
-  virtual void set_frequency(double frequency) {
-    frequency_ = frequency;
-  }
- protected:
-  double frequency_;
-};
 
 }
 }

@@ -3,10 +3,10 @@ namespace audio {
 namespace synth {
 namespace oscillators {
 
-class SineOscillator : public Oscillator {
+class ExpOscillator : public Oscillator {
  public:
-  SineOscillator();
-  ~SineOscillator();
+  ExpOscillator();
+  ~ExpOscillator();
  private:
 
 };
