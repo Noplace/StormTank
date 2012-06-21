@@ -102,6 +102,64 @@ kEventTypePitchBend,
 };
 
 
+struct Event {
+  //uint8_t* data;
+  double abs_time_ms;
+  uint32_t deltaTime;
+  EventType type,subtype;
+  uint8_t channel,track;
+    
+  union {
+    struct {
+      uint8_t frameRate,hour,min,sec,frame,subframe;
+    } smpte_offset;      
+    struct {
+      uint8_t numerator,denominator,metronome,thirtyseconds;
+    }time_signature;
+    struct {
+      uint32_t number;
+    }seq;
+    struct {
+      uint32_t microsecondsPerBeat;
+    } tempo;
+    struct {
+      uint8_t key,scale;
+    } key_signature;
+    struct {
+      uint8_t noteNumber,velocity;
+    } note;
+    struct {
+      uint8_t type,value;
+    }controller;
+    struct {
+      uint8_t noteNumber,amount;
+    }note_aftertouch;
+    struct {
+      uint8_t number;
+    }program;
+    struct {
+      uint8_t amount;
+    }channel_aftertouch;
+    struct {
+      uint8_t channelprefix;
+    } cp;
+    struct {
+      uint8_t value;
+    }pitch;
+  }data;
+
+  Event() : deltaTime(0) {
+    memset(this,0,sizeof(Event));
+  }
+  Event(const Event& other) {
+    memcpy(this,&other,sizeof(Event));
+  }
+  Event& operator =(const Event& other) {
+    memcpy(this,&other,sizeof(Event));
+    return *this;
+  }
+};
+
 /*
 class to parse the .mid file format
 (depends on stream.js)
@@ -126,35 +184,10 @@ class MidiLoader {
     }
   };
 
-  struct Event {
-    uint8_t* data;
-    uint32_t deltaTime;
-    EventType type,subtype;
-    uint8_t channel,track;
-    
-    uint32_t number;
-    uint8_t channelprefix;
-    uint8_t frameRate,hour,min,sec,frame,subframe;
-    uint8_t numerator,denominator,metronome,thirtyseconds;
-    uint8_t key,scale;
-    uint8_t noteNumber,velocity;
-    uint8_t amount,controllerType,value,programNumber;
-    uint32_t microsecondsPerBeat;
-
-    Event() : deltaTime(0),data(nullptr) {
-      memset(this,0,sizeof(Event));
-    }
-    Event(const Event& other) {
-      memcpy(this,&other,sizeof(Event));
-    }
-    Event& operator =(const Event& other) {
-      memcpy(this,&other,sizeof(Event));
-      return *this;
-    }
-  };
-  uint32_t ticksPerBeat;
-  std::vector<Event> eventList[16];
-  MidiLoader() : lastEventTypeByte(0),ticksPerBeat(0) {
+  
+  uint32_t ticksPerBeat,track_count;
+  std::vector<Event> eventList[64]; //max 64 tracks!
+  MidiLoader() : lastEventTypeByte(0),ticksPerBeat(0),track_count(0) {
 
   }
 
@@ -170,7 +203,7 @@ class MidiLoader {
 	}
 
 	
-	Event readEvent(Stream& stream);
+	void readEvent(Stream& stream,Event& event);
 };
 
 }

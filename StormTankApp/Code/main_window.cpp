@@ -77,7 +77,7 @@ void MainWindow::Initialize() {
 }
 
 void MainWindow::Step() {
-
+  //Sleep(100);
   const double dt =  1000.0 / 60.0;//16.667f;
   timing.current_cycles = timer_.GetCurrentCycles();
   double time_span =  (timing.current_cycles - timing.prev_cycles) * timer_.resolution();
@@ -150,9 +150,9 @@ int MainWindow::OnCommand(WPARAM wParam,LPARAM lParam) {
 
 int MainWindow::OnActivate(WPARAM wParam,LPARAM lParam) {
   if ((wParam&0xFFFF) == WA_INACTIVE) {
-
+    //synth_player_->Pause();
   } else {
-
+    //synth_player_->Play();
   }
   return 0;
 }

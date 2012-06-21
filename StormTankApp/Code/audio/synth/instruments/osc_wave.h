@@ -30,7 +30,8 @@ class OscWave : public Instrument {
       result += note_table[i].velocity*osc->Tick(note_table[i].phase,note_table[i].inc);
       //note_table[i].velocity = max(0,note_table[i].velocity-0.00001);
     }*/
-    return osc->Tick(phase,inc);
+    auto result = osc->Tick(phase,inc);// + osc->Tick(phase,inc*2);
+    return result;
   }
   void set_sample_rate(uint32_t sample_rate) { 
     sample_rate_ = sample_rate; 

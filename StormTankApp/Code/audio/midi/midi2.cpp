@@ -21,11 +21,11 @@ void MidiLoader::Load(uint8_t* data,uint32_t length) {
 	  auto timeDivision = headerStream.readInt16();
 	
 	  if (timeDivision & 0x8000) {
+      DebugBreak();
 		  //throw "Expressing time division in SMTPE frames is not supported yet"
 	  } else {
 		  ticksPerBeat = timeDivision;
 	  }
-	
     
 	  //var tracks = [];
 	  for (auto i = 0; i < trackCount; i++) {
@@ -33,21 +33,23 @@ void MidiLoader::Load(uint8_t* data,uint32_t length) {
 		  auto trackChunk = readChunk(stream);
 		  if (strncmp((const char*)trackChunk.id,"MTrk",4)  != 0) {
 			  //throw "Unexpected chunk - expected MTrk, got "+ trackChunk.id;
-        int a = 1;
+        DebugBreak();
 		  }
 		  Stream trackStream;
       trackStream.Load(trackChunk.data,trackChunk.length);
 		  while (!trackStream.eof()) {
-			  auto event = readEvent(trackStream);
+			  Event event;
+        readEvent(trackStream,event);
         event.track = i;
 			  eventList[i].push_back(event);
 			  //console.log(event);
 		  }
+      ++track_count;
 	  }
   }
 
-MidiLoader::Event MidiLoader::readEvent(Stream& stream) {
-	Event event;
+void MidiLoader::readEvent(Stream& stream,Event& event) {
+
 	event.deltaTime = stream.readVarInt();
 	auto eventTypeByte = stream.readInt8();
 	if ((eventTypeByte & 0xf0) == 0xf0) {
@@ -62,62 +64,62 @@ MidiLoader::Event MidiLoader::readEvent(Stream& stream) {
 					event.subtype = kEventTypeSequenceNumber;
 					if (length != 2) {
             //throw "Expected length for sequenceNumber event is 2, got " + length;
-            int a = 1;
+            DebugBreak();
           }
-					event.number = stream.readInt16();
-					return event;
+					event.data.seq.number = stream.readInt16();
+					return;
 				case 0x01:
 					event.subtype = kEventTypeText;
 					stream.read(length);
-					return event;
+					return;
 				case 0x02:
 					event.subtype = kEventTypeCopyrightNotice;
 					stream.read(length);
-					return event;
+					return;
 				case 0x03:
 					event.subtype = kEventTypeTrackName;
 					stream.read(length);
-					return event;
+					return;
 				case 0x04:
 					event.subtype = kEventTypeInstrumentName;
 					stream.read(length);
-					return event;
+					return;
 				case 0x05:
 					event.subtype = kEventTypeLyrics;
 					stream.read(length);
-					return event;
+					return;
 				case 0x06:
 					event.subtype = kEventTypeMarker;
 					stream.read(length);
-					return event;
+					return;
 				case 0x07:
 					event.subtype = kEventTypeCuePoint;
 					stream.read(length);
-					return event;
+					return;
 				case 0x20:
 					event.subtype = kEventTypeMidiChannelPrefix;
 					if (length != 1) {
             //throw "Expected length for midiChannelPrefix event is 1, got " + length;
-            int a = 1;
+            DebugBreak();
           }
-					event.channelprefix = stream.readInt8();
-					return event;
+					event.data.cp.channelprefix = stream.readInt8();
+					return;
 				case 0x2f:
 					event.subtype = kEventTypeEndOfTrack;
 					if (length != 0) throw "Expected length for endOfTrack event is 0, got " + length;
-					return event;
+					return;
 				case 0x51:
 					event.subtype = kEventTypeSetTempo;
 					if (length != 3) {
             //throw "Expected length for setTempo event is 3, got " + length;
-            int a = 1;
+            DebugBreak();
           }
-					event.microsecondsPerBeat = (
+					event.data.tempo.microsecondsPerBeat = (
 						(stream.readInt8() << 16)
 						+ (stream.readInt8() << 8)
 						+ stream.readInt8()
 					);
-					return event;
+					return;
         case 0x54: {
 					event.subtype = kEventTypeSmpteOffset;
 					if (length != 5) {
@@ -126,64 +128,70 @@ MidiLoader::Event MidiLoader::readEvent(Stream& stream) {
 					auto hourByte = stream.readInt8();
           //uint8_t frameRate[] = {
           switch (hourByte & 0x60) {
-						case 0x00: event.frameRate = 24; break; 
-            case 0x20: event.frameRate = 25; break;
-            case 0x40: event.frameRate = 29; break;
-            case 0x60: event.frameRate = 30; break;
+						case 0x00: event.data.smpte_offset.frameRate = 24; break; 
+            case 0x20: event.data.smpte_offset.frameRate = 25; break;
+            case 0x40: event.data.smpte_offset.frameRate = 29; break;
+            case 0x60: event.data.smpte_offset.frameRate = 30; break;
 					}
           //[hourByte & 0x60];
-					event.hour = hourByte & 0x1f;
-					event.min = stream.readInt8();
-					event.sec = stream.readInt8();
-					event.frame = stream.readInt8();
-					event.subframe = stream.readInt8();
-					return event;
+					event.data.smpte_offset.hour = hourByte & 0x1f;
+					event.data.smpte_offset.min = stream.readInt8();
+					event.data.smpte_offset.sec = stream.readInt8();
+					event.data.smpte_offset.frame = stream.readInt8();
+					event.data.smpte_offset.subframe = stream.readInt8();
+					return;
         }
 				case 0x58:
 					event.subtype = kEventTypeTimeSignature;
 					if (length != 4) {
             //throw "Expected length for timeSignature event is 4, got " + length;
-            int a = 1;
+            DebugBreak();
           }
-					event.numerator = stream.readInt8();
-					event.denominator = uint8_t(pow(2.0, (double)stream.readInt8()));
-					event.metronome = stream.readInt8();
-					event.thirtyseconds = stream.readInt8();
-					return event;
+					event.data.time_signature.numerator = stream.readInt8();
+					event.data.time_signature.denominator = uint8_t(pow(2.0, (double)stream.readInt8()));
+					event.data.time_signature.metronome = stream.readInt8();
+					event.data.time_signature.thirtyseconds = stream.readInt8();
+					return;
 				case 0x59:
 					event.subtype = kEventTypeKeySignature;
 					if (length != 2){
-            int a = 1;
+            DebugBreak();
             //throw "Expected length for keySignature event is 2, got " + length;
           }
-					event.key = stream.readInt8();
-					event.scale = stream.readInt8();
-					return event;
+					event.data.key_signature.key = stream.readInt8();
+					event.data.key_signature.scale = stream.readInt8();
+					return;
 				case 0x7f:
 					event.subtype = kEventTypeSequencerSpecific;
-					event.data = stream.read(length);
-					return event;
+					//event.data = 
+            stream.read(length);
+					return;
 				default:
+          //DebugBreak();
 					// console.log("Unrecognised meta event subtype: " + subtypeByte);
 					event.subtype = kEventTypeUnknown;
-					event.data = stream.read(length);
-					return event;
-			}
-			event.data = stream.read(length);
-			return event;
+					//event.data = 
+            stream.read(length);
+					return;
+      }
+			//event.data = 
+        stream.read(length);
+			return;
 		} else if (eventTypeByte == 0xf0) {
 			event.type = kEventTypeSysEx;
 			auto length = stream.readVarInt();
-			event.data = stream.read(length);
-			return event;
+			//event.data = 
+        stream.read(length);
+			return;
 		} else if (eventTypeByte == 0xf7) {
 			event.type = kEventTypeDividedSysEx;
 			auto length = stream.readVarInt();
-			event.data = stream.read(length);
-			return event;
+			//event.data = 
+        stream.read(length);
+			return;
 		} else {
 			//throw "Unrecognised MIDI event type byte: " + eventTypeByte;
-      int a = 1;
+      DebugBreak();
 		}
 	} else {
 		/* channel event */
@@ -204,43 +212,43 @@ MidiLoader::Event MidiLoader::readEvent(Stream& stream) {
 		switch (eventType) {
 			case 0x08:
 				event.subtype = kEventTypeNoteOff;
-				event.noteNumber = param1;
-				event.velocity = stream.readInt8();
-				return event;
+				event.data.note.noteNumber = param1;
+				event.data.note.velocity = stream.readInt8();
+				return;
 			case 0x09:
-				event.noteNumber = param1;
-				event.velocity = stream.readInt8();
-				if (event.velocity == 0) {
+				event.data.note.noteNumber = param1;
+				event.data.note.velocity = stream.readInt8();
+				if (event.data.note.velocity == 0) {
 					event.subtype = kEventTypeNoteOff;
 				} else {
 					event.subtype = kEventTypeNoteOn;
 				}
-				return event;
+				return;
 			case 0x0a:
 				event.subtype = kEventTypeNoteAftertouch;
-				event.noteNumber = param1;
-				event.amount = stream.readInt8();
-				return event;
+				event.data.note_aftertouch.noteNumber = param1;
+				event.data.note_aftertouch.amount = stream.readInt8();
+				return;
 			case 0x0b:
 				event.subtype = kEventTypeController;
-				event.controllerType = param1;
-				event.value = stream.readInt8();
-				return event;
+				event.data.controller.type = param1;
+        event.data.controller.value = stream.readInt8();
+				return;
 			case 0x0c:
 				event.subtype = kEventTypeProgramChange;
-				event.programNumber = param1;
-				return event;
+				event.data.program.number = param1;
+				return;
 			case 0x0d:
 				event.subtype = kEventTypeChannelAftertouch;
-				event.amount = param1;
-				return event;
+				event.data.channel_aftertouch.amount = param1;
+				return;
 			case 0x0e:
 				event.subtype = kEventTypePitchBend;
-				event.value = param1 + (stream.readInt8() << 7);
-				return event;
+				event.data.pitch.value = param1 + (stream.readInt8() << 7);
+				return;
 			default:
 				//throw "Unrecognised MIDI event type: " + eventType
-        int a = 1;
+        DebugBreak();
 				/*
 				console.log("Unrecognised MIDI event type: " + eventType);
 				stream.readInt8();

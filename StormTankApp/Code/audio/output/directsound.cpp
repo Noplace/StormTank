@@ -9,13 +9,16 @@ DirectSound::DirectSound() : window_handle_(nullptr), buffer_size_(0),last_write
 }
 
 DirectSound::~DirectSound() {
-
+  Deinitialize();
 }
   
 int DirectSound::Initialize(uint32_t sample_rate, uint8_t channels, uint8_t bits) {
   last_write_cursor=0xffffffff;
   HRESULT hr = DirectSoundCreate8(&DSDEVID_DefaultPlayback,&ds8,nullptr);
-  if (FAILED(hr)) return S_FALSE;
+  if (FAILED(hr)) {
+    Deinitialize();
+    return S_FALSE;
+  }
   hr = ds8->SetCooperativeLevel((HWND)window_handle_,DSSCL_PRIORITY);
   if (FAILED(hr)) {
     hr = ds8->SetCooperativeLevel((HWND)window_handle_,DSSCL_NORMAL);  
@@ -75,7 +78,6 @@ int DirectSound::Deinitialize() {
 }
 
 int DirectSound::Play() {
-
   auto hr = primary_buffer->Play(0,0,DSBPLAY_LOOPING);
   if (FAILED(hr)) return S_FALSE;
   hr = secondary_buffer->Play(0,0,DSBPLAY_LOOPING);
@@ -85,11 +87,15 @@ int DirectSound::Play() {
 }
 
 int DirectSound::Stop() {
-  auto hr = secondary_buffer->Stop();
-  if (FAILED(hr)) return S_FALSE;
-  hr = primary_buffer->Stop();
-  if (FAILED(hr)) return S_FALSE;
-  return hr;
+  if (secondary_buffer != nullptr) {
+    auto hr = secondary_buffer->Stop();
+    if (FAILED(hr)) return S_FALSE;
+  }
+  if (primary_buffer != nullptr) {
+    auto hr = primary_buffer->Stop();
+    if (FAILED(hr)) return S_FALSE;
+  }
+  return S_OK;
 }
 
 uint32_t DirectSound::GetBytesBuffered() {

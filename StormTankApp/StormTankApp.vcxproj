@@ -25,6 +25,7 @@
     <ClCompile Include="Code\audio\synth\oscillators\sine_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\square_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\triangle_oscillator.cpp" />
+    <ClCompile Include="Code\audio\synth\PADsynth.cpp" />
     <ClCompile Include="Code\audio\synth\player.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="Code\audio\synth\oscillators\sine_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\square_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\triangle_oscillator.h" />
+    <ClInclude Include="Code\audio\synth\PADsynth.h" />
     <ClInclude Include="Code\audio\synth\player.h" />
     <ClInclude Include="Code\audio\synth\util.h" />
     <ClInclude Include="Code\main_window.h" />

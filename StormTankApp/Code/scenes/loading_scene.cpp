@@ -1,6 +1,5 @@
 #include "../stormtankapp.h"
-#include "../song/song2.h"
-#include "../audio/midi/midi.h"
+//#include "../song/song2.h"
 
    
 
@@ -132,9 +131,11 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
   self->loading_progress += 20;
   
   */
-  self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\mario1.mid");
+  self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb1-Theme.mid");
+  //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\minute_waltz.mid");
+  
   //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
-
+  Sleep(400);
   self->win->player2().Play();
   SetEvent(self->event1);
 
