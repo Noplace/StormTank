@@ -3,16 +3,23 @@ namespace synth {
 
 class Delay {
  public:
-  Delay(int max_samples) : max_samples(max_samples), buffer_index(0),feedback(0.3) {
+  Delay() : left_buffer(nullptr),right_buffer(nullptr), max_samples(0), buffer_index(0),feedback(0.3) {
+  }
+  ~Delay() {
+    Deinitialize();
+  }
+
+  void Initialize(int max_samples)  {
+    this->max_samples = max_samples;
     left_buffer = new double[max_samples];
     right_buffer = new double[max_samples];
     memset(left_buffer,0,max_samples*sizeof(double));
     memset(right_buffer,0,max_samples*sizeof(double));
-    set_delay_ms(400);
   }
-  ~Delay() {
-    delete [] left_buffer;
-    delete [] right_buffer;
+
+  void Deinitialize() {
+    SafeDeleteArray(&left_buffer);
+    SafeDeleteArray(&right_buffer);
   }
 
   void Process(double in_left_sample,double in_right_sample,double& out_left_sample,double& out_right_sample) {

@@ -144,13 +144,21 @@ int MainWindow::OnDestroy(WPARAM wParam,LPARAM lParam) {
   return 0;
 }
 
-int MainWindow::OnCommand(WPARAM wParam,LPARAM lParam) {
+int MainWindow::OnKeyDown(WPARAM wParam,LPARAM lParam) {
+  if (wParam == 'A') {
+    synth_player_->Pause();
+  }
+
+  if (wParam == 'S') {
+    synth_player_->Play();
+  }
+
   return 0;
 }
 
 int MainWindow::OnActivate(WPARAM wParam,LPARAM lParam) {
   if ((wParam&0xFFFF) == WA_INACTIVE) {
-    //synth_player_->Pause();
+   // synth_player_->Pause();
   } else {
     //synth_player_->Play();
   }

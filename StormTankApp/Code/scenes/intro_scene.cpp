@@ -271,11 +271,19 @@ int IntroScene::Draw() {
   gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&arc1.world());
   //arc1.Draw();
 
+  {
+    char caption[255];
+    double song_time_secs = win->player2().GetPlaybackSeconds();
+    auto song_time_mins = song_time_secs / 60.0 ;
 
-  char caption[255];
-  sprintf_s(caption,"Song Time: %04.03f sec",win->player2().GetPlaybackSeconds());
-  SetWindowText(this->win->handle(),caption);
-  
+
+    auto secs   = ((song_time_mins - floor(song_time_mins))*60.0);
+    auto ms = (secs - floor(secs)) * 1000;
+    auto mins   = floor(song_time_mins);
+
+    sprintf_s(caption,"Song Time: %02d:%02d:%03d",uint32_t(mins),uint32_t(secs),uint32_t(ms));
+    SetWindowText(this->win->handle(),caption);
+  }
 
   return S_OK;
 }

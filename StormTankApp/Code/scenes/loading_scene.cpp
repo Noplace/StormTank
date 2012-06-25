@@ -118,22 +118,11 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
 
   ResetEvent(self->event1);
   
-  //ReadMidiFile2("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
-  
-  /*
-  MidiFile  inputfile;
-  self->loading_progress = 0;
-  inputfile.read("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\mario1.mid");
-  self->loading_progress += 10;
-  inputfile.absoluteTime();
-  self->loading_progress += 20;
-  inputfile.joinTracks();
-  self->loading_progress += 20;
-  
-  */
-  self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb1-Theme.mid");
+  //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\MoonLte3.mid");
+  self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\btmnjstg.mid");
   //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\minute_waltz.mid");
-  
+  //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
+
   //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
   Sleep(400);
   self->win->player2().Play();

@@ -2,28 +2,30 @@ namespace audio {
 namespace synth {
 namespace instruments {
 
-#define Polyphony 8
-class Instrument : public Component {
+class InstrumentData {
  public:
-  Instrument() : Component() {
-    
+  NoteData note_data_array[Polyphony];
+  InstrumentData() {
+    memset(note_data_array,0,sizeof(note_data_array));
   }
-  virtual ~Instrument() {
+  virtual ~InstrumentData() {
 
   }
-  virtual double Tick(uint32_t& phase,uint32_t inc) = 0;
-  virtual uint32_t get_increment(double freq) = 0;
-  
-  /*void CopyTo(Instrument* dest) {
-    memcpy(dest->note_table,note_table,sizeof(note_table));
-    dest->sample_rate_ = sample_rate_;
-  }
-  void CopyFrom(Instrument* source) {
-    memcpy(note_table,source->note_table,sizeof(note_table));
-    source->sample_rate_ = sample_rate_;
-  }*/
- protected:
+};
 
+class InstrumentProcessor : public Component {
+ public:
+  InstrumentProcessor() : Component() {
+   
+  }
+  virtual ~InstrumentProcessor() {
+
+  }
+  //virtual void Initialize() = 0;
+  //virtual void Deinitialize() = 0;
+  virtual InstrumentData* NewInstrumentData() = 0;
+  virtual double Tick(InstrumentData* data, int note_index) = 0;
+  virtual void Update(InstrumentData* data, int note_index) = 0;
 };
 
 }

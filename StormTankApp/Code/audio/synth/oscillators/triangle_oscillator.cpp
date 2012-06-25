@@ -1,5 +1,6 @@
-#include "../synth.h"
-
+#include "../base.h"
+#include "oscillator.h"
+#include "triangle_oscillator.h"
 
 namespace audio {
 namespace synth {

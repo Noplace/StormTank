@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\audio\midi\midi2.cpp" />
+    <ClCompile Include="Code\audio\synth\instruments\percussion.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\exp_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\sawtooth_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\sine_oscillator.cpp" />
@@ -36,12 +37,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\audio\midi\midi2.h" />
+    <ClInclude Include="Code\audio\synth\adsr.h" />
+    <ClInclude Include="Code\audio\synth\base.h" />
     <ClInclude Include="Code\audio\synth\channel.h" />
     <ClInclude Include="Code\audio\synth\component.h" />
     <ClInclude Include="Code\audio\synth\effects\delay.h" />
     <ClInclude Include="Code\audio\synth\filters\lowpass.h" />
     <ClInclude Include="Code\audio\synth\instruments\instrument.h" />
     <ClInclude Include="Code\audio\synth\instruments\osc_wave.h" />
+    <ClInclude Include="Code\audio\synth\instruments\percussion.h" />
+    <ClInclude Include="Code\audio\synth\instruments\piano.h" />
     <ClInclude Include="Code\audio\synth\oscillators\exp_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\sawtooth_oscillator.h" />
@@ -50,6 +55,7 @@
     <ClInclude Include="Code\audio\synth\oscillators\triangle_oscillator.h" />
     <ClInclude Include="Code\audio\synth\PADsynth.h" />
     <ClInclude Include="Code\audio\synth\player.h" />
+    <ClInclude Include="Code\audio\synth\types.h" />
     <ClInclude Include="Code\audio\synth\util.h" />
     <ClInclude Include="Code\main_window.h" />
     <ClInclude Include="Code\ptg\generators.h" />
@@ -148,6 +154,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <EnablePREfast>false</EnablePREfast>
       <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

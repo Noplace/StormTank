@@ -1,4 +1,6 @@
-#include "../synth.h"
+#include "../base.h"
+#include "oscillator.h"
+#include "sawtooth_oscillator.h"
 
 
 namespace audio {

@@ -1,10 +1,6 @@
-#include <WinCore/windows/base.h>
-#include <WinCore/timer/timer2.h>
-#include <xnamath.h>
-#include "../midi/midi2.h"
-#include "../output/output.h"
-#include "component.h"
+#include "base.h"
 #include "util.h"
+#include "adsr.h"
 #include "oscillators/oscillator.h"
 #include "oscillators/sine_oscillator.h"
 #include "oscillators/square_oscillator.h"
@@ -13,11 +9,14 @@
 #include "oscillators/exp_oscillator.h"
 #include "instruments/instrument.h"
 #include "instruments/osc_wave.h"
+#include "instruments/piano.h"
+#include "instruments/percussion.h"
 #include "filters/lowpass.h"
 #include "effects/delay.h"
 #include "channel.h"
 #include "player.h"
 
+  /*
 double sgn(double d);
 
 namespace audio {
@@ -154,5 +153,6 @@ class BasicGenerator {
   double tick;
 };
 
+
 }
-}
+}*/

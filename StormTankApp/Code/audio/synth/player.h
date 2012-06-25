@@ -1,3 +1,8 @@
+#ifndef AUDIO_SYNTH_PLAYER_H
+#define AUDIO_SYNTH_PLAYER_H
+
+#include "../midi/midi2.h"
+#include "../output/output.h"
 
 namespace audio {
 namespace synth {
@@ -25,12 +30,13 @@ struct Event {
   } data;
 };*/
 
-#define kInstrumentCount 128
-#define kChannelCount 16
 
 class Player {
  public:
-  Player() : state(0), initialized_(false),audio_interface_(nullptr),tc_event(nullptr),thread_handle(nullptr),thread_id(0) {
+  enum State {
+    kStateStopped=0,kStatePlaying=1,kStatePaused=2
+  };
+  Player() : state_(kStateStopped), initialized_(false),audio_interface_(nullptr),player_event(nullptr),msg_queue_event(nullptr),thread_handle(nullptr),thread_id(0) {
     
   }
   ~Player() {
@@ -53,43 +59,48 @@ class Player {
     }
   };
   static DWORD WINAPI PlayThread(LPVOID lpThreadParameter);
+  Util util;
+  Delay delay_unit;
   audio::AudioOutputInterface* audio_interface_;
-  instruments::Instrument* instr[kInstrumentCount];
+  instruments::InstrumentProcessor* instr[kInstrumentCount];
+  instruments::Percussion* percussion_instr;
   Channel* channels[kChannelCount];
+  midi::Event* last_event;
   short* output_buffer;
   Track* tracks;
-  int track_count;
-  HANDLE thread_handle,tc_event;
+  HANDLE thread_handle,msg_queue_event,player_event;
   double song_pos_ms,song_length_ms, song_counter_ms;
-  double sample_time_ms;
-  Util util;
+  double bpm,sample_rate_;
   DWORD thread_id;
   uint32_t ticks_per_beat;
   uint32_t samples_to_next_event;
-  double bpm;
-  int state;
+  State state_;
+  int track_count_;
   bool initialized_;
-  midi::Event* last_event;
+  
   void DestroyTrackData() {
-    for (int i=0;i<track_count;++i)
+    for (int i=0;i<track_count_;++i)
       SafeDeleteArray(&tracks[i].event_sequence);
     SafeDeleteArray(&tracks);
-    track_count = 0;
+    track_count_ = 0;
     tracks = nullptr;
   }
   void ResetTracks() {
-    for (int track_index=0;track_index<track_count;++track_index) {
+    for (int track_index=0;track_index<track_count_;++track_index) {
       auto& track = tracks[track_index];
       track.event_index = 0;      
       track.ticks_to_next_event = track.event_sequence[0].deltaTime;
     }
+    last_event = GetNextEvent();
   }
   midi::Event* GetNextEvent();
   void HandleEvent(midi::Event* event);
-  void RenderSamples(uint32_t samples_count);
+  void RenderSamples(uint32_t samples_count, short* data_out);
   void RenderSamples2(uint32_t samples_count);
-  void MixChannels(double& output_left,double& output_right);
+  void MixChannels(double& output_left, double& output_right);
 };
 
 }
 }
+
+#endif

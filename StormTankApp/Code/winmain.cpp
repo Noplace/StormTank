@@ -36,7 +36,6 @@ class StormTankApp : public core::windows::Application {
 
   }
 
-
   int Run() {
     MSG msg;
     do {

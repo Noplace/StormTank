@@ -42,7 +42,7 @@ class MainWindow: public core::windows::Window {
    protected:
     int OnCreate(WPARAM wParam,LPARAM lParam);
     int OnDestroy(WPARAM wParam,LPARAM lParam);
-    int OnCommand(WPARAM wParam,LPARAM lParam);
+    int OnKeyDown(WPARAM wParam,LPARAM lParam);
     int OnActivate(WPARAM wParam,LPARAM lParam);
   private:
     graphics::ContextD3D9*    gfx_;
