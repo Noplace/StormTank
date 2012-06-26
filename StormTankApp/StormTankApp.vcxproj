@@ -21,12 +21,12 @@
   <ItemGroup>
     <ClCompile Include="Code\audio\midi\midi2.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\percussion.cpp" />
+    <ClCompile Include="Code\audio\synth\instruments\piano.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\exp_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\sawtooth_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\sine_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\square_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\triangle_oscillator.cpp" />
-    <ClCompile Include="Code\audio\synth\PADsynth.cpp" />
     <ClCompile Include="Code\audio\synth\player.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
@@ -53,7 +53,6 @@
     <ClInclude Include="Code\audio\synth\oscillators\sine_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\square_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\triangle_oscillator.h" />
-    <ClInclude Include="Code\audio\synth\PADsynth.h" />
     <ClInclude Include="Code\audio\synth\player.h" />
     <ClInclude Include="Code\audio\synth\types.h" />
     <ClInclude Include="Code\audio\synth\util.h" />
@@ -135,8 +134,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)..\Output\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\Output\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -196,6 +195,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -54,10 +54,10 @@
     <ClCompile Include="Code\audio\midi\midi2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\audio\synth\PADsynth.cpp">
+    <ClCompile Include="Code\audio\synth\instruments\percussion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\audio\synth\instruments\percussion.cpp">
+    <ClCompile Include="Code\audio\synth\instruments\piano.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -144,9 +144,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\midi\midi2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\audio\synth\PADsynth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\synth\adsr.h">

@@ -11,6 +11,7 @@
 #include "instruments/osc_wave.h"
 #include "instruments/piano.h"
 #include "instruments/percussion.h"
+//#include "instruments/blit.h"
 #include "filters/lowpass.h"
 #include "effects/delay.h"
 #include "channel.h"

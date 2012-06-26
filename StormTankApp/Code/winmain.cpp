@@ -50,7 +50,37 @@ class StormTankApp : public core::windows::Application {
   }
 };
 
+#include <x3daudio.h>
+#include <XDSP.h>
+void fft_test() {
+  XDSP::XVECTOR unity[16];
+  XDSP::FFTInitializeUnityTable(unity,64);
+  
+  
+  XDSP::XVECTOR rv[16],iv[16],outrv[16],outiv[16];
+
+  float* rd = (float* __restrict)rv;
+  float* id = (float* __restrict)iv;
+  for (int i=0;i<64;++i) {
+    rd[i] = i/64.0;
+    id[i] = 0;//0.1*i/64.0;
+  }
+  
+  XDSP::FFT(rv,iv,unity,64,1);
+  //XDSP::FFTPolar(rv,rv,iv,64);
+  XDSP::FFTUnswizzle(outrv,rv,6);
+  XDSP::FFTUnswizzle(outiv,iv,6);
+ //for (int i=0;i<64;++i) {
+  //  id[i] = 0;//0.1*i/64.0;
+  //}
+  XDSP::IFFTDeinterleaved(outrv,outiv,unity,1,6);
+  int a = 1;
+}
+
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+  //int test_padsynth();
+  //test_padsynth();
+  //fft_test();
   StormTankApp app(hInstance,lpCmdLine,nShowCmd);
   return app.Run();
 }

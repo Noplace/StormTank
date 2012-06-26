@@ -38,6 +38,52 @@ const char* eventnames[] = {"Meta",
 "ChannelAftertouch",
 "PitchBend",
 };
+/*
+kEventTypeMeta,
+kEventTypeText,
+kEventTypeCopyrightNotice,
+kEventTypeTrackName,
+kEventTypeInstrumentName,
+kEventTypeLyrics,
+kEventTypeMarker,
+kEventTypeCuePoint,
+kEventTypeMidiChannelPrefix,
+kEventTypeEndOfTrack,
+kEventTypeSetTempo,
+kEventTypeSmpteOffset,
+kEventTypeTimeSignature,
+kEventTypeKeySignature,
+kEventTypeSequencerSpecific,
+kEventTypeUnknown,
+kEventTypeSysEx,
+kEventTypeSequenceNumber,
+kEventTypeDividedSysEx,
+kEventTypeChannel,
+kEventTypeNoteOff,
+kEventTypeNoteOn,
+kEventTypeNoteAftertouch,
+kEventTypeController,
+kEventTypeProgramChange,
+kEventTypeChannelAftertouch,
+kEventTypePitchBend,*/
+
+Player::MidiEventHandler Player::midi_main_event_handlers[5] = {
+  &Player::MidiEventMeta,    &Player::MidiEventUnknown, &Player::MidiEventUnknown, 
+  &Player::MidiEventChannel, &Player::MidiEventUnknown, 
+};
+
+Player::MidiEventHandler Player::midi_meta_event_handlers[22] = {
+  &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown,
+  &Player::MidiEventUnknown, &Player::MidiEventSetTempo, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown,
+  &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, 
+};
+
+Player::MidiEventHandler Player::midi_channel_event_handlers[22] = {
+  &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown,
+  &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventUnknown, &Player::MidiEventNoteOff, 
+  &Player::MidiEventNoteOn, &Player::MidiEventUnknown, &Player::MidiEventController, &Player::MidiEventProgramChange,  &Player::MidiEventUnknown,&Player::MidiEventUnknown,
+
+};
 
 void Player::Initialize() {
   if (initialized_ == true)
@@ -55,6 +101,7 @@ void Player::Initialize() {
   last_event = nullptr;
   output_buffer = new short[sample_rate*audio_interface_->wave_format().nChannels*1]; // 1 second output buffer
   samples_to_next_event = 0;
+  thread_msg = 0;
   //initialize all available instruments
   memset(instr,0,sizeof(instr));
   instr[0] = new instruments::Piano();
@@ -66,8 +113,11 @@ void Player::Initialize() {
   for (int i=0;i<kInstrumentCount;++i) {
     if (instr[i] == nullptr)
       instr[i] = new instruments::OscWave(instruments::OscWave::Sine);
-  }
 
+    instr[i]->set_sample_rate(sample_rate);
+  }
+  
+  InitializeCriticalSectionAndSpinCount(&cs,0x100);
   for (int i=0;i<kChannelCount;++i) {
     channels[i] = new Channel(i);
     channels[i]->set_sample_rate(sample_rate);
@@ -78,6 +128,7 @@ void Player::Initialize() {
   }
   //percussion
   percussion_instr = new instruments::Percussion();
+  percussion_instr->set_sample_rate(sample_rate);
   channels[9]->set_instrument(percussion_instr);
   tracks = nullptr;
   
@@ -85,12 +136,10 @@ void Player::Initialize() {
   delay_unit.set_feedback(0.3);
   delay_unit.set_delay_ms(400);
 
-  msg_queue_event = CreateEvent(NULL,FALSE,FALSE,NULL);
   player_event = CreateEvent(NULL,FALSE,FALSE,NULL);
   thread_handle = CreateThread(nullptr,0,static_cast<LPTHREAD_START_ROUTINE>(PlayThread),this,0,(LPDWORD)&thread_id);//CREATE_SUSPENDED
-  if (thread_handle != nullptr && msg_queue_event != nullptr) {
+  if (thread_handle != nullptr) {
     SetThreadPriority(thread_handle,THREAD_PRIORITY_ABOVE_NORMAL);
-    WaitForSingleObject(msg_queue_event,INFINITE);
   }
 
   initialized_ = true;
@@ -102,16 +151,16 @@ void Player::Deinitialize() {
 
   //force close
   SetEvent(player_event);
-  PostThreadMessage(thread_id,WM_SP_QUIT,0,0);
+  SendThreadMessage(WM_SP_QUIT);
   WaitForSingleObject(thread_handle,INFINITE);
   CloseHandle(thread_handle);
   CloseHandle(player_event);
-  CloseHandle(msg_queue_event);
+  DeleteCriticalSection(&cs);
   DestroyTrackData();
   for (int i=0;i<kChannelCount;++i) {
     SafeDelete(&channels[i]);
   }
-  //SafeDelete(&percussion_instr);
+  SafeDelete(&percussion_instr);
   for (int i=0;i<kInstrumentCount;++i) {
     SafeDelete(&instr[i]);
   }
@@ -166,7 +215,7 @@ void Player::LoadMidi(char* filename) {
       auto source_event = &midifile.eventList[track_index][event_index];
 
       switch (source_event->subtype) {
-        case midi::kEventTypeSetTempo:
+        case midi::kEventSubtypeSetTempo:
           bpm = 60000000.0 / double(source_event->data.tempo.microsecondsPerBeat);
           bps = bpm / 60.0;
           secs_per_tick = 1 / ( bps * ticks_per_beat );
@@ -212,21 +261,22 @@ void Player::LoadMidi(char* filename) {
 void Player::Play() {
   if (state_ == kStatePlaying) return;
   SetEvent(player_event);
-  PostThreadMessage(thread_id,WM_SP_PLAY,0,0);
+  SendThreadMessage(WM_SP_PLAY);
+  
 }
 
 void Player::Pause() {
   if (state_ == kStatePaused) return;
-  PostThreadMessage(thread_id,WM_SP_PAUSE,0,0);
+  SendThreadMessage(WM_SP_PAUSE);
 }
 
 void Player::Stop() {
   if (state_ == kStateStopped) return;
-  PostThreadMessage(thread_id,WM_SP_STOP,0,0);
+  SendThreadMessage(WM_SP_STOP);
 }
 
 double Player::GetPlaybackSeconds() {
-  return song_pos_ms * (1 / 1000.0);
+  return song_counter_ms * (1 / 1000.0);
 }
 
 
@@ -234,14 +284,11 @@ double Player::GetPlaybackSeconds() {
 DWORD WINAPI Player::PlayThread(LPVOID lpThreadParameter) {
   auto self = (Player*)lpThreadParameter;
   utilities::Timer<double> timer;
-  MSG msg;
-  PeekMessage(&msg, NULL, WM_USER, WM_USER+10, PM_NOREMOVE);
-  SetEvent(self->msg_queue_event);
 
   uint64_t current_cycles=0,prev_cycles=0;
   double span_accumulator = 0;
-  double update_time = 100.0;
-  
+  double update_time = 20.0;
+  double timer_res = timer.resolution();
   /*//temp
   bool apply_delay = true;
   Delay delay_unit(uint32_t(self->sample_rate_*2));
@@ -253,45 +300,47 @@ DWORD WINAPI Player::PlayThread(LPVOID lpThreadParameter) {
 
 
   while (1) {
-    if (PeekMessage(&msg, NULL, WM_USER, WM_USER+10, PM_REMOVE)) {
-      if (msg.message == WM_SP_QUIT) {
+    EnterCriticalSection(&self->cs);
+    if (self->thread_msg == WM_SP_QUIT) {
+        self->thread_msg = 0;
         break;
-      } else if (msg.message == WM_SP_PLAY) {
-        if (self->state_ != kStatePlaying) {
-          prev_cycles = timer.GetCurrentCycles();
-          self->state_ = kStatePlaying;
-          self->song_counter_ms = self->song_pos_ms;
-          span_accumulator = update_time;
-          self->audio_interface_->Play();
-        }
-      } else if (msg.message == WM_SP_PAUSE) {
-        if (self->state_ != kStatePaused) {
-          ResetEvent(self->player_event);
-          self->state_ = kStatePaused;
-          memset(self->output_buffer,0,44100*2*sizeof(short));
-          self->audio_interface_->Write(self->output_buffer,44100*1*sizeof(short));
-        }
-      } else if (msg.message == WM_SP_STOP) {
-        if (self->state_ != kStateStopped) {
-          ResetEvent(self->player_event);
-          self->state_ = kStateStopped;
-          self->ResetTracks();
-          self->song_counter_ms = self->song_pos_ms = 0;
-          self->audio_interface_->Stop();
-        }
-      } 
+    }
+    if (self->thread_msg == WM_SP_PLAY) {
+      if (self->state_ != kStatePlaying) {
+        prev_cycles = timer.GetCurrentCycles();
+        self->state_ = kStatePlaying;
+        self->song_counter_ms = self->song_pos_ms;
+        span_accumulator = update_time;
+        self->audio_interface_->Play();
+      }
+    } else if (self->thread_msg == WM_SP_PAUSE) {
+      if (self->state_ != kStatePaused) {
+        ResetEvent(self->player_event);
+        self->state_ = kStatePaused;
+        memset(self->output_buffer,0,44100*2*sizeof(short));
+        self->audio_interface_->Write(self->output_buffer,44100*1*sizeof(short));
+      }
+    } else if (self->thread_msg == WM_SP_STOP) {
+      if (self->state_ != kStateStopped) {
+        ResetEvent(self->player_event);
+        self->state_ = kStateStopped;
+        self->ResetTracks();
+        self->song_counter_ms = self->song_pos_ms = 0;
+        self->audio_interface_->Stop();
+      }
     } 
+    self->thread_msg = 0;
+    LeaveCriticalSection(&self->cs);
 
     if (self->state_ == kStatePlaying) {
       current_cycles = timer.GetCurrentCycles();
-      double time_span =  (current_cycles - prev_cycles) * timer.resolution();
-      if (time_span >= 250.0) //should at max output buffer length in ms
+      double time_span =  (current_cycles - prev_cycles) * timer_res;
+      if (time_span >= 250.0) //should be at max, output buffer length in ms
         time_span = 250.0;
  
       if (span_accumulator >= update_time) {
         uint32_t samples_to_render = uint32_t(update_time * 0.001 * self->sample_rate_);
         uint32_t buffer_size = samples_to_render * 2 * sizeof(short);
-
         self->RenderSamples(samples_to_render,self->output_buffer);
         self->audio_interface_->Write(self->output_buffer,buffer_size);
         span_accumulator -= update_time;
@@ -347,86 +396,65 @@ midi::Event* Player::GetNextEvent() {
 	} else {
 		result = nullptr;
 		samples_to_next_event = 0xFFFFFFFF;
-    PostThreadMessage(thread_id,WM_SP_STOP,0,0);
+    SendThreadMessage(WM_SP_STOP);
 	}
   return result;
 }
 
 void Player::HandleEvent(midi::Event* event) {
-	switch (event->type) {
-    case midi::kEventTypeMeta:
-			switch (event->subtype) {
-        case midi::kEventTypeSetTempo:
-          bpm = 60000000.0 / event->data.tempo.microsecondsPerBeat;
-        break;
-			}
-			break;
-    case midi::kEventTypeChannel:{
-      auto channel = channels[event->channel];
-			switch (event->subtype) {
-        case midi::kEventTypeController: {
-          if (event->data.controller.type == 0x0A) { //pan
-            double pan = event->data.controller.value / 127.0;
-            channel->set_panning(pan);
-          }
-        break;
-        }
-				case midi::kEventTypeNoteOn: {
-          double frequency = util.NoteFreq((Notes)event->data.note.noteNumber);
-          channel->AddNote(event->data.note.noteNumber,frequency,event->data.note.velocity / 127.0);
-					break;
-        }
-				case midi::kEventTypeNoteOff:
-					channel->RemoveNote(event->data.note.noteNumber);
-					break;
-        case midi::kEventTypeProgramChange:
-          if (event->channel == 9) {
-            channel->set_instrument(percussion_instr);
-          } else {
-					  channel->set_instrument(instr[event->data.program.number]);
-          }
-					break;
-			}
-			break;
-    }
-	}
+  (this->*(midi_main_event_handlers[event->type]))(event);
 };
 
-void Player::RenderSamples(uint32_t samples_count, short* data_out) {
-  //uint32_t samples_remaining = samples_count;
-
-	auto data_offset = 0;
-
-  auto generateIntoBuffer = [&](uint32_t samplesToGenerate,uint32_t dataOffset) {
-    double ov_left_sample=0,ov_right_sample=0;
-    while (samplesToGenerate) {
-      MixChannels(ov_left_sample,ov_right_sample);
-
-      //global effects
-      //if (apply_delay) {
-      //double lpfreq = 800;
-      //static double t = 0;
-      //ov_left_sample = lowpass.Tick(ov_left_sample,lpfreq+sin(t)*lpfreq);
-      //ov_right_sample = lowpass.Tick(ov_right_sample,lpfreq+sin(t)*lpfreq);
-      //t += 0.00001;
-      //delay_unit.Process(ov_left_sample,ov_right_sample,ov_left_sample,ov_right_sample);
-      //}
-
-      //clip and write to output
-      data_out[dataOffset++] = short(32767.0 * min(ov_left_sample,1.0));
-      data_out[dataOffset++] = short(32767.0 * min(ov_right_sample,1.0));
-      --samplesToGenerate;
-      song_counter_ms += util.sample_time_ms_;
-    }
-  };
+void Player::MidiEventUnknown(midi::Event* event) {
   
+}
+
+void Player::MidiEventMeta(midi::Event* event) {
+  (this->*(midi_meta_event_handlers[event->subtype]))(event);
+}
+
+void Player::MidiEventSetTempo(midi::Event* event) {
+  bpm = 60000000.0 / event->data.tempo.microsecondsPerBeat;
+}
+
+void Player::MidiEventChannel(midi::Event* event) {
+  (this->*(midi_channel_event_handlers[event->subtype]))(event);
+}
+
+void Player::MidiEventNoteOn(midi::Event* event) {
+  auto channel = channels[event->channel];
+  double frequency = util.NoteFreq((Notes)event->data.note.noteNumber);
+  channel->AddNote(event->data.note.noteNumber,frequency,event->data.note.velocity / 127.0);
+}
+void Player::MidiEventNoteOff(midi::Event* event) {
+  auto channel = channels[event->channel];
+  channel->RemoveNote(event->data.note.noteNumber);
+}
+void Player::MidiEventProgramChange(midi::Event* event) {
+  auto channel = channels[event->channel];
+  if (event->channel == 9) {
+    channel->set_instrument(percussion_instr);
+  } else {
+		channel->set_instrument(instr[event->data.program.number]);
+  }
+  channel->set_silence(false);
+}
+
+void Player::MidiEventController(midi::Event* event) {
+  auto channel = channels[event->channel];
+  if (event->data.controller.type == 0x0A) { //pan
+    double pan = event->data.controller.value / 127.0;
+    channel->set_panning(pan);
+  }
+}
+void Player::RenderSamples(uint32_t samples_count, short* data_out) {
+	auto data_offset = 0;
   while (true) {
-    
 		if (samples_to_next_event != 0xFFFFFFFF && samples_to_next_event <= samples_count) {
 			/* generate samplesToNextEvent samples, process event and repeat */
 			auto samples_to_generate = samples_to_next_event;
 			if (samples_to_generate > 0) {
-        generateIntoBuffer(samples_to_generate, data_offset);
+        GenerateIntoBuffer(samples_to_generate,data_out,data_offset);
 				data_offset += samples_to_generate * 2;
 				samples_count -= samples_to_generate;
 				samples_to_next_event -= samples_to_generate;
@@ -437,7 +465,7 @@ void Player::RenderSamples(uint32_t samples_count, short* data_out) {
 		} else {
 			/* generate samples to end of buffer */
 			if (samples_count > 0) {
-				generateIntoBuffer(samples_count, data_offset);
+				GenerateIntoBuffer(samples_count,data_out,data_offset);
 				samples_to_next_event -= samples_count;
 			}
 			break;
@@ -445,57 +473,16 @@ void Player::RenderSamples(uint32_t samples_count, short* data_out) {
 	}
 }
 
-void Player::RenderSamples2(uint32_t samples_count) {
-  
-  double ov_left_sample,ov_right_sample;
-  //mul by 2,inc by 2 ( because of 2 output channels)
-  for (uint32_t i=0;i<samples_count<<1;i+=2) {
-     
-    //process midi events
-    for (int track_index=0;track_index<track_count_;++track_index) {
-      auto& track = tracks[track_index];
-      if (track.event_count == 0 || track.event_index >= track.event_count)
-        continue;
-      
-      auto cur_event = track.getCurrentEvent();
-      while ((track.event_index < track.event_count) &&
-             (cur_event->abs_time_ms >= song_counter_ms)  && 
-             (cur_event->abs_time_ms < (song_counter_ms+util.sample_time_ms_))) {
-        HandleEvent(cur_event);
-        ++cur_event;
-        ++track.event_index;
-      }
-    } 
-    
-    MixChannels(ov_left_sample,ov_right_sample);
-
-    //global effects
-    //if (apply_delay) {
-      //double lpfreq = 800;
-      //static double t = 0;
-      //ov_left_sample = lowpass.Tick(ov_left_sample,lpfreq+sin(t)*lpfreq);
-      //ov_right_sample = lowpass.Tick(ov_right_sample,lpfreq+sin(t)*lpfreq);
-      //t += 0.00001;
-      //delay_unit.Process(ov_left_sample,ov_right_sample,ov_left_sample,ov_right_sample);
-    //}
-          
-    //clip and write to output
-    output_buffer[i] =   short(32767.0 * min(ov_left_sample,1.0));
-    output_buffer[i+1] = short(32767.0 * min(ov_right_sample,1.0));
-
-
-    song_counter_ms += util.sample_time_ms_;
-  }
-}
-
 void Player::MixChannels(double& output_left,double& output_right) {
   output_left=output_right=0;
   for (int j=0;j<kChannelCount;++j) { //mix all 16 channels
-    double left_sample=0,right_sample=0;
     auto channel = channels[j];
-    channel->Tick(left_sample,right_sample);
-    output_left += left_sample;
-    output_right += right_sample;
+    if (channel->silence() == false) {
+      double left_sample=0,right_sample=0;
+      channel->Tick(left_sample,right_sample);
+      output_left += left_sample;
+      output_right += right_sample;
+    }
   }
 }
 

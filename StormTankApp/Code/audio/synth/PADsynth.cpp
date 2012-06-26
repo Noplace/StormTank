@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "PADsynth.h"
+	
 
 XDSP::XVECTOR unity[64];
 
@@ -23,7 +24,7 @@ PADsynth::PADsynth(int N_, int samplerate_, int number_harmonics_){
     A=new REALTYPE [number_harmonics];
     for (int i=0;i<number_harmonics;i++) A[i]=0.0;
     A[1]=1.0;//default, the first harmonic has the amplitude 1.0
-    XDSP::FFTInitializeUnityTable(unity,64);
+    XDSP::FFTInitializeUnityTable(unity,16);
     freq_amp=new REALTYPE[N/2];
 };
 
@@ -53,7 +54,7 @@ REALTYPE PADsynth::profile(REALTYPE fi, REALTYPE bwi){
     return exp(-x)/bwi;
 };
 
-void PADsynth::synth(REALTYPE f,REALTYPE bw,REALTYPE bwscale,REALTYPE *smp){
+void PADsynth::synth(REALTYPE f,REALTYPE bw,REALTYPE bwscale,REALTYPE * __restrict smp){
     int i,nh;
     
     for (i=0;i<N/2;i++) freq_amp[i]=0.0;//default, all the frequency amplitudes are zero
@@ -75,8 +76,8 @@ void PADsynth::synth(REALTYPE f,REALTYPE bw,REALTYPE bwscale,REALTYPE *smp){
 	};
     };
 
-    REALTYPE *freq_real=new REALTYPE[N/2];
-    REALTYPE *freq_imaginary=new REALTYPE[N/2];
+    REALTYPE * __restrict freq_real=new REALTYPE[N/2];
+    REALTYPE * __restrict freq_imaginary=new REALTYPE[N/2];
 
     //Convert the freq_amp array to complex array (real/imaginary) by making the phases random
     for (i=0;i<N/2;i++){
@@ -85,8 +86,20 @@ void PADsynth::synth(REALTYPE f,REALTYPE bw,REALTYPE bwscale,REALTYPE *smp){
 	freq_imaginary[i]=freq_amp[i]*sin(phase);
     };
     
-    //XDSP::IFFTDeinterleaved((XDSP::XVECTOR*)freq_real,(XDSP::XVECTOR*)freq_imaginary,unity,1,UINT32(log10(double(N))/log10(2.0)));
+    auto frvec = (XDSP::XVECTOR*)freq_real;
+    auto fivec = (XDSP::XVECTOR*)freq_imaginary;
+    int count = N;
+    while (count) {
+      XDSP::IFFTDeinterleaved(frvec,fivec,unity,1,5);
+      frvec += 8;
+      fivec += 8;
+      count -= 64;
+
+    }
+    XDSP::FFTPolar((XDSP::XVECTOR*)smp,(XDSP::XVECTOR*)freq_real,(XDSP::XVECTOR*)freq_imaginary,N/2);
     //IFFT(freq_real,freq_imaginary,smp);
+
+     
 
     delete [] freq_real;
     delete [] freq_imaginary;

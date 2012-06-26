@@ -73,32 +73,36 @@ class Stream {
 
 enum EventType {
 kEventTypeMeta,
-kEventTypeText,
-kEventTypeCopyrightNotice,
-kEventTypeTrackName,
-kEventTypeInstrumentName,
-kEventTypeLyrics,
-kEventTypeMarker,
-kEventTypeCuePoint,
-kEventTypeMidiChannelPrefix,
-kEventTypeEndOfTrack,
-kEventTypeSetTempo,
-kEventTypeSmpteOffset,
-kEventTypeTimeSignature,
-kEventTypeKeySignature,
-kEventTypeSequencerSpecific,
-kEventTypeUnknown,
 kEventTypeSysEx,
-kEventTypeSequenceNumber,
 kEventTypeDividedSysEx,
 kEventTypeChannel,
-kEventTypeNoteOff,
-kEventTypeNoteOn,
-kEventTypeNoteAftertouch,
-kEventTypeController,
-kEventTypeProgramChange,
-kEventTypeChannelAftertouch,
-kEventTypePitchBend,
+kEventTypeUnknown
+};
+
+enum EventSubtype {
+kEventSubtypeText,
+kEventSubtypeCopyrightNotice,
+kEventSubtypeTrackName,
+kEventSubtypeInstrumentName,
+kEventSubtypeLyrics,
+kEventSubtypeMarker,
+kEventSubtypeCuePoint,
+kEventSubtypeMidiChannelPrefix,
+kEventSubtypeEndOfTrack,
+kEventSubtypeSetTempo,
+kEventSubtypeSmpteOffset,
+kEventSubtypeTimeSignature,
+kEventSubtypeKeySignature,
+kEventSubtypeSequencerSpecific,
+kEventSubtypeSequenceNumber,
+kEventSubtypeNoteOff,
+kEventSubtypeNoteOn,
+kEventSubtypeNoteAftertouch,
+kEventSubtypeController,
+kEventSubtypeProgramChange,
+kEventSubtypeChannelAftertouch,
+kEventSubtypePitchBend,
+kEventSubtypeUnknown,
 };
 
 
@@ -106,7 +110,8 @@ struct Event {
   //uint8_t* data;
   double abs_time_ms;
   uint32_t deltaTime;
-  EventType type,subtype;
+  EventType type;
+  EventSubtype subtype;
   uint8_t channel,track;
     
   union {

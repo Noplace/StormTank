@@ -22,7 +22,7 @@ class Util : public Component {
   }
 
   void set_sample_rate(uint32_t sample_rate) { 
-    sample_rate_ = sample_rate;
+    Component::set_sample_rate(sample_rate);
     sr_inv = 1.0/double(sample_rate_);
   }
 

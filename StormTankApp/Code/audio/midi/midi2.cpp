@@ -61,7 +61,7 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 			auto length = stream.readVarInt();
 			switch(subtypeByte) {
 				case 0x00:
-					event.subtype = kEventTypeSequenceNumber;
+					event.subtype = kEventSubtypeSequenceNumber;
 					if (length != 2) {
             //throw "Expected length for sequenceNumber event is 2, got " + length;
             DebugBreak();
@@ -69,35 +69,35 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 					event.data.seq.number = stream.readInt16();
 					return;
 				case 0x01:
-					event.subtype = kEventTypeText;
+					event.subtype = kEventSubtypeText;
 					stream.read(length);
 					return;
 				case 0x02:
-					event.subtype = kEventTypeCopyrightNotice;
+					event.subtype = kEventSubtypeCopyrightNotice;
 					stream.read(length);
 					return;
 				case 0x03:
-					event.subtype = kEventTypeTrackName;
+					event.subtype = kEventSubtypeTrackName;
 					stream.read(length);
 					return;
 				case 0x04:
-					event.subtype = kEventTypeInstrumentName;
+					event.subtype = kEventSubtypeInstrumentName;
 					stream.read(length);
 					return;
 				case 0x05:
-					event.subtype = kEventTypeLyrics;
+					event.subtype = kEventSubtypeLyrics;
 					stream.read(length);
 					return;
 				case 0x06:
-					event.subtype = kEventTypeMarker;
+					event.subtype = kEventSubtypeMarker;
 					stream.read(length);
 					return;
 				case 0x07:
-					event.subtype = kEventTypeCuePoint;
+					event.subtype = kEventSubtypeCuePoint;
 					stream.read(length);
 					return;
 				case 0x20:
-					event.subtype = kEventTypeMidiChannelPrefix;
+					event.subtype = kEventSubtypeMidiChannelPrefix;
 					if (length != 1) {
             //throw "Expected length for midiChannelPrefix event is 1, got " + length;
             DebugBreak();
@@ -105,11 +105,11 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 					event.data.cp.channelprefix = stream.readInt8();
 					return;
 				case 0x2f:
-					event.subtype = kEventTypeEndOfTrack;
+					event.subtype = kEventSubtypeEndOfTrack;
 					if (length != 0) throw "Expected length for endOfTrack event is 0, got " + length;
 					return;
 				case 0x51:
-					event.subtype = kEventTypeSetTempo;
+					event.subtype = kEventSubtypeSetTempo;
 					if (length != 3) {
             //throw "Expected length for setTempo event is 3, got " + length;
             DebugBreak();
@@ -121,7 +121,7 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 					);
 					return;
         case 0x54: {
-					event.subtype = kEventTypeSmpteOffset;
+					event.subtype = kEventSubtypeSmpteOffset;
 					if (length != 5) {
             //throw "Expected length for smpteOffset event is 5, got " + length;
           }
@@ -142,7 +142,7 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 					return;
         }
 				case 0x58:
-					event.subtype = kEventTypeTimeSignature;
+					event.subtype = kEventSubtypeTimeSignature;
 					if (length != 4) {
             //throw "Expected length for timeSignature event is 4, got " + length;
             DebugBreak();
@@ -153,7 +153,7 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 					event.data.time_signature.thirtyseconds = stream.readInt8();
 					return;
 				case 0x59:
-					event.subtype = kEventTypeKeySignature;
+					event.subtype = kEventSubtypeKeySignature;
 					if (length != 2){
             DebugBreak();
             //throw "Expected length for keySignature event is 2, got " + length;
@@ -162,14 +162,14 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 					event.data.key_signature.scale = stream.readInt8();
 					return;
 				case 0x7f:
-					event.subtype = kEventTypeSequencerSpecific;
+					event.subtype = kEventSubtypeSequencerSpecific;
 					//event.data = 
             stream.read(length);
 					return;
 				default:
           //DebugBreak();
 					// console.log("Unrecognised meta event subtype: " + subtypeByte);
-					event.subtype = kEventTypeUnknown;
+					event.subtype = kEventSubtypeUnknown;
 					//event.data = 
             stream.read(length);
 					return;
@@ -211,7 +211,7 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 		event.type = kEventTypeChannel;
 		switch (eventType) {
 			case 0x08:
-				event.subtype = kEventTypeNoteOff;
+				event.subtype = kEventSubtypeNoteOff;
 				event.data.note.noteNumber = param1;
 				event.data.note.velocity = stream.readInt8();
 				return;
@@ -219,31 +219,31 @@ void MidiLoader::readEvent(Stream& stream,Event& event) {
 				event.data.note.noteNumber = param1;
 				event.data.note.velocity = stream.readInt8();
 				if (event.data.note.velocity == 0) {
-					event.subtype = kEventTypeNoteOff;
+					event.subtype = kEventSubtypeNoteOff;
 				} else {
-					event.subtype = kEventTypeNoteOn;
+					event.subtype = kEventSubtypeNoteOn;
 				}
 				return;
 			case 0x0a:
-				event.subtype = kEventTypeNoteAftertouch;
+				event.subtype = kEventSubtypeNoteAftertouch;
 				event.data.note_aftertouch.noteNumber = param1;
 				event.data.note_aftertouch.amount = stream.readInt8();
 				return;
 			case 0x0b:
-				event.subtype = kEventTypeController;
+				event.subtype = kEventSubtypeController;
 				event.data.controller.type = param1;
         event.data.controller.value = stream.readInt8();
 				return;
 			case 0x0c:
-				event.subtype = kEventTypeProgramChange;
+				event.subtype = kEventSubtypeProgramChange;
 				event.data.program.number = param1;
 				return;
 			case 0x0d:
-				event.subtype = kEventTypeChannelAftertouch;
+				event.subtype = kEventSubtypeChannelAftertouch;
 				event.data.channel_aftertouch.amount = param1;
 				return;
 			case 0x0e:
-				event.subtype = kEventTypePitchBend;
+				event.subtype = kEventSubtypePitchBend;
 				event.data.pitch.value = param1 + (stream.readInt8() << 7);
 				return;
 			default:
