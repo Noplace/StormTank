@@ -21,9 +21,6 @@
     <ClCompile Include="Code\main_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\audio\synth\synth.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Code\scenes\intro_scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,6 +57,12 @@
     <ClCompile Include="Code\audio\synth\instruments\piano.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Code\spectrum_analyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\audio\synth\midi_synth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\stormtankapp.h">
@@ -83,13 +86,7 @@
     <ClInclude Include="Code\audio\synth\synth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\song\song1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\scenes\scenes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\song\song2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\output\directsound.h">
@@ -161,5 +158,14 @@
     <ClInclude Include="Code\audio\synth\types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Code\spectrum_analyzer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\midi_synth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FXC Include="Shaders\main2d.fx" />
   </ItemGroup>
 </Project>

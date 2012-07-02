@@ -1,66 +1,9 @@
 #include "../stormtankapp.h"
-#include "../song/song1.h"
+#include <fstream>
 
 pgt::generators::SimplexNoise sn;
 XMCOLOR* tex_data0;
-
-
-/*
-DWORD WINAPI IntroScene::playMusic(LPVOID lpThreadParameter) {
-  utilities::Timer<double> timer;
-  auto self = (IntroScene*)lpThreadParameter;
-  uint64_t current_cycles=0,prev_cycles=timer.GetCurrentCycles();
-  double span_accumulator = 0;
-  double time_lapse = 0;
-  double dt = 16.66666667;
-
-
-  short* buffer = sonant_init(songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_);
-
-  while (1) {
-    current_cycles = timer.GetCurrentCycles();
-    double time_span =  (current_cycles - prev_cycles) * timer.resolution();
-    if (time_span >= 250.0)
-      time_span = 250.0;
-    span_accumulator += time_span;
-    while (span_accumulator >= dt) {
-      span_accumulator -= dt;
-
-      uint32_t buffer_size = 0.050 * 44100 * 2 * 2;
-      if (time_lapse >= 50) {
-        //auto samples = audio::track1_synth.SamplesPerWholeNote();
-        /*auto samples = audio::track1_synth.SamplesPerTimeMS(time_lapse);
-        double freq = audio::track1_synth.NoteFreq((synth::Notes)audio::note);
-        audio::lfo.setRate(freq);
-        audio::offset = 0;
-        for (uint32_t i=0;i<samples;++i) {
-          auto sample = short(audio::lfo.tick() * 32767.0f);
-          audio::output_buffer[audio::offset++] = sample;
-          audio::output_buffer[audio::offset++] = sample;
-        }*/
-        //self->audio_interface_->Write(audio::output_buffer,audio::offset*sizeof(short));
-    /*    
-        self->audio_interface_->Write(buffer,buffer_size);
-        buffer += buffer_size>>1;
-        //audio::song_time_ms += time_lapse;
-        //if ((uint32_t(audio::song_time_ms) % 1000) == 0) {
-        //  audio::note++;
-       // }
-
-        time_lapse = 0;
-      }
-      time_lapse += dt;
-
-    }
-
-    prev_cycles = current_cycles;
-  }
-
-  
-
-  return 0;
-}*/
-   
+XMMATRIX world_mat;
 
 int IntroScene::Initialize(MainWindow* win) {
   graphics::Scene::Initialize(win->gfx());
@@ -88,6 +31,32 @@ int IntroScene::Initialize(MainWindow* win) {
 	gfx->device()->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
 	gfx->device()->SetTextureStageState( 0, D3DTSS_ALPHAOP,D3DTOP_MODULATE );
 
+  {
+    /*FILE* fp = fopen("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.fx","r");
+    fseek(fp,0,SEEK_END);
+    auto size = ftell(fp);
+    fseek(fp,0,SEEK_SET);
+    
+    fread(data,1,size-1,fp);
+    fclose(fp);*/
+
+    std::ios::openmode mode = std::ios::beg | std::ios::in;
+
+    std::ifstream ifs("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.fx",mode);
+ 
+      const std::string file_content( (std::istreambuf_iterator<char>( ifs )), std::istreambuf_iterator<char>() );
+      auto size = file_content.length();
+      char* data = new char[size];
+      //data_pointer = HeapAlloc(manager_->heap(),0,data_length);
+      memcpy(data,file_content.c_str(),size);
+   
+    ifs.close();
+
+    graphics::ShaderBlob blob;
+    gfx->CompileShaderFromMemory(data,size,"VS","vs_3_0",blob);
+    gfx->CreateVertexShader(blob.data(),blob.size(),vertex_shader_);
+    delete []data;
+  }
   arc1.Initialize(gfx);
   arc1.SetTopLeft(200,200);
   arc1.SetColor0(0xffffffff);
@@ -120,6 +89,7 @@ int IntroScene::Initialize(MainWindow* win) {
     
     memset(&vb,0,sizeof(vb));
     vb.description.byte_width = sizeof(graphics::shape::Vertex)*8;
+    vb.description.bind_flags = D3D11_BIND_VERTEX_BUFFER;
     vb.description.usage = 0;//D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
     gfx->CreateBuffer(vb,v);
 
@@ -141,135 +111,64 @@ int IntroScene::Initialize(MainWindow* win) {
     delete [] tex_data1;
     
 
-
-
-    //audio::thread = CreateThread(nullptr,0,static_cast<LPTHREAD_START_ROUTINE>(playMusic),this,CREATE_SUSPENDED,(LPDWORD)&audio::thread_id);
-    //ResumeThread(audio::thread);
-    
-    //int blit_sawtooth(double freq,int samples,short* out);
-    //blit_sawtooth(freq,samples,audio_buffer);
-   // audio_interface_->Write(audio::output_buffer,samples*2*sizeof(short));
-
-    
-
-   /* {
-      MidiFile  inputfile;
-      inputfile.read("D:\\Personal\\Projects\\StormTank\\Solution\\StormTankApp\\Content\\smb109.mid");
-      //inputfile.deltaTime();
-      inputfile.absoluteTime();
-      inputfile.joinTracks();
-      //int eventcount = inputfile.getEventCount(0);
-      //auto a0 = inputfile.getAbsoluteTickTime(0);
-      
-
-      auto ticks_per_qn = inputfile.getTicksPerQuarterNote();
-      uint32_t ticks =0;
-      double seconds = 0;
-      synth::BasicGenerator track1_synth(44100,2,16);
-      int track;
-      int timeinticks;
-      double timeinsecs;
-
-      
-      //for (int track = 0;track<inputfile.getTrackCount();++track) {
-        int event_count = inputfile.getEventCount(0);
-        
-        //for (int event=0;event<event_count;++event) {
-        //  auto ptr = &inputfile.getEvent(track,event);
-        //  ticks += ptr->time;
-        //}
-        //seconds = inputfile.getTimeInSeconds(ticks);
-        //short* audio_buffer = new short[2*44100*(int)ceil(seconds)];
-        //ticks = 0;
-        //uint32_t audio_buffer_offset = 0;
-        for (int event=0;event<event_count;++event) {
-          auto ptr = &inputfile.getEvent(track,event);
-          if (ptr->isNoteOn()) {
-            uint32_t samples = int((double(ptr->time)/ticks_per_qn)*(track1_synth.SamplesPerWholeNote()/4));
-            double freq = track1_synth.NoteFreq((synth::Notes)ptr->data[1]);
-            //audio_buffer_offset += track1_synth.GenerateSineWave(freq,samples,audio_buffer+audio_buffer_offset);
-            int b = 1;
-            char str[256];
-            sprintf(str,"%d - note on %d - samples %d\n",track,ptr->data[1],samples);
-            OutputDebugString(str);
-          }
-          if (ptr->isTimbre()) {
-            char instrument = ptr->data[1];
-            //set instrument
-          }
-          if (ptr->isTempo()) {
-            char c = ptr->data[0];
-            auto bpm = ptr->getTempoBPM();
-            track1_synth.SetBeatsPerMinute(bpm);
-            int a = 0;
-          }
-          ticks += ptr->time;
-        }
-        //audio_interface_->Write(audio_buffer,audio_buffer_offset*sizeof(short));
-        //delete [] audio_buffer;
-       // break;
-      //}
-
-
-    }*/
-
-   
+    sa.Initialize(gfx);
+    sa.Construct();
+    win->player2().set_visual_addon(&sa);
   }
   return S_OK;
 }
 
 int IntroScene::Deinitialize() {
+  win->player2().set_visual_addon(nullptr);
+  sa.Deinitialize();
+  gfx->DestroyBuffer(vb);
+  arc1.Deinitialize();
   gfx->DestroyTexture(texture);
+  gfx->DestroyShader(vertex_shader_);
   delete [] tex_data0;
   return S_OK;
 }
 
-
-
-
-XMMATRIX world_mat;
-
 int IntroScene::Update(double dt) {
-
- 
+  camera_.UpdateConstantBuffer();
   
-
   static float theta =0;
   float y = 0;//100+sin(theta)*100;
   //D3DXMATRIX matIdentity;
 	//D3DXMatrixIdentity(&matIdentity);
   world_mat = XMMatrixAffineTransformation2D(XMVectorSet(1,1,0,0),XMVectorSet(0,0,0,0),0,XMVectorSet(0,y,0,0));
-  
-
   theta += 0.3f;
 
-    //sn.Generate(tex_data0,256,256,theta,0,5);
-    //gfx->CopyToTexture(texture,tex_data0,0,256,graphics::TexturePoint(0,0),graphics::TexturePoint(0,0),256,256);
-
+  //sn.Generate(tex_data0,256,256,theta,0,5);
+  //gfx->CopyToTexture(texture,tex_data0,0,256,graphics::TexturePoint(0,0),graphics::TexturePoint(0,0),256,256);
 
   arc1.BuildTransform();
   arc1.SetRotate(theta);
-
-
-
+  sa.SetTopLeft(0,480-100);
+  sa.BuildTransform();
 
   return S_OK;
 }
 
 int IntroScene::Draw() {
-
-  uint32_t offsets[1] = {0};
-  uint32_t strides[1] = {sizeof(graphics::shape::Vertex)};
-  gfx->SetVertexBuffers(0,1,&vb,strides,offsets);
-  gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
-  gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&world_mat);
-  gfx->device()->SetTexture(0,(IDirect3DTexture9*)texture.data_pointer);
+  //gfx->SetShader(vertex_shader_);
+  camera_.SetConstantBuffer(0);
+  //uint32_t offsets[1] = {0};
+  //uint32_t strides[1] = {sizeof(graphics::shape::Vertex)};
+  //gfx->SetVertexBuffers(0,1,&vb,strides,offsets);
+  //gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
+  //gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&world_mat);
+  //gfx->device()->SetTexture(0,(IDirect3DTexture9*)texture.data_pointer);
   //gfx->Draw(4,0);
-  gfx->device()->SetTexture(0,nullptr);
+  //gfx->device()->SetTexture(0,nullptr);
   //gfx->Draw(4,4);
 
-  gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&arc1.world());
+  sa.Draw();
+
+  //gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&arc1.world());
   //arc1.Draw();
+
+  
 
   {
     char caption[255];

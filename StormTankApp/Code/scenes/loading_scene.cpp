@@ -28,6 +28,12 @@ int LoadingScene::Initialize(MainWindow* win) {
 	gfx->device()->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
 	gfx->device()->SetTextureStageState( 0, D3DTSS_ALPHAOP,D3DTOP_MODULATE );
 
+
+
+  //gfx->CompileShaderFromMemory(
+
+
+
   arc1.Initialize(gfx);
   arc1.SetTopLeft(200,200);
   arc1.SetColor0(0xffffffff);
@@ -41,6 +47,10 @@ int LoadingScene::Initialize(MainWindow* win) {
   loading_bar.SetParams(200,20);
   loading_bar.SetColors(XMCOLOR(0xff00ff00),XMCOLOR(0xff00ff00),XMCOLOR(0xff00ff00),XMCOLOR(0xff00ff00));
   loading_bar.Construct();
+
+
+
+
 
   loading_progress = 0;
   event1 = CreateEvent(nullptr,false,false,nullptr);
@@ -119,7 +129,7 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
   ResetEvent(self->event1);
   
   //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\MoonLte3.mid");
-  self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\btmnjstg.mid");
+  self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\btmnjstg.mid");
   //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\minute_waltz.mid");
   //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
 

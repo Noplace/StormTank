@@ -37,8 +37,9 @@ class MainWindow: public core::windows::Window {
     graphics::ContextD3D9* gfx() { return gfx_; }
     audio::DirectSound* audio_interface() { return audio_interface_; }
     //SonantPlayer& player() { return player_; }
+    audio::synth::MidiSynth& midi_synth() { return *midi_synth_; }
     audio::synth::Player& player2() { return *synth_player_; }
-    utilities::Timer<double>& timer() { return timer_; }
+    utilities::Timer& timer() { return timer_; }
    protected:
     int OnCreate(WPARAM wParam,LPARAM lParam);
     int OnDestroy(WPARAM wParam,LPARAM lParam);
@@ -51,7 +52,8 @@ class MainWindow: public core::windows::Window {
     graphics::InputLayout     input_layout;
     //SonantPlayer              player_;
     audio::synth::Player*      synth_player_;
-    utilities::Timer<double>  timer_;
+    audio::synth::MidiSynth*   midi_synth_;
+    utilities::Timer  timer_;
     struct {
       uint64_t extra_cycles;
       uint64_t current_cycles;

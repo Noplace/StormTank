@@ -15,6 +15,7 @@
 #include "filters/lowpass.h"
 #include "effects/delay.h"
 #include "channel.h"
+#include "midi_synth.h"
 #include "player.h"
 
   /*

@@ -31,7 +31,8 @@
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
     <ClCompile Include="Code\audio\output\directsound.cpp" />
-    <ClCompile Include="Code\audio\synth\synth.cpp" />
+    <ClCompile Include="Code\audio\synth\midi_synth.cpp" />
+    <ClCompile Include="Code\spectrum_analyzer.cpp" />
     <ClCompile Include="Code\winmain.cpp" />
     <ClCompile Include="Code\scenes\loading_scene.cpp" />
   </ItemGroup>
@@ -47,6 +48,7 @@
     <ClInclude Include="Code\audio\synth\instruments\osc_wave.h" />
     <ClInclude Include="Code\audio\synth\instruments\percussion.h" />
     <ClInclude Include="Code\audio\synth\instruments\piano.h" />
+    <ClInclude Include="Code\audio\synth\midi_synth.h" />
     <ClInclude Include="Code\audio\synth\oscillators\exp_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\sawtooth_oscillator.h" />
@@ -62,12 +64,11 @@
     <ClInclude Include="Code\ptg\pgt.h" />
     <ClInclude Include="Code\ptg\generators\simplex_noise.h" />
     <ClInclude Include="Code\scenes\scenes.h" />
-    <ClInclude Include="Code\song\song2.h" />
+    <ClInclude Include="Code\spectrum_analyzer.h" />
     <ClInclude Include="Code\stormtankapp.h" />
     <ClInclude Include="Code\audio\output\output.h" />
     <ClInclude Include="Code\audio\output\audio_output_interface.h" />
     <ClInclude Include="Code\audio\output\directsound.h" />
-    <ClInclude Include="Code\song\song1.h" />
     <ClInclude Include="Code\audio\synth\synth.h" />
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +78,15 @@
     <ProjectReference Include="..\..\WinCore\WinCore.vcxproj">
       <Project>{43ac74e9-a89d-4e31-8c01-fa2cce27f5c2}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FXC Include="Shaders\main2d.fx">
+      <target Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">1</target>
+      <output Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">0</output>
+      <strict Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</strict>
+      <output Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">0</output>
+      <FileType>Document</FileType>
+    </FXC>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C9F2332C-18DE-4679-8D0A-B5F6ED285D3B}</ProjectGuid>
@@ -108,6 +118,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\FXC.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -154,6 +165,8 @@
       <EnablePREfast>false</EnablePREfast>
       <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -168,6 +181,10 @@
       <StackCommitSize>
       </StackCommitSize>
     </Link>
+    <FXC>
+      <outputdir>
+      </outputdir>
+    </FXC>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -178,12 +195,17 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <Profile>true</Profile>
+      <Profile>false</Profile>
     </Link>
+    <FXC />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -214,6 +236,10 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN64;_AMD64;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -224,5 +250,6 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\FXC.targets" />
   </ImportGroup>
 </Project>

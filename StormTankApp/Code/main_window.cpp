@@ -63,8 +63,10 @@ void MainWindow::Initialize() {
 
   //player_.set_audio_interface(audio_interface_);
   //player_.Initialize();
+  midi_synth_ = new audio::synth::MidiSynth();
   synth_player_ = new audio::synth::Player();
   synth_player_->set_audio_interface(audio_interface_);
+  synth_player_->set_synth(midi_synth_);
   synth_player_->Initialize();
 
   //loading_scene.Initialize(this);
@@ -131,9 +133,11 @@ int MainWindow::OnCreate(WPARAM wParam,LPARAM lParam) {
 int MainWindow::OnDestroy(WPARAM wParam,LPARAM lParam) {
   //intro_scene.Deinitialize();
   //loading_scene.Deinitialize();
+
   SwitchScene(nullptr);
   synth_player_->Deinitialize();
-  delete synth_player_;
+  SafeDelete(&synth_player_);
+  SafeDelete(&midi_synth_);
   //player_.Deinitialize();
   audio_interface_->Deinitialize();
   SafeDelete(&audio_interface_);

@@ -29,6 +29,7 @@ class StormTankApp : public core::windows::Application {
     unsigned old_fp_state;
     #ifndef _M_X64 
       _controlfp_s(&old_fp_state, _PC_53, _MCW_PC);
+      //_controlfp(_RC_NEAR, _MCW_RC);
     #endif
     win.Initialize();
    }
@@ -49,7 +50,7 @@ class StormTankApp : public core::windows::Application {
     return static_cast<int>(msg.wParam);
   }
 };
-
+/*
 #include <x3daudio.h>
 #include <XDSP.h>
 void fft_test() {
@@ -75,12 +76,53 @@ void fft_test() {
   //}
   XDSP::IFFTDeinterleaved(outrv,outiv,unity,1,6);
   int a = 1;
+}*/
+
+/*
+void floatTest() {
+  float r1,r2,r3,r4;
+  utilities::Timer<double> timer;
+  r1 = r2 = r3 = r4 = 0.0f;
+  double time1 = timer.GetCurrentCycles();
+  for (int i=0;i<100000000;++i) {
+    r1 = r1 + 1.0f;
+    r4 = sinf(r1 * 2 * XM_PI * 0.0001f);
+    r3 = 12.0f;
+    r2 = (r1 * r3) / r4;
+  }
+  double time2 = timer.GetCurrentCycles();
+  double result = (time2 - time1) * timer.resolution();
+  int a = 1;
+}*/
+
+float g_one = 1.0f;
+float g_small_1 = FLT_EPSILON * 0.5;
+float g_small_2 = DBL_EPSILON * 0.5;
+float g_small_3 = DBL_EPSILON * 0.5;
+ 
+void AddThreeAndPrint()
+{
+  char str[255];
+    sprintf(str,"Sum = %1.16e\n", ((g_one + g_small_1) + g_small_2) + g_small_3);
+    OutputDebugString(str);
 }
+
+void MulDouble(double x, double y, double* pResult)
+{
+    *pResult = x * y;
+}
+ 
+void MulFloat(float x, float y, float* pResult)
+{
+    *pResult = x * y;
+}
+
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
   //int test_padsynth();
   //test_padsynth();
   //fft_test();
   StormTankApp app(hInstance,lpCmdLine,nShowCmd);
+  //AddThreeAndPrint();
   return app.Run();
 }

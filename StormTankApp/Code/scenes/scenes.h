@@ -45,7 +45,7 @@ class IntroScene : public BaseScene {
   int Update(double dt);
   int Draw();
  private:
-
+  SpectrumAnalyzer sa;
   graphics::Buffer vb;
   graphics::Texture texture;
   graphics::shape::Arc arc1;
