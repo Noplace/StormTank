@@ -10,11 +10,16 @@ class Player;
 
 class Synth : public Component {
  public:
+  struct {
+    real_t* pre_effects;
+    real_t* post_effects;
+  } buffers;
   Player* player_;
   virtual void Initialize() = 0;
   virtual void Deinitialize() = 0;
   virtual void Reset() = 0;
   virtual void RenderSamples(uint32_t samples_count, short* data_out) = 0;
+ protected:
 };
 
 class MidiSynth : public Synth {
@@ -23,6 +28,7 @@ class MidiSynth : public Synth {
   enum State {
     kStateStopped=0,kStatePlaying=1,kStatePaused=2
   };
+  Delay delay_unit;
   MidiSynth() : initialized_(false) {
   }
   ~MidiSynth() {
@@ -30,11 +36,12 @@ class MidiSynth : public Synth {
   }
   void Initialize();
   void Deinitialize();
-  void RenderSamples(uint32_t samples_count, short* data_out);
   void LoadMidi(char* filename);
+  void RenderSamples(uint32_t samples_count, short* data_out);
   void Reset() {
     ResetTracks();
   }
+  
  private:
   struct Track {
     midi::Event* event_sequence;
@@ -44,19 +51,21 @@ class MidiSynth : public Synth {
     }
   };
   static MidiEventHandler midi_main_event_handlers[5];
-  static MidiEventHandler midi_meta_event_handlers[22];
-  static MidiEventHandler midi_channel_event_handlers[22];
+  static MidiEventHandler midi_meta_event_handlers[23];
+  static MidiEventHandler midi_channel_event_handlers[23];
   Util util;
-  Delay delay_unit;
+  
   instruments::InstrumentProcessor* instr[kInstrumentCount];
   instruments::Percussion* percussion_instr;
   Channel* channels[kChannelCount];
   midi::Event* last_event;
   Track* tracks;
   double bpm;
+  real_t pitch_bend_range;
   uint32_t ticks_per_beat;
   uint32_t samples_to_next_event;
   int track_count_;
+  uint8_t rpn_fine,rpn_coarse;
   bool initialized_;
   void DestroyTrackData() {
     for (int i=0;i<track_count_;++i)
@@ -74,28 +83,8 @@ class MidiSynth : public Synth {
     last_event = GetNextEvent();
     samples_to_next_event = 0;
   }
-  void GenerateIntoBuffer(uint32_t samples_to_generate,short* data_out,uint32_t data_offset) {
-    double ov_left_sample=0,ov_right_sample=0;
-    while (samples_to_generate) {
-      MixChannels(ov_left_sample,ov_right_sample);
-
-      //global effects
-      //if (apply_delay) {
-      //double lpfreq = 800;
-      //static double t = 0;
-      //ov_left_sample = lowpass.Tick(ov_left_sample,lpfreq+sin(t)*lpfreq);
-      //ov_right_sample = lowpass.Tick(ov_right_sample,lpfreq+sin(t)*lpfreq);
-      //t += 0.00001;
-      //delay_unit.Process(ov_left_sample,ov_right_sample,ov_left_sample,ov_right_sample);
-      //}
-
-      //clip and write to output
-      data_out[data_offset++] = short(32767.0 * min(ov_left_sample,1.0));
-      data_out[data_offset++] = short(32767.0 * min(ov_right_sample,1.0));
-      --samples_to_generate;
-      //player_->song_counter_ms += util.sample_time_ms_;
-    }
-  };
+  void GenerateIntoBuffer(uint32_t samples_to_generate,short* data_out,uint32_t data_offset);
+  void MixChannels(uint32_t samples_to_generate);
   midi::Event* GetNextEvent();
   void HandleEvent(midi::Event* event);
   void MidiEventUnknown(midi::Event* event);
@@ -106,7 +95,9 @@ class MidiSynth : public Synth {
   void MidiEventNoteOff(midi::Event* event);
   void MidiEventProgramChange(midi::Event* event);
   void MidiEventController(midi::Event* event);
-  void MixChannels(double& output_left, double& output_right);
+  void MidiEventPitchBend(midi::Event* event);
+  
+  
 };
 
 }

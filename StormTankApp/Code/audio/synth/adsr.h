@@ -3,76 +3,86 @@ namespace synth {
 
 class ADSR : public Component {
  public:
-  ADSR() : Component(),current_time_ms_(0) {
-    stage = 0;
+  ADSR() : Component() , stage_(0),target_(0),value_(0),attack_amp_(1.0f),sustain_amp_(0.5f),attack_rate_(0),decay_rate_(0),release_rate_(0) {
+    stages_[0] = &ADSR::stage_0;
+    stages_[1] = &ADSR::stage_1;
+    stages_[2] = &ADSR::stage_2;
+    stages_[3] = &ADSR::stage_3;
+    stages_[4] = &ADSR::stage_4;
   }
+
   ~ADSR() {
 
   }
 
-  void SetParameters(double attack_amp, double sustain_amp, double attack_time_ms, double decay_time_ms, double release_time_ms) {
-    attack_amp_  = attack_amp;
-    sustain_amp_ = sustain_amp;
-    attack_time_ms_   =  attack_time_ms;   
-    decay_time_ms_    =  decay_time_ms;   
-    release_time_ms_  =  release_time_ms; 
+  real_t Tick() {
+    (this->*stages_[stage_])();
+    return value_;
   }
-
-  double Tick() {
-
-    double t0 = attack_time_ms_;
-    double t1 = t0+decay_time_ms_;
-    double t2 = t1+sustain_time_ms_;//90 seconds sustain!
-    double t3 = t2+release_time_ms_;
-
-    auto stage1_func = [=](double t){
-      return attack_amp_*(t*attack_velocity_)/attack_time_ms_;
-    };
-    auto stage2_func = [=](double t) {
-      return attack_amp_-(attack_amp_+sustain_amp_)*(t*attack_velocity_)/decay_time_ms_;
-    };
-    auto stage3_func = [=]() {
-      return sustain_amp_;
-    };
-    auto stage4_func = [=](double t) {
-      return sustain_amp_*((release_time_ms_-t)*release_velocity_)/release_time_ms_;
-    };
-    double result = 0;
-    if (current_time_ms_ < t0)
-      result = stage1_func(current_time_ms_);
-    else if (current_time_ms_ < t1)
-      result = stage2_func(current_time_ms_-t0);
-    else if (current_time_ms_ < t2)
-      return stage3_func();
-    else
-      return stage4_func(current_time_ms_-t2);
-
-    current_time_ms_ += sample_time_ms_;
+  void NoteOn(real_t velocity) {
+    stage_ = 1;
+    target_ = attack_amp_;
+    attack_rate_ = velocity;
   }
-
-  void NoteOn(double velocity) {
-    current_time_ms_ = 0;
-    attack_velocity_ = velocity;
-    sustain_time_ms_ = 90000.0;
+  void NoteOff(real_t velocity) {
+    stage_ = 4;
+    release_rate_ = velocity;
   }
-  void NoteOff(double velocity) {
-    sustain_time_ms_ = current_time_ms_;
-    release_velocity_ = velocity;
+  void set_attack_amp(real_t attack_amp) { attack_amp_  = attack_amp; }
+  void set_sustain_amp(real_t sustain_amp) { sustain_amp_  = sustain_amp; }
+  void set_decay_rate(real_t decay_rate_) {
+    decay_rate_ = decay_rate_;
+  }
+  void set_decay_time_ms(real_t decay_time_ms) {
+    decay_rate_ = (1.0f - sustain_amp_) / ( decay_time_ms * 0.001f * this->sample_rate_ );
   }
  protected:
-  int stage;
-  double attack_amp_,attack_velocity_;
-  double sustain_amp_,release_velocity_;
-  double current_time_ms_;
-  double attack_time_ms_;
-  double decay_time_ms_; 
-  double sustain_time_ms_;
-  double release_time_ms_;
+  typedef void (ADSR::*StageFunc)();
+  int stage_;
+  real_t value_,target_;
+  real_t attack_amp_,sustain_amp_;
+  real_t attack_rate_,decay_rate_,release_rate_;
 
-  __forceinline double lerp(double x0,double x1,double t) {
+
+  void stage_0() { value_ = 0; };
+  void stage_1() {
+    value_ += attack_rate_;
+    if ( value_ >= target_ ) {
+      value_ = target_;
+      target_ = sustain_amp_;
+	    stage_ = 2;
+    }
+  }
+  void stage_2() {
+    if ( value_ > sustain_amp_ ) {
+      value_ -= decay_rate_;
+      if ( value_ <= sustain_amp_ ) {
+        value_ = sustain_amp_;
+        stage_ = 3;
+      }
+    } else {
+      value_ += decay_rate_; // attack target < sustain level
+      if ( value_ >= sustain_amp_ ) {
+        value_ = sustain_amp_;
+        stage_ = 3;
+      }
+    }
+  }
+  void stage_3() {};
+  void stage_4() {
+    value_ -= release_rate_;
+    if ( value_ <= 0.0 ) {
+      value_ = 0.0;
+      stage_ = 0;
+    }
+  }
+
+  StageFunc stages_[5];
+
+  __forceinline real_t lerp(real_t x0,real_t x1,real_t t) {
     return x0 + t*(x1-x0);
   }
-  __forceinline double u(double t) {
+  __forceinline real_t u(real_t t) {
     return t < 0 ? 0 : t;
   }
 };

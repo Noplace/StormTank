@@ -2,6 +2,7 @@
 #include "oscillator.h"
 #include "sine_oscillator.h"
 
+
 namespace audio {
 namespace synth {
 namespace oscillators {
@@ -12,9 +13,9 @@ namespace oscillators {
 
 SineOscillator::SineOscillator() : Oscillator() {
   //if (ref_count == 0) {
-    table = new double[kIndexRange+1];
-	  for(auto i=0;i<=kIndexRange;i++)
-	    table[i] = sin(2.0*XM_PI*(i/double(kIndexRange)));
+    table = new real_t[kIndexRange+1];
+	  for(auto i=0;i<=kIndexRange;++i)
+	    table[i] = sin(2.0f*XM_PI*(i/real_t(kIndexRange)));
   //}
   //++ref_count;
 }

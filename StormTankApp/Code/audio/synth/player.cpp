@@ -19,7 +19,7 @@ void Player::Initialize() {
   state_ = kStateStopped;
   song_pos_ms = song_counter_ms = 0;
   auto sample_rate = audio_interface_->wave_format().nSamplesPerSec;
-  sample_rate_ = double(sample_rate);
+  //sample_rate_ = double(sample_rate);
 
   output_buffer_length_ms_ = 400.0;//400ms
   {
@@ -93,7 +93,7 @@ DWORD Player::InstancePlayThread() {
   double span_accumulator = 0;
   double update_time = 20.0;
   double timer_res = timer.resolution();
-  uint32_t samples_to_render = uint32_t(update_time * 0.001 * sample_rate_);
+  uint32_t samples_to_render = uint32_t(update_time * 0.001 * audio_interface_->wave_format().nSamplesPerSec);
   uint32_t buffer_size = samples_to_render * 2 * sizeof(short);
 
   /*//temp
@@ -148,8 +148,8 @@ DWORD Player::InstancePlayThread() {
         synth_->RenderSamples(samples_to_render,output_buffer);
         song_counter_ms += update_time;
         if (TryEnterCriticalSection(&vis_cs) != 0) {
-          if (visual_addon_ != nullptr)
-            visual_addon_->AddPCMData(output_buffer,samples_to_render,2,update_time);
+          if (visual_addon_ != nullptr && samples_to_render >= 256)
+            visual_addon_->AddPCMData256(synth_->buffers.post_effects,2,update_time);
           LeaveCriticalSection(&vis_cs);
         }
         //fwrite(self->output_buffer,samples_to_render*2,sizeof(short),output_file);

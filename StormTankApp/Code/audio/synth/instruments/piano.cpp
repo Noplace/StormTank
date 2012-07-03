@@ -4,16 +4,17 @@ namespace audio {
 namespace synth {
 namespace instruments {
 
-double Piano::Tick(InstrumentData* data, int note_index) {
+real_t Piano::Tick(InstrumentData* data, int note_index) {
   auto cdata = (PianoData*)data;
   auto& nd = cdata->table[note_index];
 
-
-
-  auto result = 0.4*osc1.Tick(nd.phase1,nd.inc1);
-  result += 0.3*osc2.Tick(nd.phase2,nd.inc2);
-  result += 0.2*osc3.Tick(nd.phase3,nd.inc3);
-  result += 0.2*osc4.Tick(nd.phase4,nd.inc4);
+  real_t result = 0;
+  //auto result = buffer[60][nd.phase1];
+  //nd.phase1 = (nd.phase1 + 1) % 256;
+  result += 0.4f*osc1.Tick(nd.phase1,nd.inc1);
+  result += 0.3f*osc2.Tick(nd.phase2,nd.inc2);
+  result += 0.2f*osc3.Tick(nd.phase3,nd.inc3);
+  result += 0.2f*osc4.Tick(nd.phase4,nd.inc4);
 
 
 
@@ -31,9 +32,9 @@ void Piano::Update(InstrumentData* data, int note_index) {
   cdata->table[note_index].phase3 = phase_shift;
   cdata->table[note_index].phase4 = phase_shift;*/
   cdata->table[note_index].inc1 = osc1.get_increment(cdata->note_data_array[note_index].freq);
-  cdata->table[note_index].inc2 = osc2.get_increment(cdata->note_data_array[note_index].freq*1.5);
-  cdata->table[note_index].inc3 = osc3.get_increment(cdata->note_data_array[note_index].freq*2);
-  cdata->table[note_index].inc4 = osc4.get_increment(cdata->note_data_array[note_index].freq*2.5);
+  cdata->table[note_index].inc2 = osc2.get_increment(cdata->note_data_array[note_index].freq*1.5f);
+  cdata->table[note_index].inc3 = osc3.get_increment(cdata->note_data_array[note_index].freq*2.0f);
+  cdata->table[note_index].inc4 = osc4.get_increment(cdata->note_data_array[note_index].freq*2.5f);
 }
 
 }

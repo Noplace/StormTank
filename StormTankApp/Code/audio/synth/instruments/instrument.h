@@ -24,7 +24,7 @@ class InstrumentProcessor : public Component {
   //virtual void Initialize() = 0;
   //virtual void Deinitialize() = 0;
   virtual InstrumentData* NewInstrumentData() = 0;
-  virtual double Tick(InstrumentData* data, int note_index) = 0;
+  virtual real_t Tick(InstrumentData* data, int note_index) = 0;
   virtual void Update(InstrumentData* data, int note_index) = 0;
 };
 

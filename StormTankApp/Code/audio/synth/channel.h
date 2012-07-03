@@ -11,75 +11,49 @@ class Channel : public Component {
     SafeDelete(&instrument_data_);
   }
 
-  void Tick(double& output_left_sample,double& output_right_sample) {
+  void Tick(real_t& output_left_sample,real_t& output_right_sample) {
     if (silence_ == true) {
       output_left_sample = output_right_sample = 0;
     } else {
-      double sample = 0;
+      real_t sample = 0;
       for (int i=0;i<Polyphony;++i) {
-        if (instrument_data_->note_data_array[i].on == true) //this contradicts adsr and release
-          sample += instrument_data_->note_data_array[i].velocity*instrument_->Tick(instrument_data_,i);
-        /*adsr[i].Tick()**/
-        //note_table[i].velocity = max(0,note_table[i].velocity-0.00001);
+        sample += adsr[i].Tick()*instrument_->Tick(instrument_data_,i);
       }
-      double left_sample = pan_l*sample;
-      double right_sample = pan_r*sample;
-
-      output_left_sample = (amplification_*left_sample);
-      output_right_sample = (amplification_*right_sample);
+      output_left_sample += (amplification_*pan_l*sample);
+      output_right_sample += (amplification_*pan_r*sample);
     }
   }
-  void AddNote(int note,double freq,double velocity) {
-    
+  void AddNote(int note,real_t freq,real_t velocity) {
     auto ptr = &instrument_data_->note_data_array[current_note];
     ptr->note = note;
-    ptr->freq = freq;
+    ptr->freq = ptr->base_freq = freq;
     ptr->velocity = velocity;
     ptr->on = true;
     instrument_->Update(instrument_data_,current_note);
     adsr[current_note].NoteOn(ptr->velocity);
     current_note = (current_note + 1) % Polyphony;
-
-   /* auto* ptr = &instrument_data_->note_data_array[0];
-
-
-    int i=Polyphony;
-    while (ptr->on == true && ptr->note != note && --i) {
-      ++ptr;
-    }
-    ptr->note = note;
-    ptr->freq = freq;
-    ptr->velocity = velocity;
-    ptr->on = true;
-    instrument_->Update(instrument_data_,Polyphony-i);
-    adsr[Polyphony-i].NoteOn(ptr->velocity);*/
   }
-  void RemoveNote(int note) {
+  void RemoveNote(int note,real_t velocity) {
     for (int i=0;i<Polyphony;++i) {
       auto* ptr = &instrument_data_->note_data_array[i];
       if (ptr->note == note) {
         ptr->on = false;
         ptr->note = note;
-        ptr->freq = 0;
-        ptr->velocity = 0;
-        adsr[i].NoteOff(1);
+        ptr->freq = ptr->base_freq = 0;
+        ptr->velocity = velocity;
+        adsr[i].NoteOff(velocity);
         instrument_->Update(instrument_data_,i);
         current_note = i;
       }
     }
-    /*auto* ptr = &instrument_data_->note_data_array[0];
-    int i=Polyphony;
-    while (ptr->note != note && --i) {
-      ++ptr;
+  }
+
+  void SetPitchBend(real_t amount) {
+    real_t e = exp(amount * log(2.0f) / 12);
+    for (int i=0;i<Polyphony;++i) {
+      instrument_data_->note_data_array[i].freq *= e;
+      instrument_->Update(instrument_data_,i);
     }
-    if (ptr->note == note) {
-      ptr->on = false;
-      ptr->note = note;
-      ptr->freq = 0;
-      ptr->velocity = 0;
-      adsr[Polyphony-i].NoteOff(1);
-      instrument_->Update(instrument_data_,Polyphony-i);
-    }*/
   }
 
   instruments::InstrumentProcessor* instrument() { return instrument_; }
@@ -95,19 +69,21 @@ class Channel : public Component {
       instrument_data_ = newidata;
       newidata = nullptr;
     }
-
+    //default adsr
     for (int i=0;i<Polyphony;++i) {
       instrument_->Update(instrument_data_,i);
       adsr[i].set_sample_rate(sample_rate_);
-      adsr[i].SetParameters(0.5,0.3,300,100,1000);
+      adsr[i].set_attack_amp(1.0f);
+      adsr[i].set_sustain_amp(0.3f);
+      adsr[i].set_decay_time_ms(0.01f);//or set rate
     }
   }
-  void set_amplification(double amplification) {
+  void set_amplification(real_t amplification) {
     amplification_ = amplification;
   }
-  void set_panning(double panning) {
+  void set_panning(real_t panning) {
     panning_ = panning;
-    pan_l = sqrt(1-panning_);
+    pan_l = sqrt(1.0f-panning_);
     pan_r = sqrt(panning_);
   }
   bool silence() { return silence_;  }
@@ -115,7 +91,7 @@ class Channel : public Component {
  private:
   instruments::InstrumentData* instrument_data_;
   instruments::InstrumentProcessor* instrument_;
-  double amplification_,panning_,pan_l,pan_r;
+  real_t amplification_,panning_,pan_l,pan_r,pitch_bend_range;
   int index,current_note;
   bool silence_;
   ADSR adsr[Polyphony];

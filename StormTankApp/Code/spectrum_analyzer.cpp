@@ -85,25 +85,35 @@ int SpectrumAnalyzer::Deinitialize() {
   return S_OK;
 }
 
-void SpectrumAnalyzer::AddPCMData(short* samples, uint32_t count, uint32_t channels, double time_ms) {
+void SpectrumAnalyzer::AddPCMData256(float* samples, uint32_t channels, double time_ms) {
   //EnterCriticalSection(&cs);
   float* __restrict real_arr = (float* __restrict)real_samples;
   float* __restrict img_arr = (float* __restrict)img_samples;
-  for (uint32_t i=0;i<count>>1;++i) {
-    real_arr[rindex++] = samples[(i*2)] / 32767.0f;
+  //for (uint32_t i=0;i<count>>1;++i) {
+  for (uint32_t i=0;i<nBins;++i) {
+    real_arr[i] = samples[(i*2)];// / 32767.0f;
+
+    //hann window
+    double multiplier = 0.5 * (1 - cos(2*XM_PI*i/2047));
+    real_arr[i] = multiplier * real_arr[i];
+
   }
+
+
+  //memcpy(real_samples,samples,256*sizeof(real_t));
   time_counter += time_ms;
   if (time_counter >= 10.0) {
     memset(scratch,0,nBins*sizeof(float));
     XDSP::FFT(real_samples,img_samples,unity,nBins);
     XDSP::FFTPolar(real_samples, real_samples, img_samples, nBins);
     XDSP::FFTUnswizzle((XDSP::XVECTOR*)scratch, real_samples, nBinsLog2);
+   
     //scratch[0] = scratch[0]*0.5*(1+cos((2*XM_PI*0)/LINE_COUNT-1));
     //freq_pow[0] = (20 * log10(scratch[0]*5));//max(0.01f,scratch[i]*10);
     for (int i=0;i<LINE_COUNT;++i) {
       //scratch[i] = scratch[i]*0.5*(1-cos((2*XM_PI*i)/LINE_COUNT-1));
       //double freq = (double(i)/(2*LINE_COUNT))*44100.0;
-      freq_pow[i] = (65+(20 * log10(scratch[i])))*0.01f;//max(0.01f,scratch[i]*10);
+      freq_pow[i] = 10*((20 * log10(1+scratch[i])));//max(0.01f,scratch[i]*10);
     }
     /*int nBands = 64;
     //int bandWidth = rindex / nBands;

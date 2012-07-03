@@ -7,15 +7,15 @@ namespace synth {
 namespace oscillators {
 
 ExpOscillator::ExpOscillator() : Oscillator() {
-  table = new double[kIndexRange+1];
+  table = new real_t[kIndexRange+1];
 	int i;
   int div2 = kIndexRange >> 1;
-	double e = exp(1.0);
+	real_t e = exp(1.0f);
 	for(i=0;i<div2;i++) {
-    table[i] = 2.0 * ((exp(i/double(div2)) - 1.0) / (e - 1.0)) - 1.0  ;
-    table[i+div2] = 2.0 * ((exp((div2-i)/double(div2)) - 1.0) / (e - 1.0)) - 1.0  ;
+    table[i] = 2.0f * ((exp(i/real_t(div2)) - 1.0f) / (e - 1.0f)) - 1.0f  ;
+    table[i+div2] = 2.0f * ((exp((div2-i)/real_t(div2)) - 1.0f) / (e - 1.0f)) - 1.0f  ;
   }
-	table[kIndexRange] = -1.0;
+	table[kIndexRange] = -1.0f;
 }
 
 ExpOscillator::~ExpOscillator() {

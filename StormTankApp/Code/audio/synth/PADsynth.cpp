@@ -15,7 +15,7 @@
 #include "PADsynth.h"
 	
 
-XDSP::XVECTOR unity[64];
+XDSP::XVECTOR unity[256];
 
 PADsynth::PADsynth(int N_, int samplerate_, int number_harmonics_){
     N=N_;
@@ -24,7 +24,7 @@ PADsynth::PADsynth(int N_, int samplerate_, int number_harmonics_){
     A=new REALTYPE [number_harmonics];
     for (int i=0;i<number_harmonics;i++) A[i]=0.0;
     A[1]=1.0;//default, the first harmonic has the amplitude 1.0
-    XDSP::FFTInitializeUnityTable(unity,16);
+    XDSP::FFTInitializeUnityTable(unity,256);
     freq_amp=new REALTYPE[N/2];
 };
 
@@ -65,8 +65,8 @@ void PADsynth::synth(REALTYPE f,REALTYPE bw,REALTYPE bwscale,REALTYPE * __restri
 	REALTYPE fi;
 	REALTYPE rF=f*relF(nh);
 	
-        bw_Hz=(powf(2.0f,bw/1200.0f)-1.0f)*f*powf(relF(nh),bwscale);
-	
+        bw_Hz=(pow(2.0f,bw/1200.0f)-1.0f)*f*pow(relF(nh),bwscale);
+
 	bwi=bw_Hz/(2.0f*samplerate);
 	fi=rF/samplerate;
 	for (i=0;i<N/2;i++){//here you can optimize, by avoiding to compute the profile for the full frequency (usually it's zero or very close to zero)
@@ -76,8 +76,12 @@ void PADsynth::synth(REALTYPE f,REALTYPE bw,REALTYPE bwscale,REALTYPE * __restri
 	};
     };
 
-    REALTYPE * __restrict freq_real=new REALTYPE[N/2];
-    REALTYPE * __restrict freq_imaginary=new REALTYPE[N/2];
+    REALTYPE * __restrict freq_real=new REALTYPE[N];
+    REALTYPE * __restrict freq_imaginary=new REALTYPE[N];
+    for (i=0;i<N;i++){
+	    freq_real[i]=0;
+	    freq_imaginary[i]=0;
+    };
 
     //Convert the freq_amp array to complex array (real/imaginary) by making the phases random
     for (i=0;i<N/2;i++){
@@ -85,20 +89,27 @@ void PADsynth::synth(REALTYPE f,REALTYPE bw,REALTYPE bwscale,REALTYPE * __restri
 	freq_real[i]=freq_amp[i]*cos(phase);
 	freq_imaginary[i]=freq_amp[i]*sin(phase);
     };
-    
+
+
     auto frvec = (XDSP::XVECTOR*)freq_real;
     auto fivec = (XDSP::XVECTOR*)freq_imaginary;
-    int count = N;
+    XDSP::IFFTDeinterleaved(frvec,fivec,unity,1,8);
+    auto temps = new XDSP::XVECTOR[N];
+    XDSP::FFTPolar(temps,(XDSP::XVECTOR*)freq_real,(XDSP::XVECTOR*)freq_imaginary,N);
+    XDSP::FFTUnswizzle((XDSP::XVECTOR*)smp, temps, 8);
+    delete [] temps;
+    /*int count = N;
     while (count) {
       XDSP::IFFTDeinterleaved(frvec,fivec,unity,1,5);
       frvec += 8;
       fivec += 8;
       count -= 64;
 
-    }
-    XDSP::FFTPolar((XDSP::XVECTOR*)smp,(XDSP::XVECTOR*)freq_real,(XDSP::XVECTOR*)freq_imaginary,N/2);
+    }*/
+    
     //IFFT(freq_real,freq_imaginary,smp);
-
+     //XDSP::IFFTDeinterleaved((XDSP::XVECTOR*)scratch,img_samples,unity,1,nBinsLog2);
+    
      
 
     delete [] freq_real;

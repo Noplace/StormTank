@@ -94,7 +94,7 @@ void floatTest() {
   double result = (time2 - time1) * timer.resolution();
   int a = 1;
 }*/
-
+/*
 float g_one = 1.0f;
 float g_small_1 = FLT_EPSILON * 0.5;
 float g_small_2 = DBL_EPSILON * 0.5;
@@ -116,7 +116,7 @@ void MulFloat(float x, float y, float* pResult)
 {
     *pResult = x * y;
 }
-
+*/
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
   //int test_padsynth();

@@ -4,13 +4,13 @@ namespace audio {
 namespace synth {
 namespace instruments {
 
-double Percussion::Tick(InstrumentData* data, int note_index) {
+real_t Percussion::Tick(InstrumentData* data, int note_index) {
   auto& table = ((PercussionData*)data)->table;
-  double result = 0;
+  real_t result = 0;
 
     
-  double value = (double)((randseed *= 0x15a4e35) % 255) / 255.0;
-  result = 0.4*table.highhat_amp*sin(value * 2.0f * XM_PI);
+  real_t value = (real_t)((randseed *= 0x15a4e35) % 255) / 255.0f;
+  result = 0.4f*table.highhat_amp*sin(value * 2.0f * XM_PI);
   table.highhat_amp = max(0,table.highhat_amp - inv_sr);
   
   //hihat
@@ -26,7 +26,7 @@ double Percussion::Tick(InstrumentData* data, int note_index) {
   result = 0.4*table.highhat_amp*(h1-h2-1.0);//*sin(value * 2.0f * XM_PI);;
   table.highhat_amp = max(0,table.highhat_amp - inv_sr);
   */
-  result += 0.4*table.bassdrum_amp*bassdrum.Tick(table.bassdrum_phase,table.bassdrum_inc);
+  result += 0.4f*table.bassdrum_amp*bassdrum.Tick(table.bassdrum_phase,table.bassdrum_inc);
   table.bassdrum_amp = max(0,table.bassdrum_amp - 2*inv_sr);
 
 
@@ -59,16 +59,16 @@ void Percussion::Update(InstrumentData* data, int note_index) {
     cdata->table.highhat_amp = 0;
   }
   cdata->table.bassdrum_phase = 0;
-  cdata->table.bassdrum_inc = bassdrum.get_increment(20);
+  cdata->table.bassdrum_inc = bassdrum.get_increment(20.0f);
 
   cdata->table.hihat_phase[0] = 0;
-  cdata->table.hihat_inc[0] = bassdrum.get_increment(460.0);
+  cdata->table.hihat_inc[0] = bassdrum.get_increment(460.0f);
   cdata->table.hihat_phase[1] = 0;
-  cdata->table.hihat_inc[1] = bassdrum.get_increment(1840.0);
+  cdata->table.hihat_inc[1] = bassdrum.get_increment(1840.0f);
   cdata->table.hihat_phase[2] = 0;
-  cdata->table.hihat_inc[2] = bassdrum.get_increment(5404.0);
+  cdata->table.hihat_inc[2] = bassdrum.get_increment(5404.0f);
   cdata->table.hihat_phase[3] = 0;
-  cdata->table.hihat_inc[3] = bassdrum.get_increment(7220.0);
+  cdata->table.hihat_inc[3] = bassdrum.get_increment(7220.0f);
 
 }
 

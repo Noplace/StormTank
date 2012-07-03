@@ -8,7 +8,7 @@ namespace synth {
 
 class VisualAddon {
  public:
-  virtual void AddPCMData(short* samples, uint32_t count, uint32_t channels, double time_ms) = 0;
+  virtual void AddPCMData256(float* samples, uint32_t channels, double time_ms) = 0;
 };
 
 class Player {
@@ -48,7 +48,7 @@ class Player {
   VisualAddon* visual_addon_;
   short* output_buffer;
   HANDLE thread_handle,player_event;
-  double bpm,sample_rate_,song_pos_ms,song_counter_ms,output_buffer_length_ms_;
+  double song_pos_ms,song_counter_ms,output_buffer_length_ms_;
   DWORD thread_id;
   State state_;
   int thread_msg;

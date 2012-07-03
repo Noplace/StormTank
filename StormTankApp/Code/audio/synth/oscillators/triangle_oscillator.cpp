@@ -7,16 +7,16 @@ namespace synth {
 namespace oscillators {
 
 TriangleOscillator::TriangleOscillator() : Oscillator() {
-  table = new double[kIndexRange+1];
+  table = new real_t[kIndexRange+1];
   int div4 = kIndexRange>>2;
   int i;
 	for(i=0;i<div4;i++) {
-	  table[i]                =   i / double(div4);
-	  table[i+div4]           =   (div4-i) / double(div4);
-	  table[i+div4+div4]      =   - i / double(div4);
-	  table[i+div4+div4+div4] = - (div4-i) / double(div4);
+	  table[i]                =   i / real_t(div4);
+	  table[i+div4]           =   (div4-i) / real_t(div4);
+	  table[i+div4+div4]      =   - i / real_t(div4);
+	  table[i+div4+div4+div4] = - (div4-i) / real_t(div4);
 	}
-	table[kIndexRange] = 0.0;
+	table[kIndexRange] = 0.0f;
 }
 
 TriangleOscillator::~TriangleOscillator() {

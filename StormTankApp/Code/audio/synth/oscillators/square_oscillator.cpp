@@ -7,14 +7,14 @@ namespace synth {
 namespace oscillators {
 
 SquareOscillator::SquareOscillator() : Oscillator() {
-  table = new double[kIndexRange+1];
+  table = new real_t[kIndexRange+1];
   int div2 = kIndexRange >> 1;
   int i;
   for(i=0;i<div2;++i) {
-	  table[i]     =  1.0;
-	  table[i+div2] = -1.0;
+	  table[i]     =  1.0f;
+	  table[i+div2] = -1.0f;
   }
-  table[kIndexRange] = 1.0;
+  table[kIndexRange] = 1.0f;
 }
 
 SquareOscillator::~SquareOscillator() {

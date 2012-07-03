@@ -1,11 +1,11 @@
 #ifndef AUDIO_SYNTH_TYPES_H
 #define AUDIO_SYNTH_TYPES_H
 
-typedef double real_t;
+typedef float real_t;
 
 struct NoteData {
-    double freq; //Polyphony note polyphony
-    double velocity;
+    real_t freq,base_freq; //Polyphony note polyphony
+    real_t velocity;
     int note;
     bool on;
 };

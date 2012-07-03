@@ -128,11 +128,12 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
 
   ResetEvent(self->event1);
   
-  //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\MoonLte3.mid");
-  self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\btmnjstg.mid");
-  //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\minute_waltz.mid");
-  //self->win->player2().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
-
+  self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\MoonLte3.mid");
+  //self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\btmnjstg.mid");
+  //self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\minute_waltz.mid");
+  //self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
+  //self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\liangzhu.mid");
+  
   //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
   Sleep(400);
   self->win->player2().Play();

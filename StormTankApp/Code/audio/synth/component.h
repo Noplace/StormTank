@@ -7,9 +7,9 @@ class Component {
   virtual ~Component() {}
   virtual void set_sample_rate(uint32_t sample_rate) { 
     sample_rate_ = sample_rate; 
-    sample_time_ms_ = (1000.0/sample_rate_);
+    sample_time_ms_ = (1000.0f/sample_rate_);
   }
-  double sample_time_ms_;
+  real_t sample_time_ms_;
   uint32_t sample_rate_;
 };
 

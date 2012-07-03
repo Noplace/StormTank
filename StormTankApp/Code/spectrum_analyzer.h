@@ -10,7 +10,7 @@ class SpectrumAnalyzer : public graphics::shape::Shape, public audio::synth::Vis
   int Construct() {
     return S_OK;
   }
-  void AddPCMData(short* samples, uint32_t count, uint32_t channels, double time_ms);
+  void AddPCMData256(float* samples, uint32_t channels, double time_ms);
   int Draw();
  private:
   const static int nBinsLog2 = 8;

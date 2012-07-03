@@ -35,7 +35,7 @@ class OscWave : public InstrumentProcessor {
   InstrumentData* NewInstrumentData() {
     return new OscWaveData();
   }
-  double Tick(InstrumentData* data, int note_index) {
+  real_t Tick(InstrumentData* data, int note_index) {
     auto cdata = (OscWaveData*)data;
     auto result = osc->Tick(cdata->table[note_index].phase,cdata->table[note_index].inc);// + osc->Tick(phase,inc*2);
     return result;

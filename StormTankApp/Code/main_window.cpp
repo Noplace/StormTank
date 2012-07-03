@@ -18,6 +18,7 @@
 *****************************************************************************************************************/
 #include "stormtankapp.h"
 
+float delay;
 
 MainWindow::MainWindow() : core::windows::Window() {
   current_scene = nullptr;
@@ -68,6 +69,8 @@ void MainWindow::Initialize() {
   synth_player_->set_audio_interface(audio_interface_);
   synth_player_->set_synth(midi_synth_);
   synth_player_->Initialize();
+  delay = 400.0f;
+  midi_synth_->delay_unit.set_delay_ms(delay);
 
   //loading_scene.Initialize(this);
   //intro_scene.Initialize(this);
@@ -155,6 +158,16 @@ int MainWindow::OnKeyDown(WPARAM wParam,LPARAM lParam) {
 
   if (wParam == 'S') {
     synth_player_->Play();
+  }
+
+  if (wParam == 'D') {
+    delay = min(1000.0f,delay + 1.0f);
+    midi_synth_->delay_unit.set_delay_ms(delay);
+  }
+
+  if (wParam == 'F') {
+    delay = max(0.0f,delay - 1.0f);
+    midi_synth_->delay_unit.set_delay_ms(delay);
   }
 
   return 0;

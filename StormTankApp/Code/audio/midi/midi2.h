@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 
 namespace midi {
@@ -140,6 +141,9 @@ struct Event {
       uint8_t noteNumber,amount;
     }note_aftertouch;
     struct {
+      uint16_t value;
+    }pitch;
+    struct {
       uint8_t number;
     }program;
     struct {
@@ -148,9 +152,6 @@ struct Event {
     struct {
       uint8_t channelprefix;
     } cp;
-    struct {
-      uint8_t value;
-    }pitch;
   }data;
 
   Event() : deltaTime(0) {

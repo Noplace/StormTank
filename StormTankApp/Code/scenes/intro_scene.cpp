@@ -75,7 +75,7 @@ int IntroScene::Initialize(MainWindow* win) {
       {200+0,100,0,0xffff00ff,0,0},
       {200+100,100,0,0xffffff00,0,0}
     };*/
-    graphics::shape::Vertex v[8] = {
+    static graphics::shape::Vertex v[8] = {
       graphics::shape::Vertex(XMFLOAT3(0,0,0),XMFLOAT2(0,0),XMCOLOR(1,1,1,1),0),
       graphics::shape::Vertex(XMFLOAT3(256,0,0),XMFLOAT2(1,0),XMCOLOR(1,1,1,1),0),
       graphics::shape::Vertex(XMFLOAT3(0,256,0),XMFLOAT2(0,1),XMCOLOR(1,1,1,1),0),

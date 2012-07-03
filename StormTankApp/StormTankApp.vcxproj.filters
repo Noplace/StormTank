@@ -63,6 +63,9 @@
     <ClCompile Include="Code\audio\synth\midi_synth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Code\audio\synth\PADsynth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\stormtankapp.h">
@@ -162,6 +165,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\synth\midi_synth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\PADsynth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
