@@ -19,9 +19,18 @@
 #include "stormtankapp.h"
 
 float delay;
+bool key_down[256];
+int key_state[256];
+
+  const char key_maps[10] = {
+    'Z','X','C','V','B','N','M','<','>','?'
+  };
+
 
 MainWindow::MainWindow() : core::windows::Window() {
   current_scene = nullptr;
+  memset(&key_down,0,sizeof(key_down));
+  memset(&key_state,0,sizeof(key_state));
 }
 
 MainWindow::~MainWindow() {
@@ -56,15 +65,16 @@ void MainWindow::Initialize() {
 
 
 
-  audio_interface_ = new audio::DirectSound();
+  audio_interface_ = new audio::output::DirectSound();
   audio_interface_->set_window_handle(handle());
-  audio_interface_->set_buffer_size(44100*2);
+  audio_interface_->set_buffer_size(44100*3);
   audio_interface_->Initialize(44100,2,16);
 
 
   //player_.set_audio_interface(audio_interface_);
   //player_.Initialize();
   midi_synth_ = new audio::synth::MidiSynth();
+  midi_synth_->set_mode(audio::synth::kModeSequencer);
   synth_player_ = new audio::synth::Player();
   synth_player_->set_audio_interface(audio_interface_);
   synth_player_->set_synth(midi_synth_);
@@ -94,6 +104,36 @@ void MainWindow::Step() {
     timing.span_accumulator -= dt;
     current_scene->Update(dt);
     ++timing.fps_counter;
+  }
+
+
+  for (int i=0;i<10;++i) {
+
+    if (key_down[key_maps[i]] == true && key_state[key_maps[i]] == 0) {
+      auto midi_event = midi_synth_->BeginPrepareNextEvent();
+      midi_event->channel = 0;
+      midi_event->data.note.noteNumber = (Notes)(Notes::C3+i);
+      midi_event->data.note.velocity = 127;
+      midi_event->type = midi::kEventTypeChannel;
+      midi_event->subtype = midi::kEventSubtypeNoteOn;
+      midi_event->track = 0;
+      midi_event->deltaTime = 0;
+      midi_synth_->EndPrepareNextEvent();
+      OutputDebugString("sent note on\n");
+      key_state[key_maps[i]] = 1;
+    } else if (key_down[key_maps[i]] == false && key_state[key_maps[i]] == 1) {
+      auto midi_event = midi_synth_->BeginPrepareNextEvent();
+      midi_event->channel = 0;
+      midi_event->data.note.noteNumber = (Notes)(Notes::C3+i);
+      midi_event->data.note.velocity = 127;
+      midi_event->type = midi::kEventTypeChannel;
+      midi_event->subtype = midi::kEventSubtypeNoteOff;
+      midi_event->track = 0;
+      midi_event->deltaTime = 0;
+      midi_synth_->EndPrepareNextEvent();
+      OutputDebugString("sent note off\n");
+      key_state[key_maps[i]] = 0;
+    }
   }
 
   timing.total_cycles += timing.current_cycles-timing.prev_cycles;
@@ -169,6 +209,18 @@ int MainWindow::OnKeyDown(WPARAM wParam,LPARAM lParam) {
     delay = max(0.0f,delay - 1.0f);
     midi_synth_->delay_unit.set_delay_ms(delay);
   }
+
+  key_down[wParam&0xFF] = true;
+  if (wParam == 'Z') {
+    
+  }
+
+
+  return 0;
+}
+
+int MainWindow::OnKeyUp(WPARAM wParam,LPARAM lParam) {
+  key_down[wParam&0xFF] = false;
 
   return 0;
 }

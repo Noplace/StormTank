@@ -1,20 +1,37 @@
 #ifndef AUDIO_SYNTH_MIDI_SYNTH_H
 #define AUDIO_SYNTH_MIDI_SYNTH_H
 
+#include <WinCore/io/io.h>
 #include "../midi/midi2.h"
 
 namespace audio {
 namespace synth {
+
+
+enum Mode {
+  kModeSequencer,
+  kModeTest
+};
 
 class Player;
 
 class Synth : public Component {
  public:
   struct {
-    real_t* pre_effects;
-    real_t* post_effects;
+    real_t* main;
+    real_t* aux;
+    size_t main_size;
+    size_t aux_size;
+    //real_t* pre_effects;
+    //real_t* post_effects;
   } buffers;
   Player* player_;
+  Synth() : Component(),player_(nullptr) {
+
+  }
+  virtual ~Synth() {
+
+  }
   virtual void Initialize() = 0;
   virtual void Deinitialize() = 0;
   virtual void Reset() = 0;
@@ -29,19 +46,35 @@ class MidiSynth : public Synth {
     kStateStopped=0,kStatePlaying=1,kStatePaused=2
   };
   Delay delay_unit;
-  MidiSynth() : initialized_(false) {
+  MidiSynth() : Synth(),initialized_(false),mode_(kModeSequencer),percussion_instr(nullptr),
+                last_event(nullptr),tracks(nullptr),ticks_per_beat(0),samples_to_next_event(0),bpm(0) {
+    memset(&instr,0,sizeof(instr));
+    memset(&channels,0,sizeof(channels));
   }
   ~MidiSynth() {
     Deinitialize();
   }
   void Initialize();
   void Deinitialize();
-  void LoadMidi(char* filename);
+  void LoadMidiFromFile(const char* filename);
+  void LoadMidi(uint8_t* data, size_t data_size);
   void RenderSamples(uint32_t samples_count, short* data_out);
   void Reset() {
     ResetTracks();
   }
-  
+  void set_mode(Mode mode) {
+    mode_ = mode;
+  }
+  midi::Event* BeginPrepareNextEvent() {
+    auto result = GetNextEvent();
+    EnterCriticalSection(&me_lock);
+    if (tracks[0].event_index)
+      --tracks[0].event_index;
+    return result;
+  }
+  void EndPrepareNextEvent() {
+    LeaveCriticalSection(&me_lock);
+  }
  private:
   struct Track {
     midi::Event* event_sequence;
@@ -60,12 +93,12 @@ class MidiSynth : public Synth {
   Channel* channels[kChannelCount];
   midi::Event* last_event;
   Track* tracks;
+  CRITICAL_SECTION me_lock;
   double bpm;
-  real_t pitch_bend_range;
   uint32_t ticks_per_beat;
   uint32_t samples_to_next_event;
   int track_count_;
-  uint8_t rpn_fine,rpn_coarse;
+  Mode mode_;
   bool initialized_;
   void DestroyTrackData() {
     for (int i=0;i<track_count_;++i)

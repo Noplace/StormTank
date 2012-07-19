@@ -1,4 +1,4 @@
-#include "stormtankapp.h"
+#include "../stormtankapp.h"
 
 #define LINE_COUNT 128
 
@@ -17,14 +17,14 @@ int SpectrumAnalyzer::Initialize(graphics::Context* context) {
   float xinc = 0;
   for (int i=0;i<LINE_COUNT;++i){
     float w = 1;
-    v[i*8+0] = graphics::shape::Vertex(XMFLOAT3(xinc,0,0),XMFLOAT2(0,0),XMCOLOR(1,0,0,1),0);
-    v[i*8+1] = graphics::shape::Vertex(XMFLOAT3(w+xinc,0,0),XMFLOAT2(1,0),XMCOLOR(1,0,0,1),0);
-    v[i*8+2] = graphics::shape::Vertex(XMFLOAT3(xinc,50,0),XMFLOAT2(0,1),XMCOLOR(1,1,0,1),0);
-    v[i*8+3] = graphics::shape::Vertex(XMFLOAT3(w+xinc,50,0),XMFLOAT2(1,1),XMCOLOR(1,1,0,1),0);
-    v[i*8+4] = graphics::shape::Vertex(XMFLOAT3(xinc,50,0),XMFLOAT2(0,0),XMCOLOR(1,1,0,1),0);
-    v[i*8+5] = graphics::shape::Vertex(XMFLOAT3(w+xinc,50,0),XMFLOAT2(1,0),XMCOLOR(1,1,0,1),0);
-    v[i*8+6] = graphics::shape::Vertex(XMFLOAT3(xinc,100,0),XMFLOAT2(0,1),XMCOLOR(0,1,0,1),0);
-    v[i*8+7] = graphics::shape::Vertex(XMFLOAT3(w+xinc,100,0),XMFLOAT2(1,1),XMCOLOR(0,1,0,1),0);
+    v[i*8+0] = graphics::shape::Vertex(XMFLOAT3(xinc,0,0),XMFLOAT2(0,0),XMCOLOR(1,0,0,1),i);
+    v[i*8+1] = graphics::shape::Vertex(XMFLOAT3(w+xinc,0,0),XMFLOAT2(1,0),XMCOLOR(1,0,0,1),i);
+    v[i*8+2] = graphics::shape::Vertex(XMFLOAT3(xinc,50,0),XMFLOAT2(0,1),XMCOLOR(1,1,0,1),i);
+    v[i*8+3] = graphics::shape::Vertex(XMFLOAT3(w+xinc,50,0),XMFLOAT2(1,1),XMCOLOR(1,1,0,1),i);
+    v[i*8+4] = graphics::shape::Vertex(XMFLOAT3(xinc,50,0),XMFLOAT2(0,0),XMCOLOR(1,1,0,1),i);
+    v[i*8+5] = graphics::shape::Vertex(XMFLOAT3(w+xinc,50,0),XMFLOAT2(1,0),XMCOLOR(1,1,0,1),i);
+    v[i*8+6] = graphics::shape::Vertex(XMFLOAT3(xinc,100,0),XMFLOAT2(0,1),XMCOLOR(0,1,0,1),i);
+    v[i*8+7] = graphics::shape::Vertex(XMFLOAT3(w+xinc,100,0),XMFLOAT2(1,1),XMCOLOR(0,1,0,1),i);
     xinc += 2.0f;
   }
     
@@ -51,7 +51,7 @@ int SpectrumAnalyzer::Initialize(graphics::Context* context) {
   context_->CreateBuffer(index_buffer_,indices);
   
 
-  BuildTransform();
+  Update();
 
 
 
@@ -80,8 +80,8 @@ int SpectrumAnalyzer::Deinitialize() {
   delete [] img_samples;
   delete [] scratch;
   delete [] unity;
-  LeaveCriticalSection(&cs);
-  //DeleteCriticalSection(&cs);
+  //LeaveCriticalSection(&cs);
+  DeleteCriticalSection(&cs);
   return S_OK;
 }
 
@@ -94,10 +94,11 @@ void SpectrumAnalyzer::AddPCMData256(float* samples, uint32_t channels, double t
     real_arr[i] = samples[(i*2)];// / 32767.0f;
 
     //hann window
-    double multiplier = 0.5 * (1 - cos(2*XM_PI*i/2047));
+    real_t multiplier = 0.5f * (1 - cos(2*XM_PI*i/(nBins-1)));
     real_arr[i] = multiplier * real_arr[i];
 
   }
+  real_arr[0] = 0.5f * samples[0];
 
 
   //memcpy(real_samples,samples,256*sizeof(real_t));
@@ -113,7 +114,7 @@ void SpectrumAnalyzer::AddPCMData256(float* samples, uint32_t channels, double t
     for (int i=0;i<LINE_COUNT;++i) {
       //scratch[i] = scratch[i]*0.5*(1-cos((2*XM_PI*i)/LINE_COUNT-1));
       //double freq = (double(i)/(2*LINE_COUNT))*44100.0;
-      freq_pow[i] = 10*((20 * log10(1+scratch[i])));//max(0.01f,scratch[i]*10);
+      freq_pow[i] = ((20 * log10(1+scratch[i])));//max(0.01f,scratch[i]*10);
     }
     /*int nBands = 64;
     //int bandWidth = rindex / nBands;
@@ -154,6 +155,12 @@ void SpectrumAnalyzer::AddPCMData256(float* samples, uint32_t channels, double t
   //LeaveCriticalSection(&cs);
 }
 
+int SpectrumAnalyzer::Update() {
+  //world_ = XMMatrixAffineTransformation2D(XMVectorSet(1,1,0,0),XMVectorSet(0,0,0,0),0,XMVectorSet(0,0.0f,0,0));
+  
+  return graphics::shape::Shape::Update();
+}
+
 int SpectrumAnalyzer::Draw() {
   //EnterCriticalSection(&cs);
   uint32_t offsets[1] = {0};
@@ -164,10 +171,17 @@ int SpectrumAnalyzer::Draw() {
   //((graphics::ContextD3D9*)context_)->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&world_);
   //((graphics::ContextD3D9*)context_)->DrawIndexed(64*6,0,0);
   for (int i=0;i<LINE_COUNT;++i) {
-    auto current_world_ = world_ * XMMatrixAffineTransformation2D(XMVectorSet(1,1,0,0),XMVectorSet(0,0,0,0),0,XMVectorSet(0,100.0f-100.0f*freq_pow[i],0,0));
-    ((graphics::ContextD3D9*)context_)->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&current_world_);
-    context_->Draw(8,i<<3);
+    /*auto current_world_ = world_ * XMMatrixAffineTransformation2D(XMVectorSet(1,1,0,0),XMVectorSet(0,0,0,0),0,XMVectorSet(0,100.0f-100.0f*freq_pow[i],0,0));
+    //((graphics::ContextD3D9*)context_)->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&current_world_);
+    graphics::Buffer buf;
+    current_world_ = XMMatrixTranspose(current_world_);
+    buf.internal_pointer = (void*)&current_world_;
+    buf.description.byte_width = sizeof(current_world_);
+    context_->SetConstantBuffers(graphics::kShaderTypeVertex,1,1,&buf);*/
+    
   }
+
+  context_->Draw(8*LINE_COUNT,0);
   //context_->ClearIndexBuffer();
   //LeaveCriticalSection(&cs);
   return S_OK;

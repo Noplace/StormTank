@@ -7,7 +7,6 @@
 
 #define SQRT_1OVER2  0.70710678118654752440084436210485
 
-FILE* output_file;
 
 namespace audio {
 namespace synth {
@@ -17,7 +16,7 @@ void Player::Initialize() {
     return;
 
   state_ = kStateStopped;
-  song_pos_ms = song_counter_ms = 0;
+  song_counter_ms = 0;
   auto sample_rate = audio_interface_->wave_format().nSamplesPerSec;
   //sample_rate_ = double(sample_rate);
 
@@ -39,7 +38,6 @@ void Player::Initialize() {
   }
 
   initialized_ = true;
-  output_file = fopen("output.raw","wb");
 }
 
 void Player::Deinitialize() {
@@ -57,7 +55,6 @@ void Player::Deinitialize() {
   synth_->Deinitialize();
   SafeDeleteArray(&output_buffer);
   initialized_ = false;
-  fclose(output_file);
 }
 
 void Player::Play() {
@@ -104,7 +101,7 @@ DWORD Player::InstancePlayThread() {
   filters::LowPass lowpass;
   lowpass.set_sample_rate(44100);
   */
-
+  thread_time_span = 0;
   while (1) {
     EnterCriticalSection(&cs);
     if (thread_msg == WM_SP_QUIT) {
@@ -115,7 +112,6 @@ DWORD Player::InstancePlayThread() {
       if (state_ != kStatePlaying) {
         prev_cycles = timer.GetCurrentCycles();
         state_ = kStatePlaying;
-        song_counter_ms = song_pos_ms;
         span_accumulator = update_time;
         audio_interface_->Play();
       }
@@ -131,8 +127,9 @@ DWORD Player::InstancePlayThread() {
         ResetEvent(player_event);
         state_ = kStateStopped;
         synth_->Reset();
-        song_counter_ms = song_pos_ms = 0;
+        song_counter_ms = 0;
         audio_interface_->Stop();
+        thread_time_span = 0;
       }
     } 
     thread_msg = 0;
@@ -149,7 +146,7 @@ DWORD Player::InstancePlayThread() {
         song_counter_ms += update_time;
         if (TryEnterCriticalSection(&vis_cs) != 0) {
           if (visual_addon_ != nullptr && samples_to_render >= 256)
-            visual_addon_->AddPCMData256(synth_->buffers.post_effects,2,update_time);
+            visual_addon_->AddPCMData256(synth_->buffers.main,2,update_time);
           LeaveCriticalSection(&vis_cs);
         }
         //fwrite(self->output_buffer,samples_to_render*2,sizeof(short),output_file);
@@ -157,7 +154,7 @@ DWORD Player::InstancePlayThread() {
         span_accumulator -= update_time;
        }
       span_accumulator += time_span;
-      song_pos_ms += time_span;
+      thread_time_span += time_span;
       prev_cycles = current_cycles;
     } else {
       //wait for pause/stop events with timer

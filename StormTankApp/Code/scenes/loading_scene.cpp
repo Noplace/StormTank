@@ -1,5 +1,5 @@
 #include "../stormtankapp.h"
-//#include "../song/song2.h"
+#include "../../BinContent/MoonLte3.h"
 
    
 
@@ -10,7 +10,7 @@ int LoadingScene::Initialize(MainWindow* win) {
 
   camera_.Initialize(gfx);
   camera_.Ortho2D(0,0,gfx->width(),gfx->height());
-  gfx->SetViewport(0,0,gfx->width(),gfx->height(),0,1000);
+  gfx->SetViewport(0,0,float(gfx->width()),float(gfx->height()),0,1000);
   gfx->SetCamera(&camera_);
   
   D3DXMATRIX matIdentity;
@@ -21,12 +21,12 @@ int LoadingScene::Initialize(MainWindow* win) {
 	gfx->device()->SetRenderState(D3DRS_ALPHABLENDENABLE,1);
   
 
-	gfx->device()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-	gfx->device()->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );  
-	gfx->device()->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE );
+	gfx->device()->SetTextureStageState(0,D3DTSS_COLORARG1, D3DTA_TEXTURE );
+	gfx->device()->SetTextureStageState(0,D3DTSS_COLORARG2, D3DTA_DIFFUSE );  
+	gfx->device()->SetTextureStageState(0,D3DTSS_COLOROP, D3DTOP_MODULATE );
 	gfx->device()->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
 	gfx->device()->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-	gfx->device()->SetTextureStageState( 0, D3DTSS_ALPHAOP,D3DTOP_MODULATE );
+	gfx->device()->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE );
 
 
 
@@ -94,11 +94,11 @@ int LoadingScene::Update(double dt) {
 
   
   arc1.SetRotate(theta);
-  arc1.BuildTransform();
+  arc1.Update();
   int w = gfx->width();
   loading_bar.SetParams((loading_progress*(float)w)/100.0f,20);
   loading_bar.Construct();
-  loading_bar.BuildTransform();
+  loading_bar.Update();
 
   return S_OK;
 }
@@ -128,15 +128,20 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
 
   ResetEvent(self->event1);
   
-  self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\MoonLte3.mid");
-  //self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\btmnjstg.mid");
-  //self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\minute_waltz.mid");
-  //self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
-  //self->win->midi_synth().LoadMidi("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\liangzhu.mid");
+  
+  
+  //self->win->midi_synth().LoadMidi(MoonLte3,MoonLte3_size);
+  
+  self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\bach_gavotte.mid");
+  //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\BotW-Aftermath.mid");
+  //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\MoonLte3.mid");
+  //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\btmnjstg.mid");
+  //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\minute_waltz.mid");
+  //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
+  //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\liangzhu.mid");
   
   //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);
   Sleep(400);
-  self->win->player2().Play();
   SetEvent(self->event1);
 
   return S_OK;

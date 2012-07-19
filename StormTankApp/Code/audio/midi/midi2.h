@@ -1,3 +1,21 @@
+/*****************************************************************************************************************
+* Copyright (c) 2012 Khalid Ali Al-Kooheji                                                                       *
+*                                                                                                                *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and              *
+* associated documentation files (the "Software"), to deal in the Software without restriction, including        *
+* without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell        *
+* copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the       *
+* following conditions:                                                                                          *
+*                                                                                                                *
+* The above copyright notice and this permission notice shall be included in all copies or substantial           *
+* portions of the Software.                                                                                      *
+*                                                                                                                *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT          *
+* LIMITED TO THE WARRANTIES OF MERCHANTABILITY, * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.          *
+* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, * DAMAGES OR OTHER LIABILITY,      *
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
+*****************************************************************************************************************/
 #pragma once
 #include <vector>
 
@@ -8,15 +26,15 @@ class Stream {
  public:
   
   uint8_t* str;
-  void Load(uint8_t* str,uint32_t length) {
+  void Load(uint8_t* str,size_t length) {
     this->str = str;
     str_length = length;
     position = 0;
   }
 
-	uint32_t position,str_length;
+	size_t position,str_length;
 	
-	uint8_t* read(uint32_t length) {
+	uint8_t* read(size_t length) {
 		auto result = &str[position];
 		position += length;
 		return result;
@@ -197,7 +215,7 @@ class MidiLoader {
 
   }
 
-  void Load(uint8_t* data,uint32_t length);
+  void Load(uint8_t* data,size_t length);
  protected:
 	uint8_t lastEventTypeByte;
   Chunk readChunk(Stream& stream) {

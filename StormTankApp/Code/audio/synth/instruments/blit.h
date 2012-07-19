@@ -25,16 +25,15 @@ class BlitWave : public InstrumentProcessor {
   InstrumentData* NewInstrumentData() {
     return new BlitWaveData();
   }
-
-  double Tick(InstrumentData* data, int note_index);
+  int Load();
+  int Unload();
+  real_t Tick(InstrumentData* data, int note_index);
   void Update(InstrumentData* data, int note_index);
+  int NoteOn(InstrumentData* data, int note_index);
+  int NoteOff(InstrumentData* data, int note_index);
 
-  void set_sample_rate(uint32_t sample_rate) { 
-    InstrumentProcessor::set_sample_rate(sample_rate); 
-    GenerateWavetables();
-  }
  protected:
-   double* wavetables[128];
+   real_t* wavetables[128];
    void GenerateWavetables();
 };
 

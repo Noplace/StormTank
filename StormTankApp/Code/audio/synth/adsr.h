@@ -22,31 +22,38 @@ class ADSR : public Component {
   void NoteOn(real_t velocity) {
     stage_ = 1;
     target_ = attack_amp_;
-    attack_rate_ = velocity;
+    on_vel = velocity;
   }
   void NoteOff(real_t velocity) {
     stage_ = 4;
-    release_rate_ = velocity;
+    off_vel = velocity;
   }
   void set_attack_amp(real_t attack_amp) { attack_amp_  = attack_amp; }
   void set_sustain_amp(real_t sustain_amp) { sustain_amp_  = sustain_amp; }
   void set_decay_rate(real_t decay_rate_) {
     decay_rate_ = decay_rate_;
   }
+  void set_attack_time_ms(real_t attack_time_ms) {
+    attack_rate_ = (attack_amp_ - 0.0f) * sample_time_ms_ / attack_time_ms; 
+  }//adsr test
   void set_decay_time_ms(real_t decay_time_ms) {
-    decay_rate_ = (1.0f - sustain_amp_) / ( decay_time_ms * 0.001f * this->sample_rate_ );
+    decay_rate_ = (attack_amp_ - sustain_amp_) * sample_time_ms_ / decay_time_ms;
   }
+  void set_release_time_ms(real_t release_time_ms) {
+    release_rate_ = (sustain_amp_) * sample_time_ms_ / release_time_ms;
+  }
+  int stage() { return stage_; }
  protected:
   typedef void (ADSR::*StageFunc)();
   int stage_;
   real_t value_,target_;
   real_t attack_amp_,sustain_amp_;
   real_t attack_rate_,decay_rate_,release_rate_;
-
+  real_t on_vel,off_vel;
 
   void stage_0() { value_ = 0; };
   void stage_1() {
-    value_ += attack_rate_;
+    value_ += attack_rate_*on_vel;
     if ( value_ >= target_ ) {
       value_ = target_;
       target_ = sustain_amp_;
@@ -70,7 +77,7 @@ class ADSR : public Component {
   }
   void stage_3() {};
   void stage_4() {
-    value_ -= release_rate_;
+    value_ -= release_rate_*off_vel;
     if ( value_ <= 0.0 ) {
       value_ = 0.0;
       stage_ = 0;

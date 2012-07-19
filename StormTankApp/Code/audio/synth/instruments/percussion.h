@@ -22,24 +22,29 @@ class Percussion : public InstrumentProcessor {
    randseed = 1;
   }
   virtual ~Percussion() {
-    
+    Unload(); 
   }
+  int Load();
+  int Unload();
   InstrumentData* NewInstrumentData() {
     return new PercussionData();
   }
   real_t Tick(InstrumentData* data, int note_index);
-  void Update(InstrumentData* data, int note_index);
-  void set_sample_rate(uint32_t sample_rate) { 
-    InstrumentProcessor::set_sample_rate(sample_rate); 
-    inv_sr = 1 / real_t(sample_rate_);
-    bassdrum.set_sample_rate(sample_rate_);
-    hihat_osc.set_sample_rate(sample_rate_);
-  }
+  int NoteOn(InstrumentData* data, int note_index);
+  int NoteOff(InstrumentData* data, int note_index);
  protected:
+  typedef real_t (Percussion::*PercussionPieceTick)(PercussionData* data, int note_index);
+  static PercussionPieceTick ticks[Polyphony];
   real_t inv_sr;
   unsigned int randseed;
-  oscillators::SineOscillator bassdrum;
+  oscillators::SquareOscillator bassdrum;
   oscillators::SquareOscillator hihat_osc;
+  real_t EmptyTick(PercussionData* data, int note_index) {
+    return 0.0f;
+  }
+  real_t HihatOpenTick(PercussionData* data, int note_index);
+  real_t HihatClosedTick(PercussionData* data, int note_index);
+  real_t BassDrumTick(PercussionData* data, int note_index);
 };
 
 }

@@ -45,8 +45,11 @@ class IntroScene : public BaseScene {
   int Update(double dt);
   int Draw();
  private:
-  SpectrumAnalyzer sa;
+  Oscilloscope sa;
+  FontDraw font;
   graphics::Buffer vb;
   graphics::Texture texture;
   graphics::shape::Arc arc1;
+  LPD3DXEFFECT effect;
+  D3DXHANDLE world,viewprojection;
 };

@@ -18,6 +18,30 @@
 *****************************************************************************************************************/
 #include "stormtankapp.h"
 
+#ifdef _DEBUG
+void EnableCrashingOnCrashes() 
+{ 
+    typedef BOOL (WINAPI *tGetPolicy)(LPDWORD lpFlags); 
+    typedef BOOL (WINAPI *tSetPolicy)(DWORD dwFlags); 
+    const DWORD EXCEPTION_SWALLOWING = 0x1;
+
+    HMODULE kernel32 = LoadLibraryA("kernel32.dll"); 
+    tGetPolicy pGetPolicy = (tGetPolicy)GetProcAddress(kernel32, 
+                "GetProcessUserModeExceptionPolicy"); 
+    tSetPolicy pSetPolicy = (tSetPolicy)GetProcAddress(kernel32, 
+                "SetProcessUserModeExceptionPolicy"); 
+    if (pGetPolicy && pSetPolicy) 
+    { 
+        DWORD dwFlags; 
+        if (pGetPolicy(&dwFlags)) 
+        { 
+            // Turn off the filter 
+            pSetPolicy(dwFlags & ~EXCEPTION_SWALLOWING); 
+        } 
+    } 
+}
+#endif
+
 class StormTankApp : public core::windows::Application {
  public: 
    MainWindow win;
@@ -26,6 +50,9 @@ class StormTankApp : public core::windows::Application {
       MessageBox(nullptr,"App already running","Error",MB_ICONWARNING|MB_OK);
       exit(0);
     }
+    #ifdef _DEBUG
+    EnableCrashingOnCrashes();
+    #endif
     unsigned old_fp_state;
     #ifndef _M_X64 
       _controlfp_s(&old_fp_state, _PC_53, _MCW_PC);
@@ -118,10 +145,35 @@ void MulFloat(float x, float y, float* pResult)
 }
 */
 
+
+void samples_test() {
+
+  audio::synth::ADSR adsr;
+
+  adsr.set_sample_rate(44100);
+  adsr.set_attack_amp(0.8f);
+  adsr.set_sustain_amp(0.5f);
+  adsr.set_attack_time_ms(14.0f);
+  adsr.set_decay_time_ms(4.0f);
+  adsr.set_release_time_ms(6.5f);
+  real_t time = 0;
+  char str[255];
+  adsr.NoteOn(0.5f);
+  for (int i=0;i<4410;++i) {
+    sprintf(str,"%2.3f ms : %f\n",time,adsr.Tick());
+    OutputDebugString(str);    
+    time += adsr.sample_time_ms_;
+
+    if (time > 40.0f)
+      adsr.NoteOff(0.5f);
+  }
+}
+
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
   //int test_padsynth();
   //test_padsynth();
   //fft_test();
+  //samples_test();
   StormTankApp app(hInstance,lpCmdLine,nShowCmd);
   //AddThreeAndPrint();
   return app.Run();

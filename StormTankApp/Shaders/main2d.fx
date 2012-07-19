@@ -1,41 +1,21 @@
-//--------------------------------------------------------------------------------------
-// File: Tutorial07.fx
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
+matrix viewprojection;
+matrix world;
 
+float spec_pow[128];
 
-//--------------------------------------------------------------------------------------
-// Constant Buffer Variables
-//--------------------------------------------------------------------------------------
-Texture2D txDiffuse : register( t0 );
-Texture2DArray font_textures : register( t1 );
-SamplerState samLinear : register( s0 );
-
-SamplerState samLinear2
+sampler2D tex1 : register( s0 );
+SamplerState sampler1
 {
+
 Filter = MIN_MAG_MIP_LINEAR;
 AddressU = Clamp;
 AddressV = Clamp;
 AddressW = Wrap;
-ComparisonFunc = NEVER;
-MinLOD = 0;
+//ComparisonFunc = NEVER;
+//MinLOD = 0;
 //MaxLOD = MAX;
 };
-BlendState NoBlend
-{ 
-    BlendEnable[0] = False;
-};
 
-float4x4 View: register (c0);
-float4x4 Projection: register (c4);
-float4x4 world: register (c8);
-bool enable_texture;
-float4 ps_color;
-
-
-
-//--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
     float3 pos : POSITION;
@@ -52,17 +32,15 @@ struct PS_INPUT
 	uint page : BLENDINDICES0;
 };
 
-//--------------------------------------------------------------------------------------
-// Vertex Shader
-//--------------------------------------------------------------------------------------
 PS_INPUT VS( VS_INPUT input )
 {
 	//PS_INPUT output = (PS_INPUT)0;
 	//return input;
     PS_INPUT output = (PS_INPUT)0;
-    output.pos =  mul(  float4(input.pos,1), world );
-    output.pos = mul( output.pos, View );
-    output.pos = mul( output.pos, Projection );
+	
+    output.pos = mul(  float4(input.pos,1), world );
+    output.pos = mul( output.pos, viewprojection );
+	
 	//output.Pos.x -= output.Pos.z;
     output.uv = input.uv;
 	output.color = input.color;
@@ -71,29 +49,88 @@ PS_INPUT VS( VS_INPUT input )
 }
 
 
-//--------------------------------------------------------------------------------------
-// Pixel Shader
-//--------------------------------------------------------------------------------------
-float4 PS( PS_INPUT input) : SV_Target
+PS_INPUT SpectrumVS( VS_INPUT input )
 {
-	//if (enable_texture == true)
-	//	return input.Col*ps_color * txDiffuse.Sample( samLinear2, input.Tex );
-	//else
-		return input.color*ps_color;
+	//PS_INPUT output = (PS_INPUT)0;
+	//return input;
+    PS_INPUT output = (PS_INPUT)0;
+	input.pos.y = 50-spec_pow[input.page]*50;//50-(spec_pow[input.page]*50);
+    output.pos = mul(  float4(input.pos,1), world );
+    output.pos = mul( output.pos, viewprojection );
+	
+	//output.Pos.x -= output.Pos.z;
+    output.uv = input.uv;
+	output.color = input.color;
+	output.page = input.page;
+    return output;
 }
 
-float4 PSTex( PS_INPUT input) : SV_Target
+
+PS_INPUT OscilloscopeVS( VS_INPUT input )
 {
-	return input.color*ps_color * txDiffuse.Sample( samLinear2, input.uv );
+	//PS_INPUT output = (PS_INPUT)0;
+	//return input;
+    PS_INPUT output = (PS_INPUT)0;
+	input.pos.y = 50-spec_pow[input.page]*50;//50-(spec_pow[input.page]*50);
+    output.pos = mul(  float4(input.pos,1), world );
+    output.pos = mul( output.pos, viewprojection );
+	
+	//output.Pos.x -= output.Pos.z;
+    output.uv = input.uv;
+	output.color = input.color;
+	output.page = input.page;
+    return output;
 }
 
-float4 PSFont( PS_INPUT input) : SV_Target
-{
-    float4 pixel = 0;
-	uint index = 0;
-	pixel = font_textures.Sample( samLinear2, float3(input.uv,input.page) );
 
-	pixel.a = pixel.a * ps_color;
-	return pixel * input.color;
+float4 PS( PS_INPUT input,uniform bool tex_enabled) : SV_Target
+{
+	if (tex_enabled == true) {
+		return input.color * tex2D(tex1,input.uv);
+	}
+	else
+	{
+		return input.color;// * tex1.Sample(sampler1, input.uv);// * tex2D(tex,input.uv);
+	}
+	/*float4 Out    = (float4) 0; 
+
+    Out        = input.color * tex1.Sample(samLinear2, input.uv);
+    float fIntensity = Out.r*0.30f + Out.g*0.59f + Out.b*0.11f;
+    Out        = float4(fIntensity,fIntensity,fIntensity,1.f);
+
+    return Out;*/
+
 }
 
+
+
+technique t1
+{
+    pass p1
+    {
+        //SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetVertexShader( CompileShader( vs_3_0, VS() ) );
+        SetPixelShader( CompileShader( ps_3_0, PS(true) ) );
+    }
+
+    pass p2
+    {
+        //SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetVertexShader( CompileShader( vs_3_0, VS() ) );
+        SetPixelShader( CompileShader( ps_3_0, PS(false) ) );
+    }
+
+    pass spec
+    {
+        //SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetVertexShader( CompileShader( vs_3_0, SpectrumVS() ) );
+        SetPixelShader( CompileShader( ps_3_0, PS(false) ) );
+    }
+
+    pass osc
+    {
+        //SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetVertexShader( CompileShader( vs_3_0, OscilloscopeVS() ) );
+        SetPixelShader( CompileShader( ps_3_0, PS(false) ) );
+    }
+}

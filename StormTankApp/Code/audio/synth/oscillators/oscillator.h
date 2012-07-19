@@ -3,6 +3,7 @@
 #define kPrecision 24
 #define kPrecisionMask 0xFFFFFF
 #define kPrecisionRange 16777216.0f //(double)(1<<kPrecision);
+#define k1Div24lowerBits (1.0f/(kPrecisionRange))
 
 namespace audio {
 namespace synth {
@@ -10,7 +11,7 @@ namespace oscillators {
 
 class Oscillator : public Component {
  public:
-  Oscillator() : Component(), k1Div24lowerBits(1.0f/(kPrecisionRange)) {
+  Oscillator() : Component() {
 
   }
   virtual ~Oscillator() {
@@ -29,7 +30,6 @@ class Oscillator : public Component {
   }
  protected:
   real_t* table;
-  const real_t k1Div24lowerBits;
 };
 
 }

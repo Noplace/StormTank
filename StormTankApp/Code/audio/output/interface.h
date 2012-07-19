@@ -16,40 +16,27 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
 *****************************************************************************************************************/
-#include <WinCore/windows/windows.h>
-#include <WinCore/types.h>
-#include <audiodefs.h>
-#include <dsound.h>
-#include "interface.h"
+#ifndef AUDIO_OUTPUT_AUDIO_OUTPUT_INTERFACE_H
+#define AUDIO_OUTPUT_AUDIO_OUTPUT_INTERFACE_H
 
 namespace audio {
 namespace output {
 
-class DirectSound : public Interface {
+class Interface {
  public:
-  DirectSound();
-  ~DirectSound();
-  int Initialize(uint32_t sample_rate, uint8_t channels, uint8_t bits);
-  int Deinitialize();
-  int Play();
-  int Stop();
-  uint32_t GetBytesBuffered();
-  void GetCursors(uint32_t& play, uint32_t& write);
-  int Write(void* data_pointer, uint32_t size_bytes);
-  void set_window_handle(HWND window_handle) { window_handle_ = window_handle; }
-  void set_buffer_size(uint32_t buffer_size) { buffer_size_ = buffer_size; }
+  virtual int Initialize(uint32_t sample_rate,uint8_t channels,uint8_t bits) = 0;
+  virtual int Deinitialize() = 0;
+  virtual int Play() = 0;
+  virtual int Stop() = 0;
+  virtual uint32_t GetBytesBuffered() = 0;
+  virtual void GetCursors(uint32_t& play, uint32_t& write) = 0;
+  virtual int Write(void* data_pointer, uint32_t size_bytes) = 0;
+  const WAVEFORMATEX& wave_format() { return wave_format_; }
  protected:
-  IDirectSound8* ds8;
-  LPDIRECTSOUNDBUFFER primary_buffer;
-  LPDIRECTSOUNDBUFFER secondary_buffer;
-  //uint8_t* audio_data;  
-  void* window_handle_;
-  //uint32_t offset_;
- // uint32_t written_bytes;
-  uint32_t buffer_size_;
-  //uint32_t next_pos;
-  DWORD last_write_cursor;
+  WAVEFORMATEX wave_format_;
 };
 
 }
 }
+
+#endif

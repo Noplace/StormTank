@@ -35,7 +35,7 @@ class MainWindow: public core::windows::Window {
       }
     }
     graphics::ContextD3D9* gfx() { return gfx_; }
-    audio::DirectSound* audio_interface() { return audio_interface_; }
+    audio::output::DirectSound* audio_interface() { return audio_interface_; }
     //SonantPlayer& player() { return player_; }
     audio::synth::MidiSynth& midi_synth() { return *midi_synth_; }
     audio::synth::Player& player2() { return *synth_player_; }
@@ -44,10 +44,11 @@ class MainWindow: public core::windows::Window {
     int OnCreate(WPARAM wParam,LPARAM lParam);
     int OnDestroy(WPARAM wParam,LPARAM lParam);
     int OnKeyDown(WPARAM wParam,LPARAM lParam);
+    int OnKeyUp(WPARAM wParam,LPARAM lParam);
     int OnActivate(WPARAM wParam,LPARAM lParam);
   private:
     graphics::ContextD3D9*    gfx_;
-    audio::DirectSound*       audio_interface_;
+    audio::output::DirectSound* audio_interface_;
     BaseScene*                current_scene;
     graphics::InputLayout     input_layout;
     //SonantPlayer              player_;

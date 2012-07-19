@@ -15,17 +15,21 @@ class InstrumentData {
 
 class InstrumentProcessor : public Component {
  public:
-  InstrumentProcessor() : Component() {
+  InstrumentProcessor() : Component() , loaded_(false) {
    
   }
   virtual ~InstrumentProcessor() {
 
   }
-  //virtual void Initialize() = 0;
-  //virtual void Deinitialize() = 0;
+  virtual int Load() = 0;
+  virtual int Unload() = 0;
   virtual InstrumentData* NewInstrumentData() = 0;
   virtual real_t Tick(InstrumentData* data, int note_index) = 0;
-  virtual void Update(InstrumentData* data, int note_index) = 0;
+  virtual int NoteOn(InstrumentData* data, int note_index) = 0;
+  virtual int NoteOff(InstrumentData* data, int note_index) = 0;
+ protected:
+  ADSR adsr[Polyphony];
+  bool loaded_;
 };
 
 }

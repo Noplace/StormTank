@@ -1,12 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug - Intel C++|Win32">
+      <Configuration>Debug - Intel C++</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug - Intel C++|x64">
+      <Configuration>Debug - Intel C++</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release - Intel C++|Win32">
+      <Configuration>Release - Intel C++</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release - Intel C++|x64">
+      <Configuration>Release - Intel C++</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
@@ -20,20 +36,25 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\audio\midi\midi2.cpp" />
+    <ClCompile Include="Code\audio\synth\instruments\blit.cpp" />
+    <ClCompile Include="Code\audio\synth\instruments\pad.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\percussion.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\piano.cpp" />
+    <ClCompile Include="Code\audio\synth\instruments\violin.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\exp_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\sawtooth_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\sine_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\square_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\triangle_oscillator.cpp" />
-    <ClCompile Include="Code\audio\synth\PADsynth.cpp" />
+    <ClCompile Include="Code\audio\synth\padsynth\pad_synth.cpp" />
     <ClCompile Include="Code\audio\synth\player.cpp" />
+    <ClCompile Include="Code\gfx\font_draw.cpp" />
+    <ClCompile Include="Code\gfx\oscilloscope.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
     <ClCompile Include="Code\audio\output\directsound.cpp" />
     <ClCompile Include="Code\audio\synth\midi_synth.cpp" />
-    <ClCompile Include="Code\spectrum_analyzer.cpp" />
+    <ClCompile Include="Code\gfx\spectrum_analyzer.cpp" />
     <ClCompile Include="Code\winmain.cpp" />
     <ClCompile Include="Code\scenes\loading_scene.cpp" />
   </ItemGroup>
@@ -44,11 +65,15 @@
     <ClInclude Include="Code\audio\synth\channel.h" />
     <ClInclude Include="Code\audio\synth\component.h" />
     <ClInclude Include="Code\audio\synth\effects\delay.h" />
+    <ClInclude Include="Code\audio\synth\filters\chebyshev_filter.h" />
     <ClInclude Include="Code\audio\synth\filters\lowpass.h" />
+    <ClInclude Include="Code\audio\synth\instruments\blit.h" />
     <ClInclude Include="Code\audio\synth\instruments\instrument.h" />
     <ClInclude Include="Code\audio\synth\instruments\osc_wave.h" />
+    <ClInclude Include="Code\audio\synth\instruments\pad.h" />
     <ClInclude Include="Code\audio\synth\instruments\percussion.h" />
     <ClInclude Include="Code\audio\synth\instruments\piano.h" />
+    <ClInclude Include="Code\audio\synth\instruments\violin.h" />
     <ClInclude Include="Code\audio\synth\midi_synth.h" />
     <ClInclude Include="Code\audio\synth\oscillators\exp_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\oscillator.h" />
@@ -56,20 +81,22 @@
     <ClInclude Include="Code\audio\synth\oscillators\sine_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\square_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\triangle_oscillator.h" />
-    <ClInclude Include="Code\audio\synth\PADsynth.h" />
+    <ClInclude Include="Code\audio\synth\padsynth\pad_synth.h" />
     <ClInclude Include="Code\audio\synth\player.h" />
     <ClInclude Include="Code\audio\synth\types.h" />
     <ClInclude Include="Code\audio\synth\util.h" />
+    <ClInclude Include="Code\gfx\font_draw.h" />
+    <ClInclude Include="Code\gfx\oscilloscope.h" />
     <ClInclude Include="Code\main_window.h" />
     <ClInclude Include="Code\ptg\generators.h" />
     <ClInclude Include="Code\ptg\layers.h" />
     <ClInclude Include="Code\ptg\pgt.h" />
     <ClInclude Include="Code\ptg\generators\simplex_noise.h" />
     <ClInclude Include="Code\scenes\scenes.h" />
-    <ClInclude Include="Code\spectrum_analyzer.h" />
+    <ClInclude Include="Code\gfx\spectrum_analyzer.h" />
     <ClInclude Include="Code\stormtankapp.h" />
     <ClInclude Include="Code\audio\output\output.h" />
-    <ClInclude Include="Code\audio\output\audio_output_interface.h" />
+    <ClInclude Include="Code\audio\output\interface.h" />
     <ClInclude Include="Code\audio\output\directsound.h" />
     <ClInclude Include="Code\audio\synth\synth.h" />
   </ItemGroup>
@@ -82,12 +109,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <FXC Include="Shaders\main2d.fx">
-      <target Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">1</target>
-      <output Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">0</output>
-      <strict Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</strict>
-      <output Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">0</output>
+    <BIN2H Include="Content\MoonLte3.mid">
       <FileType>Document</FileType>
+    </BIN2H>
+  </ItemGroup>
+  <ItemGroup>
+    <FXC Include="Shaders\main2d.fx">
+      <target Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">2</target>
+      <target Condition="'$(Configuration)|$(Platform)'=='Release|x64'">2</target>
     </FXC>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -101,7 +130,19 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>NotSet</CharacterSet>
+    <UseIntelMKL>No</UseIntelMKL>
+    <UseILP64Interfaces>false</UseILP64Interfaces>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>NotSet</CharacterSet>
@@ -114,30 +155,61 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+    <InterproceduralOptimization>true</InterproceduralOptimization>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\FXC.props" />
+    <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\bin2h\Bin2h.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
@@ -147,7 +219,17 @@
     <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
@@ -157,7 +239,45 @@
     <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnablePREfast>false</EnablePREfast>
+      <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>false</Profile>
+      <StackReserveSize>
+      </StackReserveSize>
+      <HeapReserveSize>
+      </HeapReserveSize>
+      <HeapCommitSize>
+      </HeapCommitSize>
+      <StackCommitSize>
+      </StackCommitSize>
+    </Link>
+    <FXC>
+      <outputdir>
+      </outputdir>
+    </FXC>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -211,7 +331,47 @@
     </Link>
     <FXC />
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>false</Profile>
+    </Link>
+    <FXC />
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
@@ -250,10 +410,37 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;comdlg32.lib;uuid.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_WIN64;_AMD64;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Strict</FloatingPointModel>
+      <AdditionalOptions>-D___INTEL_COMPILER -D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
+      <Cpp0xSupport>true</Cpp0xSupport>
+      <InterproceduralOptimization>MultiFile</InterproceduralOptimization>
+      <OptimizeForWindowsApplication>true</OptimizeForWindowsApplication>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\FXC.targets" />
+    <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\bin2h\Bin2h.targets" />
   </ImportGroup>
 </Project>

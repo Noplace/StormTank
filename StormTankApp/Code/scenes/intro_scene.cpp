@@ -1,9 +1,12 @@
 #include "../stormtankapp.h"
 #include <fstream>
-
+#include <time.h>
 pgt::generators::SimplexNoise sn;
 XMCOLOR* tex_data0;
 XMMATRIX world_mat;
+
+
+double main_time_span;
 
 int IntroScene::Initialize(MainWindow* win) {
   graphics::Scene::Initialize(win->gfx());
@@ -13,7 +16,7 @@ int IntroScene::Initialize(MainWindow* win) {
 
   camera_.Initialize(gfx);
   camera_.Ortho2D(0,0,640,480);
-  gfx->SetViewport(0,0,640,480,0,1000);
+  gfx->SetViewport(0,0,640,480,-1000,1000);
   gfx->SetCamera(&camera_);
   
   D3DXMATRIX matIdentity;
@@ -22,39 +25,63 @@ int IntroScene::Initialize(MainWindow* win) {
 	gfx->device()->SetRenderState(D3DRS_ZENABLE,  D3DZB_TRUE );
 	gfx->device()->SetRenderState(D3DRS_LIGHTING, 0 );
 	gfx->device()->SetRenderState(D3DRS_ALPHABLENDENABLE,1);
-  
 
-	gfx->device()->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_TEXTURE );
-	gfx->device()->SetTextureStageState( 0, D3DTSS_COLORARG2, D3DTA_DIFFUSE );  
-	gfx->device()->SetTextureStageState( 0, D3DTSS_COLOROP, D3DTOP_MODULATE );
+	gfx->device()->SetTextureStageState(0,D3DTSS_COLORARG1, D3DTA_TEXTURE );
+	gfx->device()->SetTextureStageState(0,D3DTSS_COLORARG2, D3DTA_DIFFUSE );  
+	gfx->device()->SetTextureStageState(0,D3DTSS_COLOROP, D3DTOP_MODULATE );
 	gfx->device()->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
 	gfx->device()->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
-	gfx->device()->SetTextureStageState( 0, D3DTSS_ALPHAOP,D3DTOP_MODULATE );
+	gfx->device()->SetTextureStageState(0,D3DTSS_ALPHAOP,D3DTOP_MODULATE );
+
+	gfx->device()->SetTextureStageState(1,D3DTSS_COLORARG1, D3DTA_TEXTURE );
+	gfx->device()->SetTextureStageState(1,D3DTSS_COLORARG2, D3DTA_DIFFUSE );  
+	gfx->device()->SetTextureStageState(1,D3DTSS_COLOROP, D3DTOP_MODULATE );
+	gfx->device()->SetTextureStageState(1,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
+	gfx->device()->SetTextureStageState(1,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
+	gfx->device()->SetTextureStageState(1,D3DTSS_ALPHAOP,D3DTOP_MODULATE );
 
   {
-    /*FILE* fp = fopen("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.fx","r");
+    //uint8_t* data;
+    //ReadWholeFileBinary("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.o",&data;
+    /*FILE* fp = fopen("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.o","rb");
     fseek(fp,0,SEEK_END);
     auto size = ftell(fp);
     fseek(fp,0,SEEK_SET);
-    
-    fread(data,1,size-1,fp);
+    char* data = new char[size];
+    fread(data,1,size,fp);
     fclose(fp);*/
-
+    /*
     std::ios::openmode mode = std::ios::beg | std::ios::in;
-
     std::ifstream ifs("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.fx",mode);
- 
-      const std::string file_content( (std::istreambuf_iterator<char>( ifs )), std::istreambuf_iterator<char>() );
-      auto size = file_content.length();
-      char* data = new char[size];
-      //data_pointer = HeapAlloc(manager_->heap(),0,data_length);
-      memcpy(data,file_content.c_str(),size);
-   
+    const std::string file_content( (std::istreambuf_iterator<char>( ifs )), std::istreambuf_iterator<char>() );
+    auto size = file_content.length();
+    char* data = new char[size];
+    memcpy(data,file_content.c_str(),size);
     ifs.close();
 
-    graphics::ShaderBlob blob;
-    gfx->CompileShaderFromMemory(data,size,"VS","vs_3_0",blob);
-    gfx->CreateVertexShader(blob.data(),blob.size(),vertex_shader_);
+
+    LPD3DXBUFFER buffer=nullptr,parser_errors=nullptr;
+    LPD3DXEFFECTCOMPILER compiler;
+    D3DXCreateEffectCompiler(data,size,nullptr,nullptr,0,&compiler,&parser_errors);
+    if (parser_errors != nullptr) {
+      OutputDebugString((LPCSTR)parser_errors->GetBufferPointer());
+      parser_errors->Release();
+    }
+    compiler->CompileEffect(0,&buffer,&parser_errors);
+    if (parser_errors != nullptr) {
+      OutputDebugString((LPCSTR)parser_errors->GetBufferPointer());
+      parser_errors->Release();
+    }
+    compiler->Release();
+    */
+    uint8_t* data;
+    size_t size;
+    core::io::ReadWholeFileBinary("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.o",&data,size);
+
+    if (data != nullptr) {
+      gfx->CreateEffectInterface((uint8_t*)data,size,(void**)&effect);
+    }
+
     delete []data;
   }
   arc1.Initialize(gfx);
@@ -63,23 +90,18 @@ int IntroScene::Initialize(MainWindow* win) {
   arc1.SetColor1(0x000000ff);
   arc1.SetParams(120,0,2,10);
   arc1.Construct();
-  
+
+  font.Initialize(gfx);
+  font.Construct(16,"Arial");
+  font.SetTopLeft(400,0);
+  font.SetSize(640,480);
+
   {
-      /*GfxVertex v[8] = {
-      {0,0,0,0xffffffff,0,0},
-      {100,0,0,0xffffFFFF,1,0},
-      {0,100,0,0xffffFFFF,0,1},
-      {100,100,0,0xffffffFF,1,1},
-      {200+0,0,0,0xffffffff,0,0},
-      {200+100,0,0,0xffff0000,0,0},
-      {200+0,100,0,0xffff00ff,0,0},
-      {200+100,100,0,0xffffff00,0,0}
-    };*/
     static graphics::shape::Vertex v[8] = {
-      graphics::shape::Vertex(XMFLOAT3(0,0,0),XMFLOAT2(0,0),XMCOLOR(1,1,1,1),0),
-      graphics::shape::Vertex(XMFLOAT3(256,0,0),XMFLOAT2(1,0),XMCOLOR(1,1,1,1),0),
-      graphics::shape::Vertex(XMFLOAT3(0,256,0),XMFLOAT2(0,1),XMCOLOR(1,1,1,1),0),
-      graphics::shape::Vertex(XMFLOAT3(256,256,0),XMFLOAT2(1,1),XMCOLOR(1,1,1,1),0),
+      graphics::shape::Vertex(XMFLOAT3(0,0,1),XMFLOAT2(0,0),XMCOLOR(1,1,1,1),0),
+      graphics::shape::Vertex(XMFLOAT3(256,0,1),XMFLOAT2(1,0),XMCOLOR(1,1,1,1),0),
+      graphics::shape::Vertex(XMFLOAT3(0,256,1),XMFLOAT2(0,1),XMCOLOR(1,1,1,1),0),
+      graphics::shape::Vertex(XMFLOAT3(256,256,1),XMFLOAT2(1,1),XMCOLOR(1,1,1,1),0),
 
       graphics::shape::Vertex(XMFLOAT3(200+0,0,0),XMFLOAT2(0,0),XMCOLOR(1,1,1,0),0),
       graphics::shape::Vertex(XMFLOAT3(200+100,0,0),XMFLOAT2(0,0),XMCOLOR(1,1,0,0),0),
@@ -114,11 +136,27 @@ int IntroScene::Initialize(MainWindow* win) {
     sa.Initialize(gfx);
     sa.Construct();
     win->player2().set_visual_addon(&sa);
+
+    camera_.UpdateConstantBuffer();
+    camera_.SetConstantBuffer(0);
+    
+    viewprojection = effect->GetParameterByName(0,"viewprojection");
+    world = effect->GetParameterByName(0,"world");
+
+    effect->SetTechnique(effect->GetTechnique(0));
+    effect->SetMatrix(viewprojection,(D3DXMATRIX*)&(camera_.view()*camera_.projection()));
+    world_mat = XMMatrixIdentity();
+    effect->SetMatrix(world,(D3DXMATRIX*)&world_mat);
+
   }
+
+  main_time_span = 0;
+  win->player2().Play();
   return S_OK;
 }
 
 int IntroScene::Deinitialize() {
+  gfx->DestroyEffectInterface((void**)&effect);
   win->player2().set_visual_addon(nullptr);
   sa.Deinitialize();
   gfx->DestroyBuffer(vb);
@@ -130,48 +168,65 @@ int IntroScene::Deinitialize() {
 }
 
 int IntroScene::Update(double dt) {
-  camera_.UpdateConstantBuffer();
+  
   
   static float theta =0;
   float y = 0;//100+sin(theta)*100;
   //D3DXMATRIX matIdentity;
 	//D3DXMatrixIdentity(&matIdentity);
   world_mat = XMMatrixAffineTransformation2D(XMVectorSet(1,1,0,0),XMVectorSet(0,0,0,0),0,XMVectorSet(0,y,0,0));
-  theta += 0.3f;
+
 
   //sn.Generate(tex_data0,256,256,theta,0,5);
   //gfx->CopyToTexture(texture,tex_data0,0,256,graphics::TexturePoint(0,0),graphics::TexturePoint(0,0),256,256);
 
-  arc1.BuildTransform();
   arc1.SetRotate(theta);
-  sa.SetTopLeft(0,480-100);
-  sa.BuildTransform();
+  arc1.Update();
+  
 
+  sa.SetTopLeft(0,480-100);
+  sa.Update();
+
+  font.Update();
+
+
+  theta += 0.3f;
+  main_time_span += dt;
   return S_OK;
 }
 
 int IntroScene::Draw() {
   //gfx->SetShader(vertex_shader_);
-  camera_.SetConstantBuffer(0);
+  //gfx->SetShader(pixel_shader_);
+  UINT passes;
+  gfx->device()->SetTexture(0,(IDirect3DBaseTexture9*)texture.data_pointer);
+  effect->Begin(&passes,0);
+  effect->BeginPass(0);
   //uint32_t offsets[1] = {0};
   //uint32_t strides[1] = {sizeof(graphics::shape::Vertex)};
   //gfx->SetVertexBuffers(0,1,&vb,strides,offsets);
   //gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
-  //gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&world_mat);
-  //gfx->device()->SetTexture(0,(IDirect3DTexture9*)texture.data_pointer);
+  //effect->SetMatrix(world,(D3DXMATRIX*)&world_mat);
+  //effect->CommitChanges();
   //gfx->Draw(4,0);
-  //gfx->device()->SetTexture(0,nullptr);
-  //gfx->Draw(4,4);
+  effect->EndPass();
 
-  sa.Draw();
-
-  //gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&arc1.world());
+  effect->BeginPass(1);
+  effect->SetMatrix(world,(D3DXMATRIX*)&arc1.world());
+  effect->CommitChanges();
   //arc1.Draw();
+  effect->EndPass();
 
-  
+  effect->BeginPass(3);
+  effect->SetFloatArray(effect->GetParameterByName(0,"spec_pow"),sa.freq_pow,128);
+  effect->SetMatrix(world,(D3DXMATRIX*)&sa.world());
+  effect->CommitChanges();
+  sa.Draw();
+  effect->EndPass();
+  effect->End();
 
   {
-    char caption[255];
+    char song_info[512];
     double song_time_secs = win->player2().GetPlaybackSeconds();
     auto song_time_mins = song_time_secs / 60.0 ;
 
@@ -179,9 +234,23 @@ int IntroScene::Draw() {
     auto secs   = ((song_time_mins - floor(song_time_mins))*60.0);
     auto ms = (secs - floor(secs)) * 1000;
     auto mins   = floor(song_time_mins);
+    
+    time_t t = time(0);
 
-    sprintf_s(caption,"Song Time: %02d:%02d:%03d",uint32_t(mins),uint32_t(secs),uint32_t(ms));
-    SetWindowText(this->win->handle(),caption);
+    auto tsecs   = t % 60;
+    auto tmins   = (t / 60) % 60;
+    auto thrs   = (t / (60*60)) % 24;
+    auto tdays   = (t / (60*60*24)) % 365;
+    auto tyears   = 1970 + (t / (60*60*24*365));
+    uint32_t play,write;
+    win->audio_interface()->GetCursors(play,write);
+
+    sprintf_s(song_info,"play: %d write: %d\nTime: %d:%03d:%02d:%02d:%02d\nSong Time: %02d:%02d:%03d\nSound Thread Time: %f\nScene Thread Time: %f",
+      play,write,
+      tyears,tdays,thrs,tmins,tsecs,
+      uint32_t(mins),uint32_t(secs),uint32_t(ms),
+      win->player2().thread_time_span,main_time_span);
+    font.Draw(song_info,-1,DT_LEFT);
   }
 
   return S_OK;

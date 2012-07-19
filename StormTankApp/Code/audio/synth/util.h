@@ -8,10 +8,9 @@ class Util : public Component {
  public:
   Util() : Component() {
       real_t A4_freq = 440;
-      real_t two = pow(2.0f,1/12.0f);
       chromatic_scale_freq = new real_t[note_count];
       for (int i=0;i<note_count;++i) {
-        chromatic_scale_freq[i] = A4_freq * pow(two,i-69);//45 = index of A4
+        chromatic_scale_freq[i] = A4_freq * pow(_2_POW_12TH,i-69);//45 = index of A4
       }
 
       

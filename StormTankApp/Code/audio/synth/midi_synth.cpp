@@ -1,6 +1,6 @@
 #include "synth.h"
 
-#define SQRT_1OVER2  0.70710678118654752440084436210485
+//#define OUTPUT_EVENTS
 
 namespace audio {
 namespace synth {
@@ -60,55 +60,84 @@ void MidiSynth::Initialize() {
   if (initialized_ == true)
     return;
 
-  memset(&tracks,0,sizeof(tracks));
 
   util.set_sample_rate(sample_rate_);
-  buffers.pre_effects = new real_t[sample_rate_*2]; //44100 samples & channels , check with player later on!
-  buffers.post_effects = new real_t[sample_rate_*2]; //44100 samples & channels , check with player later on!
+  
+
+  auto buffer_length_ms_ = 400.0f;//400ms
+  auto buffer_size = uint32_t(sample_rate_*2*buffer_length_ms_*0.001);
+  buffers.aux_size = buffers.main_size = buffer_size;
+  buffers.main = new real_t[buffers.main_size]; //44100 samples & channels , check with player later on!
+  buffers.aux = new real_t[buffers.aux_size]; //44100 samples & channels , check with player later on!
+
   last_event = nullptr;
   samples_to_next_event = 0;
 
   //initialize all available instruments
-  memset(instr,0,sizeof(instr));
+  
   instr[0] = new instruments::Piano();
   instr[2] = new instruments::OscWave(instruments::OscWave::Triangle);
-  instr[81] = new instruments::OscWave(instruments::OscWave::Square);
-  instr[82] = new instruments::OscWave(instruments::OscWave::Sawtooth);
+
+
+  instr[40] = new instruments::Violin();
+
+  instr[48] = new instruments::Pad();//strings1
+  instr[49] = new instruments::Pad();
+
+  instr[80] = new instruments::OscWave(instruments::OscWave::Square);
+  instr[81] = new instruments::OscWave(instruments::OscWave::Sawtooth);
   for (int i=0;i<kInstrumentCount;++i) {
     if (instr[i] == nullptr)
       instr[i] = new instruments::OscWave(instruments::OscWave::Sine);
     instr[i]->set_sample_rate(sample_rate_);
   }
 
+  instr[0]->Load();
   for (int i=0;i<kChannelCount;++i) {
     channels[i] = new Channel(i);
     channels[i]->set_sample_rate(sample_rate_);
+    channels[i]->set_buffer_length(400.0f);
     channels[i]->set_instrument(instr[0]);
     channels[i]->set_silence(true);
     channels[i]->set_panning(0.5f);
-    channels[i]->set_amplification(0.4f);
+    channels[i]->set_amplification(0.7f);
   }
   //percussion
   percussion_instr = new instruments::Percussion();
   percussion_instr->set_sample_rate(sample_rate_);
+  percussion_instr->Load();
   channels[9]->set_instrument(percussion_instr);
-  tracks = nullptr;
-  
+ 
 
-  //misc 
-  pitch_bend_range = 2.0f;
-  rpn_fine = rpn_coarse = 0;
 
   delay_unit.Initialize(uint32_t(sample_rate_*2));
   delay_unit.set_feedback(0.3f);
   delay_unit.set_delay_ms(400.0f);
 
+  tracks = nullptr;
+
+  if (mode_ == kModeTest) {
+    track_count_ = 1;
+    tracks = new Track[track_count_];
+    bpm = 120; //qn per min
+    channels[0]->set_silence(false);
+    uint32_t max_event_count = 0;
+    for (int track_index=0;track_index<track_count_;++track_index) {
+        auto& track = tracks[track_index];
+        tracks[track_index].event_count = 20;
+        tracks[track_index].event_sequence = new midi::Event[tracks[track_index].event_count];
+        tracks[track_index].event_index = 0;
+        max_event_count = max(max_event_count,tracks[track_index].event_count);
+    }
+  }
+  InitializeCriticalSection(&me_lock);
   initialized_ = true;
 }
 
 void MidiSynth::Deinitialize() {
   if (initialized_ == false)
     return;
+  DeleteCriticalSection(&me_lock);
   delay_unit.Deinitialize();
   DestroyTrackData();
   for (int i=0;i<kChannelCount;++i) {
@@ -118,23 +147,26 @@ void MidiSynth::Deinitialize() {
   for (int i=0;i<kInstrumentCount;++i) {
     SafeDelete(&instr[i]);
   }
-  SafeDeleteArray(&buffers.post_effects);
-  SafeDeleteArray(&buffers.pre_effects);
+  SafeDeleteArray(&buffers.aux);
+  SafeDeleteArray(&buffers.main);
   initialized_ = false;
 }
 
-void MidiSynth::LoadMidi(char* filename) {
+void MidiSynth::LoadMidiFromFile(const char* filename) {
+  uint8_t* buffer;
+  size_t size=0;
+  core::io::ReadWholeFileBinary(filename,&buffer,size);
+  if (size != 0) {
+    LoadMidi(buffer,size);
+    core::io::DestroyFileBuffer(&buffer);
+  }
+}
+
+void MidiSynth::LoadMidi(uint8_t* data, size_t data_size) {
   player_->Stop();
   
-  FILE* fp = fopen(filename,"rb");
-  fseek(fp,0,SEEK_END);
-  long size = ftell(fp);
-  fseek(fp,0,SEEK_SET);
-  auto buffer = new uint8_t[size];
-  fread(buffer,1,size,fp);
-  fclose(fp);
   midi::MidiLoader midifile;
-  midifile.Load(buffer,size);
+  midifile.Load(data,data_size);
   
   DestroyTrackData();
   track_count_ = midifile.track_count;
@@ -151,14 +183,14 @@ void MidiSynth::LoadMidi(char* filename) {
   uint32_t max_event_count = 0;
   for (int track_index=0;track_index<track_count_;++track_index) {
       auto& track = tracks[track_index];
-      tracks[track_index].event_count = midifile.eventList[track_index].size();
+      tracks[track_index].event_count = (uint32_t)midifile.eventList[track_index].size();
       tracks[track_index].event_sequence = new midi::Event[tracks[track_index].event_count];
       max_event_count = max(max_event_count,tracks[track_index].event_count);
   }
   //ResetTracks();
   //uint32_t abs_time[64];
   //memset(abs_time,0,sizeof(abs_time));
-  char str[512];
+  
   for (uint32_t event_index=0;event_index<max_event_count;++event_index) {
     int track_index=0;
     for (track_index=0;track_index<track_count_;++track_index) {
@@ -168,10 +200,23 @@ void MidiSynth::LoadMidi(char* filename) {
       auto source_event = &midifile.eventList[track_index][event_index];
 
       switch (source_event->subtype) {
+        case midi::kEventSubtypeNoteOff:
+          if (source_event->data.note.velocity == 0)
+            source_event->data.note.velocity = 127;
+        break;
+
         case midi::kEventSubtypeSetTempo:
           bpm = 60000000.0 / double(source_event->data.tempo.microsecondsPerBeat);
           bps = bpm / 60.0;
           secs_per_tick = 1 / ( bps * ticks_per_beat );
+        break;
+
+        case midi::kEventSubtypeProgramChange:
+          if (source_event->channel == 9) {
+            percussion_instr->Load();
+          } else {
+            instr[source_event->data.program.number]->Load();
+          }
         break;
       }
 
@@ -189,9 +234,11 @@ void MidiSynth::LoadMidi(char* filename) {
       channels[source_event->channel]->set_silence(false);
       memcpy(&current_event.data,&source_event->data,sizeof(current_event.data));
       
-      sprintf(str,"time %04.03f type : %s %d %s track %d channel %d\n",time_ms,eventnames[source_event->type],source_event->subtype,subeventnames[source_event->subtype],source_event->track,source_event->channel);
-      OutputDebugString(str);
-
+      #ifdef OUTPUT_EVENTS
+        char str[512];
+        sprintf(str,"time\t%04.03f\ttype : %s\t%02d\t%s\ttrack %02d\tchannel %02d\n",time_ms,eventnames[source_event->type],source_event->subtype,subeventnames[source_event->subtype],source_event->track,source_event->channel);
+        OutputDebugString(str);
+      #endif
       /*if (current_event.subtype == midi::kEventSubtypeProgramChange) {
         sprintf(str,"time %04.03f type : %s %s track %d channel %d\n",time_ms,eventnames[source_event->type],eventnames[source_event->subtype],source_event->track,source_event->channel);
         OutputDebugString(str);
@@ -207,140 +254,157 @@ void MidiSynth::LoadMidi(char* filename) {
     }
     
   } 
+
   //find song length
   for (int i=0;i<track_count_;++i) {
     player_->song_length_ms = max(player_->song_length_ms,tracks[i].event_sequence[tracks[i].event_count-1].abs_time_ms);
   }
 
-  delete [] buffer;
   Reset();
 }
 
 
 void MidiSynth::RenderSamples(uint32_t samples_count, short* data_out) {
 	auto data_offset = 0;
-  while (true) {
-		if (samples_to_next_event != 0xFFFFFFFF && samples_to_next_event <= samples_count) {
-			/* generate samplesToNextEvent samples, process event and repeat */
-			auto samples_to_generate = samples_to_next_event;
-			if (samples_to_generate > 0) {
-        GenerateIntoBuffer(samples_to_generate,data_out,data_offset);
-				data_offset += samples_to_generate * 2;
-				samples_count -= samples_to_generate;
-				samples_to_next_event -= samples_to_generate;
-			}
-      if (last_event != nullptr)
-			  HandleEvent(last_event);
-      last_event = GetNextEvent();
-		} else {
-			/* generate samples to end of buffer */
-			if (samples_count > 0) {
-				GenerateIntoBuffer(samples_count,data_out,data_offset);
-				samples_to_next_event -= samples_count;
-			}
-			break;
+  if (mode_ == kModeTest) {
+    samples_to_next_event = samples_count;
+		auto samples_to_generate = samples_to_next_event;
+		if (samples_to_generate > 0) {
+      GenerateIntoBuffer(samples_to_generate,data_out,data_offset);
+			data_offset += samples_to_generate * 2;
+			samples_count -= samples_to_generate;
+			samples_to_next_event -= samples_to_generate;
+      if (mode_ == kModeTest)
+        samples_to_next_event = 0xFFFFFFFF;
 		}
-	}
+    if (last_event != nullptr) {
+			HandleEvent(last_event);
+      memset(last_event,0,sizeof(midi::Event));
+    }
+    last_event = GetNextEvent();
+  } else if (mode_ == kModeSequencer) {
+    while (true) {
+		  if (samples_to_next_event != 0xFFFFFFFF && samples_to_next_event <= samples_count) {
+			  /* generate samplesToNextEvent samples, process event and repeat */
+			  auto samples_to_generate = samples_to_next_event;
+			  if (samples_to_generate > 0) {
+          GenerateIntoBuffer(samples_to_generate,data_out,data_offset);
+				  data_offset += samples_to_generate * 2;
+				  samples_count -= samples_to_generate;
+				  samples_to_next_event -= samples_to_generate;
+          if (mode_ == kModeTest)
+            samples_to_next_event = 0xFFFFFFFF;
+			  }
+        if (last_event != nullptr) {
+			    HandleEvent(last_event);
+          if (mode_ == kModeTest)
+            memset(last_event,0,sizeof(midi::Event));
+        }
+        last_event = GetNextEvent();
+
+		  } else {
+			  /* generate samples to end of buffer */
+			  if (samples_count > 0) {
+				  GenerateIntoBuffer(samples_count,data_out,data_offset);
+				  samples_to_next_event -= samples_count;
+			  }
+			  break;
+		  }
+	  }
+  }
 }
 
 void MidiSynth::GenerateIntoBuffer(uint32_t samples_to_generate,short* data_out,uint32_t data_offset) {
-    real_t ov_left_sample=0,ov_right_sample=0;
-
+  MixChannels(samples_to_generate);
+  //SendToAux
+  //mix with aux
+  //global post processing
+  //memcpy(buffers.post_effects,buffers.pre_effects,samples_to_generate*2*sizeof(real_t));
+  //delay_unit.Process(buffers.main,buffers.main,samples_to_generate);
     
-    MixChannels(samples_to_generate);
-    memcpy(buffers.post_effects,buffers.pre_effects,samples_to_generate*2*sizeof(float));
-    //delay_unit.Process(buffers.pre_effects,buffers.post_effects,samples_to_generate);
-    
-    for (uint32_t i=0;i<samples_to_generate<<1;i+=2) {
-      data_out[data_offset++] = short(32767.0f * min(buffers.post_effects[i],1.0f));
-      data_out[data_offset++] = short(32767.0f * min(buffers.post_effects[i+1],1.0f));;
-    }
-
-    //while (samples_to_generate) {
-
-      //global effects
-      //if (apply_delay) {
-      //double lpfreq = 800;
-      //static double t = 0;
-      //ov_left_sample = lowpass.Tick(ov_left_sample,lpfreq+sin(t)*lpfreq);
-      //ov_right_sample = lowpass.Tick(ov_right_sample,lpfreq+sin(t)*lpfreq);
-      //t += 0.00001;
-      //delay_unit.Process(ov_left_sample,ov_right_sample,ov_left_sample,ov_right_sample);
-      //}
-
-      //clip and write to output
-      ///data_out[data_offset++] = short(32767.0f * min(ov_left_sample,1.0f));
-      //data_out[data_offset++] = short(32767.0f * min(ov_right_sample,1.0f));
-      //--samples_to_generate;
-      //player_->song_counter_ms += util.sample_time_ms_;
-    //}
+  for (uint32_t i=0;i<samples_to_generate<<1;i+=2) {
+    data_out[data_offset++] = short(32767.0f * min(buffers.main[i],1.0f));
+    data_out[data_offset++] = short(32767.0f * min(buffers.main[i+1],1.0f));;
   }
+}
 
 void MidiSynth::MixChannels(uint32_t samples_to_generate) {
   
-  for (uint32_t i=0;i<samples_to_generate<<1;i+=2) {
-    real_t output_left=0,output_right=0;
-    for (int j=0;j<kChannelCount;j+=4) { //mix all 16 channels
-      //auto channel = channels[j];
-      if (channels[j]->silence() == false) {
-        channels[j]->Tick(output_left,output_right);
-      }
-      if (channels[j+1]->silence() == false) {
-        channels[j+1]->Tick(output_left,output_right);
-      }
-      if (channels[j+2]->silence() == false) {
-        channels[j+2]->Tick(output_left,output_right);
-      }
-      if (channels[j+3]->silence() == false) {
-        channels[j+3]->Tick(output_left,output_right);
-      }
+  //render and mix each chanel
+  auto mainbufptr = buffers.main;
+  memset(mainbufptr,0,sizeof(real_t)*samples_to_generate*2);
+  for (uint32_t j=0;j<kChannelCount;j+=4) { //mix all 16 channels
+    channels[j+0]->Render(samples_to_generate);
+    channels[j+1]->Render(samples_to_generate);
+    channels[j+2]->Render(samples_to_generate);
+    channels[j+3]->Render(samples_to_generate);
+    auto buf0 = channels[j+0]->buffer();
+    auto buf1 = channels[j+1]->buffer();
+    auto buf2 = channels[j+2]->buffer();
+    auto buf3 = channels[j+3]->buffer();
+    
+    for (uint32_t i=0;i<samples_to_generate<<1;++i) {
+      mainbufptr[i] += buf0[i]+buf1[i]+buf2[i]+buf3[i];
+      ++i;
+      mainbufptr[i] += buf0[i]+buf1[i]+buf2[i]+buf3[i];
     }
-    buffers.pre_effects[i] = output_left;
-    buffers.pre_effects[i+1] = output_right;
   }
 }
 
 midi::Event* MidiSynth::GetNextEvent() {
-  uint32_t track_index=0xFFFFFFFF;
-  uint32_t event_index=0xFFFFFFFF;
-  uint32_t ticks_to_next_event = 0xFFFFFFFF;
   midi::Event* result = nullptr;
+  
+  if (mode_ == kModeSequencer) {
+    uint32_t track_index=0xFFFFFFFF;
+    uint32_t event_index=0xFFFFFFFF;
+    uint32_t ticks_to_next_event = 0xFFFFFFFF;
 
-	for (int i = 0; i < track_count_; i++) {
-		if (
-			tracks[i].ticks_to_next_event != 0xFFFFFFFF
-			&& (ticks_to_next_event == 0xFFFFFFFF || tracks[i].ticks_to_next_event < ticks_to_next_event)
-		) {
-			ticks_to_next_event = tracks[i].ticks_to_next_event;
-			track_index = i;
-			event_index = tracks[i].event_index;
-		}
-	}
+	  for (int i = 0; i < track_count_; i++) {
+		  if (
+			  tracks[i].ticks_to_next_event != 0xFFFFFFFF
+			  && (ticks_to_next_event == 0xFFFFFFFF || tracks[i].ticks_to_next_event < ticks_to_next_event)
+		  ) {
+			  ticks_to_next_event = tracks[i].ticks_to_next_event;
+			  track_index = i;
+			  event_index = tracks[i].event_index;
+		  }
+	  }
 
-	if (track_index != 0xFFFFFFFF) {
-		/* consume event from that track */
-		result = &tracks[track_index].event_sequence[event_index];
-		if ((event_index+1) < tracks[track_index].event_count) {
-			tracks[track_index].ticks_to_next_event += tracks[track_index].event_sequence[event_index+1].deltaTime;
-		} else {
-			tracks[track_index].ticks_to_next_event = 0xFFFFFFFF;
-		}
-		++tracks[track_index].event_index;
-		/* advance timings on all tracks by ticksToNextEvent */
-		for (int i = 0; i < track_count_; i++) {
-			if (tracks[i].ticks_to_next_event != 0xFFFFFFFF) {
-				tracks[i].ticks_to_next_event -= ticks_to_next_event;
-			}
-		}
+	  if (track_index != 0xFFFFFFFF) {
+		  /* consume event from that track */
+		  result = &tracks[track_index].event_sequence[event_index];
+		  if ((event_index+1) < tracks[track_index].event_count) {
+			  tracks[track_index].ticks_to_next_event += tracks[track_index].event_sequence[event_index+1].deltaTime;
+		  } else {
+			  tracks[track_index].ticks_to_next_event = 0xFFFFFFFF;
+		  }
+		  ++tracks[track_index].event_index;
+		  /* advance timings on all tracks by ticksToNextEvent */
+		  for (int i = 0; i < track_count_; i++) {
+			  if (tracks[i].ticks_to_next_event != 0xFFFFFFFF) {
+				  tracks[i].ticks_to_next_event -= ticks_to_next_event;
+			  }
+		  }
 
-	  auto beatsToNextEvent = ticks_to_next_event / double(ticks_per_beat);
+	    auto beatsToNextEvent = ticks_to_next_event / double(ticks_per_beat);
+		  auto secondsToNextEvent = beatsToNextEvent / (bpm / 60);
+		  samples_to_next_event += uint32_t(secondsToNextEvent * sample_rate_);
+	  } else {
+		  result = nullptr;
+		  samples_to_next_event = 0xFFFFFFFF;
+      player_->Stop();
+	  }
+  } else if (mode_ == kModeTest) {
+    EnterCriticalSection(&me_lock);
+    result = &tracks[0].event_sequence[tracks[0].event_index];
+    tracks[0].ticks_to_next_event = 0;
+
+	  auto beatsToNextEvent = tracks[0].ticks_to_next_event / double(ticks_per_beat);
 		auto secondsToNextEvent = beatsToNextEvent / (bpm / 60);
 		samples_to_next_event += uint32_t(secondsToNextEvent * sample_rate_);
-	} else {
-		result = nullptr;
-		samples_to_next_event = 0xFFFFFFFF;
-    player_->Stop();
-	}
+    tracks[0].event_index = (tracks[0].event_index + 1) % tracks[0].event_count;
+    LeaveCriticalSection(&me_lock);
+  }
   return result;
 }
 
@@ -369,10 +433,12 @@ void MidiSynth::MidiEventNoteOn(midi::Event* event) {
   real_t frequency = util.NoteFreq((Notes)event->data.note.noteNumber);
   channel->AddNote(event->data.note.noteNumber,frequency,event->data.note.velocity / 127.0f);
 }
+
 void MidiSynth::MidiEventNoteOff(midi::Event* event) {
   auto channel = channels[event->channel];
   channel->RemoveNote(event->data.note.noteNumber,event->data.note.velocity / 127.0f);
 }
+
 void MidiSynth::MidiEventProgramChange(midi::Event* event) {
   auto channel = channels[event->channel];
   if (event->channel == 9) {
@@ -386,12 +452,16 @@ void MidiSynth::MidiEventProgramChange(midi::Event* event) {
 void MidiSynth::MidiEventController(midi::Event* event) {
   auto channel = channels[event->channel];
   if (event->data.controller.type == 0x06) { //data entry slider coarse
-    if (rpn_coarse == 0) {
-      pitch_bend_range = (real_t)event->data.controller.value;
+    if (channel->param_coarse == 0) {
+      channel->des_coarse = event->data.controller.value;
+      real_t p = ((real_t)channel->des_coarse*0.5f) + ((real_t)channel->des_fine / 100.0f);
+      channel->set_pitch_bend_range(p);
     }
   } else if (event->data.controller.type == 0x26) { //data entry slider fine
-    if (rpn_fine == 0) {
-      pitch_bend_range += (real_t)event->data.controller.value / 100.0f;
+    if (channel->param_fine == 0) {
+      channel->des_fine = event->data.controller.value;
+      real_t p = ((real_t)channel->des_coarse) + ((real_t)channel->des_fine / 100.0f);
+      channel->set_pitch_bend_range(p);
     }
   } else if (event->data.controller.type == 0x0A) { //pan
     real_t pan = event->data.controller.value / 127.0f;
@@ -402,16 +472,16 @@ void MidiSynth::MidiEventController(midi::Event* event) {
   } else if (event->data.controller.type == 0x07) { //main volume
     real_t vol = event->data.controller.value / 127.0f;
     channel->set_amplification(vol);
-  } else if (event->data.controller.type == 0x64) { //RPR coarse
-    rpn_coarse = event->data.controller.value;
-  } else if (event->data.controller.type == 0x65) { //RPR fine
-    rpn_fine = event->data.controller.value;
+  } else if (event->data.controller.type == 0x64) { //RPN coarse
+    channel->param_coarse = event->data.controller.value;
+  } else if (event->data.controller.type == 0x65) { //RPN fine
+    channel->param_fine = event->data.controller.value;
   }
 }
 
 void MidiSynth::MidiEventPitchBend(midi::Event* event) {
   auto channel = channels[event->channel];
-  real_t amount = ((event->data.pitch.value - 8192) / 16384.0f)*2*pitch_bend_range;
+  real_t amount = ((event->data.pitch.value - 8192) / 16384.0f)*channel->pitch_bend_range();
   channel->SetPitchBend(amount);
 }
 

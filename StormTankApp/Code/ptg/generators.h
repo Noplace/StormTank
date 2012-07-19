@@ -130,6 +130,7 @@ z = z % 3;
 			case 2: return(3);
 		}
 	}
+  return 0;
   }
 
 };
