@@ -81,6 +81,9 @@
     <ClCompile Include="Code\audio\synth\instruments\violin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Code\audio\output\dsio_cpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\stormtankapp.h">
@@ -201,6 +204,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\synth\instruments\violin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\output\dsio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

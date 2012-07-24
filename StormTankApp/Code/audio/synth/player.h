@@ -42,6 +42,7 @@ class Player {
   }
   double thread_time_span;
  private:
+  static void __stdcall callback_func(void *parm, float *buf, uint32_t len);
   static DWORD WINAPI PlayThread(LPVOID lpThreadParameter);
   CRITICAL_SECTION cs,vis_cs;
   audio::output::Interface* audio_interface_;

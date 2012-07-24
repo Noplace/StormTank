@@ -1,4 +1,5 @@
 #include "synth.h"
+#include "../output/dsio.h"
 
 #define WM_SP_QUIT 0x400
 #define WM_SP_PLAY 0x401
@@ -8,8 +9,15 @@
 #define SQRT_1OVER2  0.70710678118654752440084436210485
 
 
+
+
 namespace audio {
 namespace synth {
+
+void __stdcall Player::callback_func(void *parm, float *buf, uint32_t len) {
+  auto player = (Player*)parm;
+  player->synth_->RenderSamplesReal(len,buf);
+}
 
 void Player::Initialize() {
   if (initialized_ == true)
@@ -54,6 +62,8 @@ void Player::Deinitialize() {
   DeleteCriticalSection(&vis_cs);
   synth_->Deinitialize();
   SafeDeleteArray(&output_buffer);
+
+
   initialized_ = false;
 }
 
@@ -61,6 +71,8 @@ void Player::Play() {
   if (state_ == kStatePlaying) return;
   SetEvent(player_event);
   SendThreadMessage(WM_SP_PLAY);
+
+  //dsInit(callback_func,this,this->audio_interface_->window_handle());
 }
 
 void Player::Pause() {

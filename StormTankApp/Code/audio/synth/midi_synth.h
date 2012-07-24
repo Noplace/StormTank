@@ -35,6 +35,7 @@ class Synth : public Component {
   virtual void Initialize() = 0;
   virtual void Deinitialize() = 0;
   virtual void Reset() = 0;
+  virtual void RenderSamplesReal(uint32_t samples_count, real_t* data_out) = 0;
   virtual void RenderSamples(uint32_t samples_count, short* data_out) = 0;
  protected:
 };
@@ -58,6 +59,7 @@ class MidiSynth : public Synth {
   void Deinitialize();
   void LoadMidiFromFile(const char* filename);
   void LoadMidi(uint8_t* data, size_t data_size);
+  void RenderSamplesReal(uint32_t samples_count, real_t* data_out);
   void RenderSamples(uint32_t samples_count, short* data_out);
   void Reset() {
     ResetTracks();
@@ -116,6 +118,7 @@ class MidiSynth : public Synth {
     last_event = GetNextEvent();
     samples_to_next_event = 0;
   }
+  void GenerateIntoBufferReal(uint32_t samples_to_generate,real_t* data_out,uint32_t data_offset);
   void GenerateIntoBuffer(uint32_t samples_to_generate,short* data_out,uint32_t data_offset);
   void MixChannels(uint32_t samples_to_generate);
   midi::Event* GetNextEvent();

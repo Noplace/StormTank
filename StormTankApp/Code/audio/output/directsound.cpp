@@ -23,8 +23,8 @@
 namespace audio {
 namespace output {
 
-DirectSound::DirectSound() : window_handle_(nullptr), buffer_size_(0),last_write_cursor(0) {
-
+DirectSound::DirectSound() : buffer_size_(0),last_write_cursor(0) {
+  window_handle_ = nullptr;
 }
 
 DirectSound::~DirectSound() {

@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\audio\midi\midi2.cpp" />
+    <ClCompile Include="Code\audio\output\dsio_cpp.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\blit.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\pad.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\percussion.cpp" />
@@ -60,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\audio\midi\midi2.h" />
+    <ClInclude Include="Code\audio\output\dsio.h" />
     <ClInclude Include="Code\audio\synth\adsr.h" />
     <ClInclude Include="Code\audio\synth\base.h" />
     <ClInclude Include="Code\audio\synth\channel.h" />

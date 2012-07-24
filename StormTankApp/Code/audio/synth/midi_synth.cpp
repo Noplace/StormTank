@@ -264,6 +264,59 @@ void MidiSynth::LoadMidi(uint8_t* data, size_t data_size) {
 }
 
 
+void MidiSynth::RenderSamplesReal(uint32_t samples_count, real_t* data_out) {
+	auto data_offset = 0;
+  if (mode_ == kModeTest) {
+    samples_to_next_event = samples_count;
+		auto samples_to_generate = samples_to_next_event;
+		if (samples_to_generate > 0) {
+      GenerateIntoBufferReal(samples_to_generate,data_out,data_offset);
+			data_offset += samples_to_generate * 2;
+			samples_count -= samples_to_generate;
+			samples_to_next_event -= samples_to_generate;
+      if (mode_ == kModeTest)
+        samples_to_next_event = 0xFFFFFFFF;
+		}
+    if (last_event != nullptr) {
+			HandleEvent(last_event);
+      memset(last_event,0,sizeof(midi::Event));
+    }
+    last_event = GetNextEvent();
+  } else if (mode_ == kModeSequencer) {
+    while (true) {
+		  if (samples_to_next_event != 0xFFFFFFFF && samples_to_next_event <= samples_count) {
+			  /* generate samplesToNextEvent samples, process event and repeat */
+			  auto samples_to_generate = samples_to_next_event;
+			  if (samples_to_generate > 0) {
+          GenerateIntoBufferReal(samples_to_generate,data_out,data_offset);
+				  data_offset += samples_to_generate * 2;
+				  samples_count -= samples_to_generate;
+				  samples_to_next_event -= samples_to_generate;
+          if (mode_ == kModeTest)
+            samples_to_next_event = 0xFFFFFFFF;
+			  }
+        if (last_event != nullptr) {
+			    HandleEvent(last_event);
+          if (mode_ == kModeTest)
+            memset(last_event,0,sizeof(midi::Event));
+        }
+        last_event = GetNextEvent();
+
+		  } else {
+			  /* generate samples to end of buffer */
+			  if (samples_count > 0) {
+				  GenerateIntoBufferReal(samples_count,data_out,data_offset);
+				  samples_to_next_event -= samples_count;
+			  }
+			  break;
+		  }
+	  }
+  }
+
+
+}
+
+
 void MidiSynth::RenderSamples(uint32_t samples_count, short* data_out) {
 	auto data_offset = 0;
   if (mode_ == kModeTest) {
@@ -312,6 +365,21 @@ void MidiSynth::RenderSamples(uint32_t samples_count, short* data_out) {
 		  }
 	  }
   }
+
+
+}
+
+void MidiSynth::GenerateIntoBufferReal(uint32_t samples_to_generate,real_t* data_out,uint32_t data_offset) {
+  MixChannels(samples_to_generate);
+  //SendToAux
+  //mix with aux
+  //global post processing
+  //memcpy(buffers.post_effects,buffers.pre_effects,samples_to_generate*2*sizeof(real_t));
+  //delay_unit.Process(buffers.main,buffers.main,samples_to_generate);
+  for (uint32_t i=0;i<samples_to_generate<<1;i+=2) {
+    data_out[data_offset++] = min(buffers.main[i],1.0f);
+    data_out[data_offset++] = min(buffers.main[i+1],1.0f);
+  }
 }
 
 void MidiSynth::GenerateIntoBuffer(uint32_t samples_to_generate,short* data_out,uint32_t data_offset) {
@@ -321,7 +389,6 @@ void MidiSynth::GenerateIntoBuffer(uint32_t samples_to_generate,short* data_out,
   //global post processing
   //memcpy(buffers.post_effects,buffers.pre_effects,samples_to_generate*2*sizeof(real_t));
   //delay_unit.Process(buffers.main,buffers.main,samples_to_generate);
-    
   for (uint32_t i=0;i<samples_to_generate<<1;i+=2) {
     data_out[data_offset++] = short(32767.0f * min(buffers.main[i],1.0f));
     data_out[data_offset++] = short(32767.0f * min(buffers.main[i+1],1.0f));;

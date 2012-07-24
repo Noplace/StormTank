@@ -32,8 +32,11 @@ class Interface {
   virtual void GetCursors(uint32_t& play, uint32_t& write) = 0;
   virtual int Write(void* data_pointer, uint32_t size_bytes) = 0;
   const WAVEFORMATEX& wave_format() { return wave_format_; }
+  void* window_handle() { return window_handle_; }
+  void set_window_handle(HWND window_handle) { window_handle_ = window_handle; }
  protected:
   WAVEFORMATEX wave_format_;
+  void* window_handle_;
 };
 
 }
