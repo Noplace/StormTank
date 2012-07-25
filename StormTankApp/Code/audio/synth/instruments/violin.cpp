@@ -1,7 +1,4 @@
-#include "../synth.h"
-
-
-
+#include "violin.h"
 
 namespace audio {
 namespace synth {

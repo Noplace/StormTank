@@ -1,3 +1,13 @@
+#ifndef AUDIO_SYNTH_INSTRUMENTS_OSC_WAVE_H
+#define AUDIO_SYNTH_INSTRUMENTS_OSC_WAVE_H
+
+#include "instrument.h"
+#include "../oscillators/sine_oscillator.h"
+#include "../oscillators/triangle_oscillator.h"
+#include "../oscillators/sawtooth_oscillator.h"
+#include "../oscillators/square_oscillator.h"
+#include "../oscillators/exp_oscillator.h"
+
 namespace audio {
 namespace synth {
 namespace instruments {
@@ -86,3 +96,6 @@ class OscWave : public InstrumentProcessor {
 }
 }
 }
+
+
+#endif

@@ -1,4 +1,4 @@
-#include "../synth.h"
+#include "pad_synth.h"
 
 namespace audio {
 namespace synth {

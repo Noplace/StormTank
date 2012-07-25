@@ -1,3 +1,8 @@
+#ifndef AUDIO_SYNTH_OSCILLATORS_OSCILLATOR_H
+#define AUDIO_SYNTH_OSCILLATORS_OSCILLATOR_H
+
+#include "../base.h"
+
 #define kIndex 8
 #define kIndexRange (1<<kIndex)
 #define kPrecision 24
@@ -35,3 +40,5 @@ class Oscillator : public Component {
 }
 }
 }
+
+#endif

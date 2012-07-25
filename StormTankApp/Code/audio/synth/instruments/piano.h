@@ -1,3 +1,11 @@
+#ifndef AUDIO_SYNTH_INSTRUMENTS_PIANO_H
+#define AUDIO_SYNTH_INSTRUMENTS_PIANO_H
+
+#include "../oscillators/sine_oscillator.h"
+#include "../oscillators/triangle_oscillator.h"
+#include "../oscillators/sawtooth_oscillator.h"
+#include "instrument.h"
+#include "pad.h"
 
 namespace audio {
 namespace synth {
@@ -41,3 +49,6 @@ class Piano : public Pad {
 }
 }
 }
+
+
+#endif

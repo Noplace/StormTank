@@ -1,5 +1,3 @@
-#include "../base.h"
-#include "oscillator.h"
 #include "exp_oscillator.h"
 
 namespace audio {

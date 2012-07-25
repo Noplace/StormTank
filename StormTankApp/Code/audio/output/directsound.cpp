@@ -23,8 +23,9 @@
 namespace audio {
 namespace output {
 
-DirectSound::DirectSound() : buffer_size_(0),last_write_cursor(0) {
+DirectSound::DirectSound() : last_write_cursor(0),last_cursor_pos(0) {
   window_handle_ = nullptr;
+  buffer_size_ = 0;
 }
 
 DirectSound::~DirectSound() {
@@ -75,7 +76,7 @@ int DirectSound::Initialize(uint32_t sample_rate, uint8_t channels, uint8_t bits
 
 	ZeroMemory( &dsbd, sizeof(DSBUFFERDESC) );
 	dsbd.dwSize        = sizeof(DSBUFFERDESC);
-	dsbd.dwFlags       =   DSBCAPS_LOCSOFTWARE | DSBCAPS_STICKYFOCUS | DSBCAPS_GETCURRENTPOSITION2;
+	dsbd.dwFlags       = DSBCAPS_GLOBALFOCUS | DSBCAPS_GETCURRENTPOSITION2;
 	dsbd.dwBufferBytes = buffer_size_;
 	dsbd.lpwfxFormat   = &wave_format_;
   // Create a temporary sound buffer with the specific buffer settings.
@@ -182,6 +183,96 @@ int DirectSound::Write(void* data_pointer, uint32_t size_bytes) {
 
   return S_OK;
 }
+
+
+int DirectSound::BeginWrite(uint32_t& samples) {
+   DWORD curpos;
+  int32_t nwrite = 0;
+  for (;;) {
+    HRESULT hr = secondary_buffer->GetCurrentPosition(&curpos, 0);
+    if (hr == S_OK)
+    {
+      // find out how many bytes to write
+      curpos &= ~31u;
+      if (curpos == last_cursor_pos)
+        return S_FALSE;
+
+      nwrite = curpos - last_cursor_pos;
+      if (nwrite < 0)
+        nwrite += buffer_size_;
+
+      hr = secondary_buffer->Lock(last_cursor_pos, nwrite, &buf1, &len1, &buf2, &len2, 0);
+    }
+
+    if (hr == S_OK)
+      break;
+    else if (hr == DSERR_BUFFERLOST)
+      secondary_buffer->Restore();
+    else
+      return S_FALSE;
+  }
+
+  // we got the lock
+  last_cursor_pos = curpos;
+  //g_dsound.bufcnt += nwrite;
+  samples = nwrite / 4;
+  return S_OK;
+}
+
+
+static void clamp(void *dest, const float *src, int32_t nsamples)
+{
+  int16_t *dests = (int16_t *)dest;
+
+  for (int32_t i=0; i < nsamples; i++)
+  {
+    float v = src[i] * 32768.0f;
+    if (v >  32600.0f) v =  32600.0f;
+    if (v < -32600.0f) v = -32600.0f;
+    dests[i] = (int16_t)v;
+  }
+}
+
+
+int DirectSound::EndWrite(void* data_pointer) {
+
+  /*auto dest_buf=(uint8_t*)buf1;
+  auto dw=len1;
+
+  auto src_buf=(float*)data_pointer;
+  while (dw) { 
+    float v = *src_buf++;
+    v *= 32768.0f; // * vol;
+    if (v >  32600.0f) v =  32600.0f;
+    if (v < -32600.0f) v = -32600.0f;
+    *dest_buf++ = (short)v;
+    dw--;
+  }
+
+  if(buf2)  {
+    dest_buf=(uint8_t*)buf2;
+    dw=len2;
+    while(dw) {
+      float v = *src_buf++;
+      v *= 32768.0f; // * vol;
+      if (v >  32600.0f) v =  32600.0f;
+      if (v < -32600.0f) v = -32600.0f;
+      *dest_buf++ = (short)v;
+    dw--;
+    }
+  }*/
+
+    if (buf1)
+      clamp(buf1, (float*)data_pointer, len1/2);
+    if (buf2)
+      clamp(buf2, (float*)data_pointer + len1/2, len2/2);
+
+  if (secondary_buffer->Unlock(buf1, len1, buf2, len2)==DS_OK)
+    return S_OK;
+  else
+    return S_FALSE;
+}
+
 
 }
 }

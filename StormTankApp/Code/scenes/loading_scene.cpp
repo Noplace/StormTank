@@ -130,14 +130,15 @@ DWORD WINAPI LoadingScene::LoadingThread(LPVOID lpThreadParameter) {
   
   
   
-  //self->win->midi_synth().LoadMidi(MoonLte3,MoonLte3_size);
+  self->win->midi_synth().LoadMidi(MoonLte3,MoonLte3_size);
   
-  self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\bach_gavotte.mid");
+  //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\bach_gavotte.mid");
   //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\BotW-Aftermath.mid");
   //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\MoonLte3.mid");
   //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\btmnjstg.mid");
   //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\minute_waltz.mid");
   //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\smb109.mid");
+  //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\liangzhu.mid");
   //self->win->midi_synth().LoadMidiFromFile("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Content\\liangzhu.mid");
   
   //self->win->player().LoadSong(&songdata,_4K_SONANT_ROWLEN_,_4K_SONANT_ENDPATTERN_,&self->loading_progress);

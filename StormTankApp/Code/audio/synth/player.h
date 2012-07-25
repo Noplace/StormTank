@@ -2,6 +2,7 @@
 #define AUDIO_SYNTH_PLAYER_H
 
 #include "../output/output.h"
+#include "synth.h"
 
 namespace audio {
 namespace synth {
@@ -13,13 +14,12 @@ class VisualAddon {
 
 class Player {
  public:
-  typedef void (Player::*MidiEventHandler)(midi::Event* event);
   enum State {
     kStateStopped=0,kStatePlaying=1,kStatePaused=2
   };
   double song_length_ms;
   Player() : state_(kStateStopped), initialized_(false),audio_interface_(nullptr),
-             visual_addon_(nullptr), player_event(nullptr),thread_handle(nullptr),thread_id(0) {
+             visual_addon_(nullptr), tick_event(nullptr),thread_handle(nullptr),thread_id(0) {
   }
   ~Player() {
     Deinitialize();
@@ -29,6 +29,9 @@ class Player {
   void Play();
   void Pause();
   void Stop();
+  void Tick() {
+    SetEvent(tick_event);
+  }
   double GetPlaybackSeconds();
   void set_audio_interface(output::Interface* audio_interface) { audio_interface_ = (output::Interface*)audio_interface; }
   void set_visual_addon(VisualAddon* visual_addon) { 
@@ -40,7 +43,6 @@ class Player {
     synth_ = synth;
     synth_->player_ = this;
   }
-  double thread_time_span;
  private:
   static void __stdcall callback_func(void *parm, float *buf, uint32_t len);
   static DWORD WINAPI PlayThread(LPVOID lpThreadParameter);
@@ -48,18 +50,13 @@ class Player {
   audio::output::Interface* audio_interface_;
   Synth* synth_;
   VisualAddon* visual_addon_;
-  short* output_buffer;
-  HANDLE thread_handle,player_event;
-  double song_pos_ms,song_counter_ms,output_buffer_length_ms_;
+  real_t* output_buffer;
+  HANDLE thread_handle,tick_event,exit_event;
+  double song_pos_ms,song_counter_ms;
+  uint32_t output_buffer_size_;
   DWORD thread_id;
   State state_;
-  int thread_msg;
   bool initialized_;
-  void SendThreadMessage(int msg) {
-    EnterCriticalSection(&cs);
-    thread_msg = msg;
-    LeaveCriticalSection(&cs);
-  }
   DWORD InstancePlayThread();
 };
 

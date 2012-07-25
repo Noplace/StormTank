@@ -1,5 +1,6 @@
-#include "../synth.h"
+#include "pad.h"
 #include <time.h>
+
 namespace audio {
 namespace synth {
 namespace instruments {

@@ -1,3 +1,9 @@
+#ifndef AUDIO_SYNTH_INSTRUMENTS_PERCUSSION_H
+#define AUDIO_SYNTH_INSTRUMENTS_PERCUSSION_H
+
+#include "../oscillators/square_oscillator.h"
+#include "instrument.h"
+
 namespace audio {
 namespace synth {
 namespace instruments {
@@ -50,3 +56,5 @@ class Percussion : public InstrumentProcessor {
 }
 }
 }
+
+#endif

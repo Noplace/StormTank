@@ -36,17 +36,16 @@ class DirectSound : public Interface {
   uint32_t GetBytesBuffered();
   void GetCursors(uint32_t& play, uint32_t& write);
   int Write(void* data_pointer, uint32_t size_bytes);
+  int BeginWrite(uint32_t& samples);
+  int EndWrite(void* data_pointer) ;  
   
-  void set_buffer_size(uint32_t buffer_size) { buffer_size_ = buffer_size; }
  protected:
   IDirectSound8* ds8;
   LPDIRECTSOUNDBUFFER primary_buffer;
   LPDIRECTSOUNDBUFFER secondary_buffer;
-  //uint8_t* audio_data;  
-  //uint32_t offset_;
- // uint32_t written_bytes;
-  uint32_t buffer_size_;
-  //uint32_t next_pos;
+  void *buf1, *buf2;
+  DWORD len1, len2;
+  uint32_t last_cursor_pos;
   DWORD last_write_cursor;
 };
 

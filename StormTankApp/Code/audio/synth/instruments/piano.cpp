@@ -1,7 +1,4 @@
-#include "../synth.h"
-
-
-
+#include "piano.h"
 
 namespace audio {
 namespace synth {
@@ -50,8 +47,8 @@ int Piano::Load() {
     adsr[i].set_sample_rate(sample_rate_);
     adsr[i].set_attack_amp(1.0f);
     adsr[i].set_sustain_amp(0.6f);
-    adsr[i].set_attack_time_ms(800.0f);
-    adsr[i].set_decay_time_ms(80.0f);
+    adsr[i].set_attack_time_ms(40.0f);
+    adsr[i].set_decay_time_ms(50.0f);
     adsr[i].set_release_time_ms(100.5f);
   }
 

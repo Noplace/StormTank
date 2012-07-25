@@ -1,6 +1,8 @@
 #ifndef AUDIO_SYNTH_PAD_SYNTH_H
 #define AUDIO_SYNTH_PAD_SYNTH_H
 
+#include "../base.h"
+
 namespace audio {
 namespace synth {
 

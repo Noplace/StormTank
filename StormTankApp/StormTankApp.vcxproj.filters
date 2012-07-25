@@ -81,9 +81,6 @@
     <ClCompile Include="Code\audio\synth\instruments\violin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\audio\output\dsio_cpp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\stormtankapp.h">
@@ -102,9 +99,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\ptg\generators\simplex_noise.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\audio\synth\synth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\scenes\scenes.h">
@@ -206,7 +200,7 @@
     <ClInclude Include="Code\audio\synth\instruments\violin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\audio\output\dsio.h">
+    <ClInclude Include="Code\audio\synth\synth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

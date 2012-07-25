@@ -11,7 +11,7 @@ class MainWindow;
 #include <VisualEssence/Code/ve.h>
 #include "ptg/pgt.h"
 #include "audio/output/output.h"
-#include "audio/synth/synth.h"
+#include "audio/synth/midi_synth.h"
 #include "gfx/font_draw.h"
 #include "gfx/spectrum_analyzer.h"
 #include "gfx/oscilloscope.h"

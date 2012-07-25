@@ -1,25 +1,42 @@
+#ifndef AUDIO_SYNTH_SYNTH_H
+#define AUDIO_SYNTH_SYNTH_H
+
 #include "base.h"
-#include "util.h"
-#include "adsr.h"
-#include "oscillators/oscillator.h"
-#include "oscillators/sine_oscillator.h"
-#include "oscillators/square_oscillator.h"
-#include "oscillators/triangle_oscillator.h"
-#include "oscillators/sawtooth_oscillator.h"
-#include "oscillators/exp_oscillator.h"
-#include "padsynth/pad_synth.h"
-#include "instruments/instrument.h"
-#include "instruments/osc_wave.h"
-#include "instruments/pad.h"
-#include "instruments/piano.h"
-#include "instruments/violin.h"
-#include "instruments/percussion.h"
-#include "instruments/blit.h"
-#include "filters/lowpass.h"
-#include "effects/delay.h"
-#include "channel.h"
-#include "midi_synth.h"
-#include "player.h"
+#include "synth.h"
+
+namespace audio {
+namespace synth {
+
+class Player;
+
+class Synth : public Component {
+ public:
+  struct {
+    real_t* main;
+    real_t* aux;
+    size_t main_size;
+    size_t aux_size;
+    //real_t* pre_effects;
+    //real_t* post_effects;
+  } buffers;
+  Player* player_;
+  Synth() : Component(),player_(nullptr) {
+
+  }
+  virtual ~Synth() {
+
+  }
+  virtual void Initialize() = 0;
+  virtual void Deinitialize() = 0;
+  virtual void Reset() = 0;
+  virtual void RenderSamplesStereo(uint32_t samples_count, real_t* data_out) = 0;
+ protected:
+};
+
+}
+}
+
+#endif
 
   /*
 double sgn(double d);

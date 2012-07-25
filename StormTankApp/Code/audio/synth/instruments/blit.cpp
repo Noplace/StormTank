@@ -1,4 +1,4 @@
-#include "../synth.h"
+#include "blit.h"
 
 namespace audio {
 namespace synth {

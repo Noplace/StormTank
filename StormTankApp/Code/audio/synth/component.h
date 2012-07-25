@@ -1,3 +1,6 @@
+#ifndef AUDIO_SYNTH_COMPONENT_H
+#define AUDIO_SYNTH_COMPONENT_H
+
 namespace audio {
 namespace synth {
 
@@ -16,3 +19,5 @@ class Component {
 
 }
 }
+
+#endif

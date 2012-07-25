@@ -1,3 +1,9 @@
+#ifndef AUDIO_SYNTH_INSTRUMENTS_INSTRUMENT_H
+#define AUDIO_SYNTH_INSTRUMENTS_INSTRUMENT_H
+
+#include "../base.h"
+#include "../adsr.h"
+
 namespace audio {
 namespace synth {
 namespace instruments {
@@ -35,3 +41,5 @@ class InstrumentProcessor : public Component {
 }
 }
 }
+
+#endif

@@ -1,3 +1,8 @@
+#ifndef AUDIO_SYNTH_INSTRUMENTS_VIOLIN_H
+#define AUDIO_SYNTH_INSTRUMENTS_VIOLIN_H
+
+#include "instrument.h"
+#include "pad.h"
 
 namespace audio {
 namespace synth {
@@ -31,3 +36,6 @@ class Violin : public Pad {
 }
 }
 }
+
+
+#endif

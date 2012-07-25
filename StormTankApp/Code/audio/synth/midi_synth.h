@@ -3,6 +3,14 @@
 
 #include <WinCore/io/io.h>
 #include "../midi/midi2.h"
+#include "base.h"
+#include "util.h"
+#include "filters/lowpass.h"
+#include "effects/delay.h"
+#include "channel.h"
+#include "instruments/percussion.h"
+#include "synth.h"
+#include "player.h"
 
 namespace audio {
 namespace synth {
@@ -13,32 +21,6 @@ enum Mode {
   kModeTest
 };
 
-class Player;
-
-class Synth : public Component {
- public:
-  struct {
-    real_t* main;
-    real_t* aux;
-    size_t main_size;
-    size_t aux_size;
-    //real_t* pre_effects;
-    //real_t* post_effects;
-  } buffers;
-  Player* player_;
-  Synth() : Component(),player_(nullptr) {
-
-  }
-  virtual ~Synth() {
-
-  }
-  virtual void Initialize() = 0;
-  virtual void Deinitialize() = 0;
-  virtual void Reset() = 0;
-  virtual void RenderSamplesReal(uint32_t samples_count, real_t* data_out) = 0;
-  virtual void RenderSamples(uint32_t samples_count, short* data_out) = 0;
- protected:
-};
 
 class MidiSynth : public Synth {
  public:
@@ -59,8 +41,7 @@ class MidiSynth : public Synth {
   void Deinitialize();
   void LoadMidiFromFile(const char* filename);
   void LoadMidi(uint8_t* data, size_t data_size);
-  void RenderSamplesReal(uint32_t samples_count, real_t* data_out);
-  void RenderSamples(uint32_t samples_count, short* data_out);
+  void RenderSamplesStereo(uint32_t samples_count, real_t* data_out);
   void Reset() {
     ResetTracks();
   }
@@ -118,9 +99,8 @@ class MidiSynth : public Synth {
     last_event = GetNextEvent();
     samples_to_next_event = 0;
   }
-  void GenerateIntoBufferReal(uint32_t samples_to_generate,real_t* data_out,uint32_t data_offset);
-  void GenerateIntoBuffer(uint32_t samples_to_generate,short* data_out,uint32_t data_offset);
-  void MixChannels(uint32_t samples_to_generate);
+  void GenerateIntoBufferStereo(uint32_t samples_to_generate, real_t* data_out, uint32_t& data_offset);
+  void MixChannelsStereo(uint32_t samples_to_generate);
   midi::Event* GetNextEvent();
   void HandleEvent(midi::Event* event);
   void MidiEventUnknown(midi::Event* event);

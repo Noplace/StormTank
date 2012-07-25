@@ -1,4 +1,4 @@
-#include "../synth.h"
+#include "percussion.h"
 #include "../filters/chebyshev_filter.h"
 
 audio::synth::filters::ChebyshevFilter filter;

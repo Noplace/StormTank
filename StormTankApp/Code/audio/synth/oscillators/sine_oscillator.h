@@ -1,3 +1,7 @@
+#ifndef AUDIO_SYNTH_OSCILLATORS_SINE_OSCILLATOR_H
+#define AUDIO_SYNTH_OSCILLATORS_SINE_OSCILLATOR_H
+
+#include "oscillator.h"
 
 namespace audio {
 namespace synth {
@@ -14,3 +18,5 @@ class SineOscillator : public Oscillator {
 }
 }
 }
+
+#endif

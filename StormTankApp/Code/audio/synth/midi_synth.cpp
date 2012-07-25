@@ -1,4 +1,11 @@
-#include "synth.h"
+#include "midi_synth.h"
+#include "instruments/instrument.h"
+#include "instruments/osc_wave.h"
+#include "instruments/pad.h"
+#include "instruments/piano.h"
+#include "instruments/violin.h"
+#include "instruments/percussion.h"
+#include "instruments/blit.h"
 
 //#define OUTPUT_EVENTS
 
@@ -77,7 +84,6 @@ void MidiSynth::Initialize() {
   
   instr[0] = new instruments::Piano();
   instr[2] = new instruments::OscWave(instruments::OscWave::Triangle);
-
 
   instr[40] = new instruments::Violin();
 
@@ -163,6 +169,8 @@ void MidiSynth::LoadMidiFromFile(const char* filename) {
 }
 
 void MidiSynth::LoadMidi(uint8_t* data, size_t data_size) {
+  if (mode_ == kModeTest)
+    return;
   player_->Stop();
   
   midi::MidiLoader midifile;
@@ -264,13 +272,13 @@ void MidiSynth::LoadMidi(uint8_t* data, size_t data_size) {
 }
 
 
-void MidiSynth::RenderSamplesReal(uint32_t samples_count, real_t* data_out) {
-	auto data_offset = 0;
+void MidiSynth::RenderSamplesStereo(uint32_t samples_count, real_t* data_out) {
+	uint32_t data_offset = 0;
   if (mode_ == kModeTest) {
     samples_to_next_event = samples_count;
 		auto samples_to_generate = samples_to_next_event;
 		if (samples_to_generate > 0) {
-      GenerateIntoBufferReal(samples_to_generate,data_out,data_offset);
+      GenerateIntoBufferStereo(samples_to_generate,data_out,data_offset);
 			data_offset += samples_to_generate * 2;
 			samples_count -= samples_to_generate;
 			samples_to_next_event -= samples_to_generate;
@@ -288,8 +296,7 @@ void MidiSynth::RenderSamplesReal(uint32_t samples_count, real_t* data_out) {
 			  /* generate samplesToNextEvent samples, process event and repeat */
 			  auto samples_to_generate = samples_to_next_event;
 			  if (samples_to_generate > 0) {
-          GenerateIntoBufferReal(samples_to_generate,data_out,data_offset);
-				  data_offset += samples_to_generate * 2;
+          GenerateIntoBufferStereo(samples_to_generate,data_out,data_offset);
 				  samples_count -= samples_to_generate;
 				  samples_to_next_event -= samples_to_generate;
           if (mode_ == kModeTest)
@@ -305,7 +312,7 @@ void MidiSynth::RenderSamplesReal(uint32_t samples_count, real_t* data_out) {
 		  } else {
 			  /* generate samples to end of buffer */
 			  if (samples_count > 0) {
-				  GenerateIntoBufferReal(samples_count,data_out,data_offset);
+				  GenerateIntoBufferStereo(samples_count,data_out,data_offset);
 				  samples_to_next_event -= samples_count;
 			  }
 			  break;
@@ -317,89 +324,24 @@ void MidiSynth::RenderSamplesReal(uint32_t samples_count, real_t* data_out) {
 }
 
 
-void MidiSynth::RenderSamples(uint32_t samples_count, short* data_out) {
-	auto data_offset = 0;
-  if (mode_ == kModeTest) {
-    samples_to_next_event = samples_count;
-		auto samples_to_generate = samples_to_next_event;
-		if (samples_to_generate > 0) {
-      GenerateIntoBuffer(samples_to_generate,data_out,data_offset);
-			data_offset += samples_to_generate * 2;
-			samples_count -= samples_to_generate;
-			samples_to_next_event -= samples_to_generate;
-      if (mode_ == kModeTest)
-        samples_to_next_event = 0xFFFFFFFF;
-		}
-    if (last_event != nullptr) {
-			HandleEvent(last_event);
-      memset(last_event,0,sizeof(midi::Event));
-    }
-    last_event = GetNextEvent();
-  } else if (mode_ == kModeSequencer) {
-    while (true) {
-		  if (samples_to_next_event != 0xFFFFFFFF && samples_to_next_event <= samples_count) {
-			  /* generate samplesToNextEvent samples, process event and repeat */
-			  auto samples_to_generate = samples_to_next_event;
-			  if (samples_to_generate > 0) {
-          GenerateIntoBuffer(samples_to_generate,data_out,data_offset);
-				  data_offset += samples_to_generate * 2;
-				  samples_count -= samples_to_generate;
-				  samples_to_next_event -= samples_to_generate;
-          if (mode_ == kModeTest)
-            samples_to_next_event = 0xFFFFFFFF;
-			  }
-        if (last_event != nullptr) {
-			    HandleEvent(last_event);
-          if (mode_ == kModeTest)
-            memset(last_event,0,sizeof(midi::Event));
-        }
-        last_event = GetNextEvent();
-
-		  } else {
-			  /* generate samples to end of buffer */
-			  if (samples_count > 0) {
-				  GenerateIntoBuffer(samples_count,data_out,data_offset);
-				  samples_to_next_event -= samples_count;
-			  }
-			  break;
-		  }
-	  }
-  }
-
-
-}
-
-void MidiSynth::GenerateIntoBufferReal(uint32_t samples_to_generate,real_t* data_out,uint32_t data_offset) {
-  MixChannels(samples_to_generate);
+void MidiSynth::GenerateIntoBufferStereo(uint32_t samples_to_generate, real_t* data_out, uint32_t& data_offset) {
+  MixChannelsStereo(samples_to_generate);
   //SendToAux
   //mix with aux
   //global post processing
   //memcpy(buffers.post_effects,buffers.pre_effects,samples_to_generate*2*sizeof(real_t));
-  //delay_unit.Process(buffers.main,buffers.main,samples_to_generate);
+  delay_unit.Process(buffers.main,buffers.main,samples_to_generate);
   for (uint32_t i=0;i<samples_to_generate<<1;i+=2) {
-    data_out[data_offset++] = min(buffers.main[i],1.0f);
-    data_out[data_offset++] = min(buffers.main[i+1],1.0f);
+    data_out[data_offset++] = buffers.main[i];
+    data_out[data_offset++] = buffers.main[i+1];
   }
 }
 
-void MidiSynth::GenerateIntoBuffer(uint32_t samples_to_generate,short* data_out,uint32_t data_offset) {
-  MixChannels(samples_to_generate);
-  //SendToAux
-  //mix with aux
-  //global post processing
-  //memcpy(buffers.post_effects,buffers.pre_effects,samples_to_generate*2*sizeof(real_t));
-  //delay_unit.Process(buffers.main,buffers.main,samples_to_generate);
-  for (uint32_t i=0;i<samples_to_generate<<1;i+=2) {
-    data_out[data_offset++] = short(32767.0f * min(buffers.main[i],1.0f));
-    data_out[data_offset++] = short(32767.0f * min(buffers.main[i+1],1.0f));;
-  }
-}
-
-void MidiSynth::MixChannels(uint32_t samples_to_generate) {
+void MidiSynth::MixChannelsStereo(uint32_t samples_to_generate) {
   
   //render and mix each chanel
   auto mainbufptr = buffers.main;
-  memset(mainbufptr,0,sizeof(real_t)*samples_to_generate*2);
+  //memset(mainbufptr,0,sizeof(real_t)*samples_to_generate*2);
   for (uint32_t j=0;j<kChannelCount;j+=4) { //mix all 16 channels
     channels[j+0]->Render(samples_to_generate);
     channels[j+1]->Render(samples_to_generate);
@@ -411,7 +353,7 @@ void MidiSynth::MixChannels(uint32_t samples_to_generate) {
     auto buf3 = channels[j+3]->buffer();
     
     for (uint32_t i=0;i<samples_to_generate<<1;++i) {
-      mainbufptr[i] += buf0[i]+buf1[i]+buf2[i]+buf3[i];
+      mainbufptr[i] = buf0[i]+buf1[i]+buf2[i]+buf3[i];
       ++i;
       mainbufptr[i] += buf0[i]+buf1[i]+buf2[i]+buf3[i];
     }

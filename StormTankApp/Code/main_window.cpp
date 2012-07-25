@@ -67,7 +67,7 @@ void MainWindow::Initialize() {
 
   audio_interface_ = new audio::output::DirectSound();
   audio_interface_->set_window_handle(handle());
-  audio_interface_->set_buffer_size(44100*3);
+  audio_interface_->set_buffer_size((44100/10)*4);
   audio_interface_->Initialize(44100,2,16);
 
 
@@ -119,6 +119,7 @@ void MainWindow::Step() {
       midi_event->track = 0;
       midi_event->deltaTime = 0;
       midi_synth_->EndPrepareNextEvent();
+      synth_player_->Tick();
       OutputDebugString("sent note on\n");
       key_state[key_maps[i]] = 1;
     } else if (key_down[key_maps[i]] == false && key_state[key_maps[i]] == 1) {
@@ -131,6 +132,7 @@ void MainWindow::Step() {
       midi_event->track = 0;
       midi_event->deltaTime = 0;
       midi_synth_->EndPrepareNextEvent();
+      synth_player_->Tick();
       OutputDebugString("sent note off\n");
       key_state[key_maps[i]] = 0;
     }

@@ -242,14 +242,12 @@ int IntroScene::Draw() {
     auto thrs   = (t / (60*60)) % 24;
     auto tdays   = (t / (60*60*24)) % 365;
     auto tyears   = 1970 + (t / (60*60*24*365));
-    uint32_t play,write;
-    win->audio_interface()->GetCursors(play,write);
-
-    sprintf_s(song_info,"play: %d write: %d\nTime: %d:%03d:%02d:%02d:%02d\nSong Time: %02d:%02d:%03d\nSound Thread Time: %f\nScene Thread Time: %f",
-      play,write,
+    extern float delay;
+    sprintf_s(song_info,"Delay: %f\nTime: %d:%03d:%02d:%02d:%02d\nSong Time: %02d:%02d:%03d\nScene Thread Time: %f",
+      delay,
       tyears,tdays,thrs,tmins,tsecs,
       uint32_t(mins),uint32_t(secs),uint32_t(ms),
-      win->player2().thread_time_span,main_time_span);
+      main_time_span);
     font.Draw(song_info,-1,DT_LEFT);
   }
 

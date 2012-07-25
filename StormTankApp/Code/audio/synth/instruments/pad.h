@@ -1,3 +1,8 @@
+#ifndef AUDIO_SYNTH_INSTRUMENTS_PAD_H
+#define AUDIO_SYNTH_INSTRUMENTS_PAD_H
+
+#include "instrument.h"
+#include "../padsynth/pad_synth.h"
 
 namespace audio {
 namespace synth {
@@ -42,3 +47,6 @@ class Pad : public InstrumentProcessor {
 }
 }
 }
+
+
+#endif

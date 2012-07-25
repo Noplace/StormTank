@@ -1,3 +1,8 @@
+#ifndef AUDIO_SYNTH_INSTRUMENTS_BLIT_H
+#define AUDIO_SYNTH_INSTRUMENTS_BLIT_H
+
+#include "instrument.h"
+
 namespace audio {
 namespace synth {
 namespace instruments {
@@ -40,3 +45,5 @@ class BlitWave : public InstrumentProcessor {
 }
 }
 }
+
+#endif

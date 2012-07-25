@@ -1,3 +1,8 @@
+#ifndef AUDIO_SYNTH_CHANNEL_H
+#define AUDIO_SYNTH_CHANNEL_H
+
+#include "instruments/instrument.h"
+
 namespace audio {
 namespace synth {
 
@@ -116,3 +121,5 @@ class Channel : public Component {
 
 }
 }
+
+#endif

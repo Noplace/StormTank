@@ -1,3 +1,6 @@
+#ifndef AUDIO_SYNTH_ADSR_H
+#define AUDIO_SYNTH_ADSR_H
+
 namespace audio {
 namespace synth {
 
@@ -96,3 +99,5 @@ class ADSR : public Component {
 
 }
 }
+
+#endif
