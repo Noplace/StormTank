@@ -104,7 +104,7 @@ int LoadingScene::Update(double dt) {
 }
 
 int LoadingScene::Draw() {
-
+  gfx->ClearTarget();
   //uint32_t offsets[1] = {0};
   //uint32_t strides[1] = {sizeof(graphics::shape::Vertex)};
   //gfx->SetVertexBuffers(0,1,&vb,strides,offsets);

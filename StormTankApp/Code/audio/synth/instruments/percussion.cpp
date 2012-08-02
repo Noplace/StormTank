@@ -1,3 +1,21 @@
+/*****************************************************************************************************************
+* Copyright (c) 2012 Khalid Ali Al-Kooheji                                                                       *
+*                                                                                                                *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and              *
+* associated documentation files (the "Software"), to deal in the Software without restriction, including        *
+* without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell        *
+* copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the       *
+* following conditions:                                                                                          *
+*                                                                                                                *
+* The above copyright notice and this permission notice shall be included in all copies or substantial           *
+* portions of the Software.                                                                                      *
+*                                                                                                                *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT          *
+* LIMITED TO THE WARRANTIES OF MERCHANTABILITY, * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.          *
+* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, * DAMAGES OR OTHER LIABILITY,      *
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
+*****************************************************************************************************************/
 #include "percussion.h"
 #include "../filters/chebyshev_filter.h"
 
@@ -8,6 +26,69 @@ namespace audio {
 namespace synth {
 namespace instruments {
 
+static float getFrequency(float fFrequency, float fMultiplier,
+unsigned char nValue, unsigned char nLimit)
+{
+	if(nValue > nLimit)
+	{
+		nValue -= nLimit;
+	}
+	else
+	{
+		nValue = nLimit - nValue;
+		fMultiplier = 1.0f / fMultiplier;
+	}
+ 
+	do
+		fFrequency *= fMultiplier;
+	while(--nValue);
+ 
+	return fFrequency;
+}
+
+static float getnotefreq(unsigned char n) {
+    return getFrequency(0.00390625f, 1.059463094f, n, 128);
+}
+
+static float osc_sin(float value) {
+    return sin(value * 2.0f * 3.141592f);
+}
+
+class Filter {
+ public:
+  float low,band,q,freq;
+  void Init(float freq) {
+    this->freq = freq;
+    float res = 240.0f;
+      q = (float)res / 255.0f;
+                        low = band = 0.0f;
+  }
+
+  real_t Tick(real_t rsample) {
+    //5900.0f;//instrument->fx_freq;
+        
+          real_t f = 1.5f * sin(freq * 3.141592f / 44100.0f);
+          low += f * band;
+          float high = q * (rsample - band) - low;
+          band += f * high;
+          /*switch(instrument->fx_filter) {
+              case 1: // Hipass
+                  rsample = high;
+                  break;
+              case 2: // Lopass
+                  rsample = low;
+                  break;
+              case 3: // Bandpass
+                  rsample = band;
+                  break;
+              case 4: // Notch
+                  rsample = low + high;
+          }*/
+          return low;
+  }
+
+}bassdrum2,snare;
+
 Percussion::PercussionPieceTick Percussion::ticks[Polyphony] = {
   &Percussion::EmptyTick,&Percussion::EmptyTick,&Percussion::EmptyTick,&Percussion::EmptyTick,
   &Percussion::EmptyTick,&Percussion::EmptyTick,&Percussion::EmptyTick,&Percussion::EmptyTick,
@@ -17,10 +98,12 @@ int Percussion::Load() {
   if (loaded_ == true)
     return S_FALSE;
   inv_sr = 1 / real_t(sample_rate_);
-  bassdrum.set_sample_rate(sample_rate_);
+  bassdrum_osc1.set_sample_rate(sample_rate_);
+  bassdrum_osc2.set_sample_rate(sample_rate_);
   hihat_osc.set_sample_rate(sample_rate_); 
 
-
+  snare.Init(11024.0f);
+  bassdrum2.Init(5900.0f);
   //default adsr, should be instrument specific
   for (int i=0;i<Polyphony;++i) {
     adsr[i].set_sample_rate(sample_rate_);
@@ -28,10 +111,10 @@ int Percussion::Load() {
     adsr[i].set_sustain_amp(0.6f);
     adsr[i].set_attack_time_ms(8.0f);
     adsr[i].set_decay_time_ms(8.0f);
-    adsr[i].set_release_time_ms(100.5f);
+    adsr[i].set_release_time_ms(10.5f);
   }
 
-  filter.Initialize(0.2,0,0,4);
+  filter.Initialize(0.2f,0,0,4);
 
   loaded_ = true;
   return S_OK;
@@ -53,14 +136,27 @@ real_t Percussion::Tick(InstrumentData* data, int note_index) {
   //result = (this->*(ticks[note_index]))((PercussionData*)data,note_index);
   if (adsr[note_index].stage() != 0 && data->note_data_array[note_index].note == 46) {
     real_t value = (real_t)((randseed *= 0x15a4e35) % 255) / 255.0f;
-    result = 0.5f*sin(value * 2.0f * XM_PI);
-    result *= adsr[note_index].Tick();
+    result = sin(value * 2.0f * XM_PI);
+    result *= 0.2f*adsr[note_index].Tick();
   }
 
-  if (adsr[note_index].stage() != 0 && data->note_data_array[note_index].note == 35) {
-    result = 0.6f*bassdrum.Tick(table.bassdrum_phase,table.bassdrum_inc);
-    result = filter.Tick(result);
-    result *= adsr[note_index].Tick();
+  if (adsr[note_index].stage() != 0 && 
+    (data->note_data_array[note_index].note == 35 || data->note_data_array[note_index].note == 36)) {
+    real_t e = adsr[note_index].Tick();
+    real_t f = 180;//getnotefreq(123);
+    f *= e*e;
+    table.bassdrum_inc1 = bassdrum_osc1.get_increment(f);
+    table.bassdrum_inc2 = bassdrum_osc1.get_increment(f);
+    result += bassdrum_osc1.Tick(table.bassdrum_phase1,table.bassdrum_inc1);
+    //result += bassdrum_osc2.Tick(table.bassdrum_phase2,table.bassdrum_inc2);
+    real_t value = (real_t)((randseed *= 0x15a4e35) % 255) / 255.0f;
+   
+
+    result *= e;
+
+    result = bassdrum2.Tick(result);//
+    //result = filter.Tick(result);
+    
   }
 
   //hihat
@@ -84,14 +180,19 @@ real_t Percussion::Tick(InstrumentData* data, int note_index) {
   return result;
 }
 
+int Percussion::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
+  auto cdata = (PercussionData*)data;
+  cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
+  return S_OK;
+}
+
 int Percussion::NoteOn(InstrumentData* data, int note_index) {
   auto cdata = (PercussionData*)data;
   NoteData* nd = &cdata->note_data_array[note_index];
 
-  if (nd->note == 35 && nd->on == true) {
+  if ((nd->note == 35||nd->note == 36) && nd->on == true) {
     cdata->table.bassdrum_amp = 1.0;
   }
-
   
   if (nd->note == 42 && nd->on == true) {
     cdata->table.highhat_closed = true;
@@ -103,18 +204,14 @@ int Percussion::NoteOn(InstrumentData* data, int note_index) {
     cdata->table.highhat_amp = 1.0;
   }
  
-
-  cdata->table.bassdrum_phase = 0;
-  cdata->table.bassdrum_inc = bassdrum.get_increment(40.0f);
-
   cdata->table.hihat_phase[0] = 0;
-  cdata->table.hihat_inc[0] = bassdrum.get_increment(460.0f);
+  cdata->table.hihat_inc[0] = hihat_osc.get_increment(460.0f);
   cdata->table.hihat_phase[1] = 0;
-  cdata->table.hihat_inc[1] = bassdrum.get_increment(1840.0f);
+  cdata->table.hihat_inc[1] = hihat_osc.get_increment(1840.0f);
   cdata->table.hihat_phase[2] = 0;
-  cdata->table.hihat_inc[2] = bassdrum.get_increment(5404.0f);
+  cdata->table.hihat_inc[2] = hihat_osc.get_increment(5404.0f);
   cdata->table.hihat_phase[3] = 0;
-  cdata->table.hihat_inc[3] = bassdrum.get_increment(7220.0f);
+  cdata->table.hihat_inc[3] = hihat_osc.get_increment(7220.0f);
 
   adsr[note_index].NoteOn(nd->velocity);
   return S_OK;
@@ -132,7 +229,7 @@ int Percussion::NoteOff(InstrumentData* data, int note_index) {
     cdata->table.highhat_closed = false;
     cdata->table.highhat_amp = 0;
   }
-  if (nd->note == 35 && nd->on == false) {
+  if ((nd->note == 35||nd->note == 36) && nd->on == false) {
     cdata->table.bassdrum_amp = 0;
   }
  

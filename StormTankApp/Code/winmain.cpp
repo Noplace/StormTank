@@ -174,6 +174,9 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
   //test_padsynth();
   //fft_test();
   //samples_test();
+  //void test_karplusStrong();
+  //test_karplusStrong();
+
   StormTankApp app(hInstance,lpCmdLine,nShowCmd);
   //AddThreeAndPrint();
   return app.Run();

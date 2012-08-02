@@ -135,6 +135,45 @@ void DirectSound::GetCursors(uint32_t& play, uint32_t& write) {
   secondary_buffer->GetCurrentPosition((LPDWORD)&play,(LPDWORD)&write);
 }
 
+
+int DirectSound::Write(void* data_pointer, uint32_t size_bytes) {
+  LPVOID buf_ptr1, buf_ptr2;
+  HRESULT hr;
+  DWORD play_cursor,write_cursor;
+  DWORD buf_size1,buf_size2; 
+
+  for (;;) {
+    hr = secondary_buffer->GetCurrentPosition(&play_cursor,&write_cursor);
+    if (hr == S_OK)
+    {
+      hr = secondary_buffer->Lock(write_cursor,size_bytes,&buf_ptr1,&buf_size1,&buf_ptr2,&buf_size2,0);
+    }
+
+    if (hr == S_OK)
+      break;
+    else if (hr == DSERR_BUFFERLOST)
+      secondary_buffer->Restore();
+    else
+      return S_FALSE;
+  }  
+
+  auto dest_buf=(uint8_t*)buf_ptr1;
+  auto len=buf_size1;
+
+  auto src_buf=(uint8_t*)data_pointer;
+  while(len) {*dest_buf++=*src_buf++;len--;}
+
+  if(buf_ptr2)  {
+    dest_buf=(uint8_t*)buf_ptr2;
+    len=buf_size2;
+    while(len) {*dest_buf++=*src_buf++;len--;}
+  }
+
+  secondary_buffer->Unlock(buf_ptr1,buf_size1,buf_ptr2,buf_size2);
+  return S_OK;
+}
+
+/*
 int DirectSound::Write(void* data_pointer, uint32_t size_bytes) {
   HRESULT hr;
   DWORD buffer_status;
@@ -180,9 +219,9 @@ int DirectSound::Write(void* data_pointer, uint32_t size_bytes) {
   if (last_write_cursor >= buffer_size_) 
     last_write_cursor -= buffer_size_;
   last_write_cursor = play_cursor;*/
-
+/*
   return S_OK;
-}
+}*/
 
 
 int DirectSound::BeginWrite(uint32_t& samples) {

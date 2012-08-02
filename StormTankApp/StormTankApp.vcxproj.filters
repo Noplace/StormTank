@@ -81,6 +81,12 @@
     <ClCompile Include="Code\audio\synth\instruments\violin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Code\audio\synth\instruments\sonant_program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\stormtankapp.h">
@@ -129,9 +135,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\synth\instruments\instrument.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\audio\synth\oscillators\oscillator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\synth\oscillators\triangle_oscillator.h">
@@ -201,6 +204,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\synth\synth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\effects\effect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\instruments\sonant_program.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\wavetable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\oscillators\oscillator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\instruments\karplusstrong.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

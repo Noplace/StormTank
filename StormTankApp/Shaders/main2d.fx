@@ -3,7 +3,12 @@ matrix world;
 
 float spec_pow[128];
 
-sampler2D tex1 : register( s0 );
+//sampler2D tex1 : register( s0 );
+texture tex1;
+sampler s0: register(s0) = sampler_state  {
+    Texture = (tex1);
+};
+
 SamplerState sampler1
 {
 
@@ -86,7 +91,7 @@ PS_INPUT OscilloscopeVS( VS_INPUT input )
 float4 PS( PS_INPUT input,uniform bool tex_enabled) : SV_Target
 {
 	if (tex_enabled == true) {
-		return input.color * tex2D(tex1,input.uv);
+		return input.color * tex2D(s0,input.uv);
 	}
 	else
 	{
@@ -102,6 +107,76 @@ float4 PS( PS_INPUT input,uniform bool tex_enabled) : SV_Target
 
 }
 
+float pixelWidth = 0.0015625;
+float pw = 0.0015625;
+float ph = 0.00208333333333333333333333333333;
+float PixelKernel[13] =
+{
+    -6,
+    -5,
+    -4,
+    -3,
+    -2,
+    -1,
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+};
+static const float BlurWeights[13] = 
+{
+    0.002216,
+    0.008764,
+    0.026995,
+    0.064759,
+    0.120985,
+    0.176033,
+    0.199471,
+    0.176033,
+    0.120985,
+    0.064759,
+    0.026995,
+    0.008764,
+    0.002216,
+};
+
+
+float4 PSBlur( PS_INPUT input) : SV_Target
+{
+	
+	float4 Color = 0;
+	float2 Samp = input.uv;
+	Color += tex2D(s0, Samp);
+	Color += tex2D(s0, float2(input.uv.x-pw,input.uv.y-ph))*0.4;
+	Color += tex2D(s0, float2(input.uv.x-pw,input.uv.y+ph))*0.3;
+	Color += tex2D(s0, float2(input.uv.x+pw,input.uv.y-ph))*0.2;
+	Color += tex2D(s0, float2(input.uv.x+pw,input.uv.y+ph))*0.1;
+
+	Color /= 4;
+	Color *= 0.88;
+  /*float4 Color = 0;
+  float2 Samp = input.uv;
+
+    for (int i = 0; i < 13; i++) {
+        Samp.x = input.uv.x + PixelKernel[i] * (pixelWidth/1.5);
+        Color += tex2D(s0, Samp.xy) * BlurWeights[i];
+    }
+   
+   for (int i = 0; i < 13; i++) {
+        Samp.y = input.uv.y + PixelKernel[i] * pixelWidth;
+        Color += tex2D(s0, Samp.xy) * BlurWeights[i];
+   }
+
+   Color.rgb *= round(Color.rgb)/1.25;
+   Color.rgb *= (Color.r + Color.g + Color.b)/3;
+   Color *= 0.70;
+   */
+    return Color;
+
+}
 
 
 technique t1
@@ -132,5 +207,12 @@ technique t1
         //SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetVertexShader( CompileShader( vs_3_0, OscilloscopeVS() ) );
         SetPixelShader( CompileShader( ps_3_0, PS(false) ) );
+    }
+
+    pass blur
+    {
+        //SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
+		SetVertexShader( CompileShader( vs_3_0, VS() ) );
+        SetPixelShader( CompileShader( ps_3_0, PSBlur() ) );
     }
 }

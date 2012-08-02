@@ -1,40 +1,40 @@
+/*****************************************************************************************************************
+* Copyright (c) 2012 Khalid Ali Al-Kooheji                                                                       *
+*                                                                                                                *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and              *
+* associated documentation files (the "Software"), to deal in the Software without restriction, including        *
+* without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell        *
+* copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the       *
+* following conditions:                                                                                          *
+*                                                                                                                *
+* The above copyright notice and this permission notice shall be included in all copies or substantial           *
+* portions of the Software.                                                                                      *
+*                                                                                                                *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT          *
+* LIMITED TO THE WARRANTIES OF MERCHANTABILITY, * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.          *
+* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, * DAMAGES OR OTHER LIABILITY,      *
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
+*****************************************************************************************************************/
 #ifndef AUDIO_SYNTH_OSCILLATORS_OSCILLATOR_H
 #define AUDIO_SYNTH_OSCILLATORS_OSCILLATOR_H
 
-#include "../base.h"
-
-#define kIndex 8
-#define kIndexRange (1<<kIndex)
-#define kPrecision 24
-#define kPrecisionMask 0xFFFFFF
-#define kPrecisionRange 16777216.0f //(double)(1<<kPrecision);
-#define k1Div24lowerBits (1.0f/(kPrecisionRange))
+#include "../wavetable.h"
 
 namespace audio {
 namespace synth {
 namespace oscillators {
 
-class Oscillator : public Component {
+class Oscillator : public Wavetable<> {
  public:
-  Oscillator() : Component() {
+  Oscillator() : Wavetable() {
+  }
+
+  virtual ~Oscillator() {
 
   }
-  virtual ~Oscillator() {
-  }
-  virtual real_t Tick(uint32_t& phase,uint32_t inc) {
-    // the 8 MSB are the index in the table in the range 0-255 
-    int i = phase >> kPrecision; 
-    // and the kPrecision LSB are the fractionnal part
-    real_t frac = (phase & kPrecisionMask) * k1Div24lowerBits;
-    // increment the phase for the next tick
-    phase += inc; // the phase overflow itself
-    return (table[i]*(1.0f-frac) + table[i+1]*frac); // linear interpolation
-  }
-  virtual uint32_t get_increment(real_t frequency) {
-    return (uint32_t)((256.0f * frequency / sample_rate_) * kPrecisionRange);
-  }
- protected:
-  real_t* table;
+
+  
 };
 
 }

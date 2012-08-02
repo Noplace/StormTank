@@ -16,24 +16,59 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
 *****************************************************************************************************************/
-#ifndef AUDIO_SYNTH_OSCILLATORS_EXP_OSCILLATOR_H
-#define AUDIO_SYNTH_OSCILLATORS_EXP_OSCILLATOR_H
+#ifndef AUDIO_SYNTH_WAVETABLE_H
+#define AUDIO_SYNTH_WAVETABLE_H
 
-#include "oscillator.h"
+#include "../base.h"
+
+//#define kIndex 8
+//#define kIndexRange (1<<kIndex)
+//#define kPrecision 24
+//#define kPrecisionMask 0xFFFFFF
+//#define kPrecisionRange 16777216.0f //(double)(1<<kPrecision);
+//#define k1Div24lowerBits (1.0f/(kPrecisionRange))
 
 namespace audio {
 namespace synth {
-namespace oscillators {
 
-class ExpOscillator : public Oscillator {
+template<int kIndex=8,int kPrecision=24>
+class Wavetable : public Component {
  public:
-  ExpOscillator();
-  ~ExpOscillator();
- private:
+  const int kPrecisionMask;
+  const int kIndexRange;
+  const real_t kPrecisionRange;
+  const real_t kPrecisionRangeInv;
 
+  Wavetable() : Component(),
+    kPrecisionMask((1<<kPrecision)-1),
+    kIndexRange(1<<kIndex),
+    kPrecisionRange((real_t)(1<<kPrecision)),
+    kPrecisionRangeInv(1.0f/(kPrecisionRange)){
+   //kPrecisionMask = ((1<<kPrecision)-1);
+   //kIndexRange = (1<<kIndex);
+   //kPrecisionRange = (real_t)(1<<kPrecision);
+  }
+
+  virtual ~Wavetable() {
+
+  }
+
+  virtual real_t Tick(uint32_t& phase,uint32_t inc) {
+    // the 8 MSB are the index in the table in the range 0-255 
+    int i = phase >> kPrecision; 
+    // and the kPrecision LSB are the fractionnal part
+    real_t frac = (phase & kPrecisionMask) * kPrecisionRangeInv;
+    // increment the phase for the next tick
+    phase += inc; // the phase overflow itself
+    return (table[i]*(1.0f-frac) + table[i+1]*frac); // linear interpolation
+  }
+  virtual uint32_t get_increment(real_t frequency) {
+    return (uint32_t)((kIndexRange * frequency / sample_rate_) * kPrecisionRange);
+  }
+ protected:
+  real_t* table;
 };
 
-}
 }
 }
 

@@ -1,29 +1,27 @@
+/*****************************************************************************************************************
+* Copyright (c) 2012 Khalid Ali Al-Kooheji                                                                       *
+*                                                                                                                *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and              *
+* associated documentation files (the "Software"), to deal in the Software without restriction, including        *
+* without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell        *
+* copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the       *
+* following conditions:                                                                                          *
+*                                                                                                                *
+* The above copyright notice and this permission notice shall be included in all copies or substantial           *
+* portions of the Software.                                                                                      *
+*                                                                                                                *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT          *
+* LIMITED TO THE WARRANTIES OF MERCHANTABILITY, * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.          *
+* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, * DAMAGES OR OTHER LIABILITY,      *
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
+*****************************************************************************************************************/
 #include "piano.h"
 
 namespace audio {
 namespace synth {
 namespace instruments {
 
-
-class LowPassFilter : public Component {
- public:  
-  LowPassFilter() {
-    x1=x2=y1=y2=0;
-  }
-  real_t Tick(real_t x,real_t freq) {
-    real_t fc = (freq*0.5f)/(44100.0f*0.5f);
-    real_t x_ = exp(-2*XM_PI*fc);
-    a0 = 1 - x_;
-    b1 = x_;
-
-    real_t y = a0*x+b1*y1;
-    y1 = y;
-    return y;
-  }
-  real_t a0,b1;
-  real_t x1,x2,y1,y2;
-
-};
 
 Piano::Piano() : Pad() {
  
@@ -52,7 +50,8 @@ int Piano::Load() {
     adsr[i].set_release_time_ms(100.5f);
   }
 
-
+  //moog.set_sample_rate(sample_rate_);
+  //moog.Initialize();
   //lowpass.set_sample_rate(sample_rate_);
   //lowpass.Initialize(0.1,0,0,4);
   return hr;
@@ -88,14 +87,17 @@ real_t Piano::Tick(InstrumentData* data, int note_index) {
   return result;
 }
 
-
-int Piano::NoteOn(InstrumentData* data, int note_index) {
+int Piano::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
   auto cdata = (PianoData*)data;
-
+  cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
   cdata->piano_table[note_index].inc1 = osc1.get_increment(cdata->note_data_array[note_index].freq);
   cdata->piano_table[note_index].inc2 = osc2.get_increment(cdata->note_data_array[note_index].freq*1.5f);
   cdata->piano_table[note_index].inc3 = osc3.get_increment(cdata->note_data_array[note_index].freq*2.0f);
   cdata->piano_table[note_index].inc4 = osc4.get_increment(cdata->note_data_array[note_index].freq*2.5f);
+  return S_OK;
+}
+
+int Piano::NoteOn(InstrumentData* data, int note_index) {
   Pad::NoteOn(data,note_index);
   return S_OK;
 }

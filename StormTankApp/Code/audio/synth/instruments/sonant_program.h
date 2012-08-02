@@ -16,58 +16,94 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
 *****************************************************************************************************************/
-#ifndef AUDIO_SYNTH_INSTRUMENTS_PIANO_H
-#define AUDIO_SYNTH_INSTRUMENTS_PIANO_H
+#ifndef AUDIO_SYNTH_INSTRUMENTS_SONANT_PROGRAM_H
+#define AUDIO_SYNTH_INSTRUMENTS_SONANT_PROGRAM_H
 
-#include "../oscillators/sine_oscillator.h"
-#include "../oscillators/triangle_oscillator.h"
-#include "../oscillators/sawtooth_oscillator.h"
 #include "instrument.h"
-#include "pad.h"
 
 namespace audio {
 namespace synth {
 namespace instruments {
 
-class PianoData : public PadData {
+
+
+class SonantProgramData : public InstrumentData {
  public:
   struct {
-     uint32_t phase1,inc1;
-     uint32_t phase2,inc2;
-     uint32_t phase3,inc3;
-     uint32_t phase4,inc4;
-  } piano_table[Polyphony];
-  PianoData() : PadData() {
-    memset(piano_table,0,sizeof(piano_table));
+    unsigned int attack;
+    unsigned int sustain;
+    unsigned int release;
+    double c1,c2;
+
+    float q;
+    float low,band;
+
+    unsigned int i,icount,currentpos;
+  } table[Polyphony];
+  SonantProgramData() : InstrumentData() {
+    memset(table,0,sizeof(table));
   }
 };
 
-class Piano : public Pad {
+class SonantProgram : public InstrumentProcessor {
  public:
-  Piano();
-  virtual ~Piano() {
-    Unload();
+  struct Data {
+    // Oscillator 1
+    unsigned char   osc1_oct;       // Octave knob
+    unsigned char   osc1_det;       // Detune knob
+    unsigned char   osc1_detune;    // Actual detune knob
+    unsigned char   osc1_xenv;      // Multiply freq by envelope
+    unsigned char   osc1_vol;       // Volume knob
+    unsigned char   osc1_waveform;  // Wave form
+    // Oscillator 2
+    unsigned char   osc2_oct;       // Octave knob
+    unsigned char   osc2_det;       // Detune knob
+    unsigned char   osc2_detune;    // Actual detune knob
+    unsigned char   osc2_xenv;      // Multiply freq by envelope
+    unsigned char   osc2_vol;       // Volume knob
+    unsigned char   osc2_waveform;  // Wave form
+    // Noise oscillator
+    unsigned char   noise_fader;    // Amount of noise to add
+    // Envelope
+    unsigned int    env_attack;     // Attack
+    unsigned int    env_sustain;    // Sustain
+    unsigned int    env_release;    // Release
+    unsigned char   env_master;     // Master volume knob
+    // Effects
+    unsigned char   fx_filter;      // Hi/lo/bandpass or notch toggle
+            float   fx_freq;        // FX Frequency
+    unsigned char   fx_resonance;   // FX Resonance
+    unsigned char   fx_delay_time;  // Delay time
+    unsigned char   fx_delay_amt;   // Delay amount
+    unsigned char   fx_pan_freq;    // Panning frequency
+    unsigned char   fx_pan_amt;     // Panning amount
+    // LFO
+    unsigned char   lfo_osc1_freq;  // Modify osc1 freq (FM) toggle
+    unsigned char   lfo_fx_freq;    // Modify fx freq toggle
+    unsigned char   lfo_freq;       // LFO freq
+    unsigned char   lfo_amt;        // LFO amount
+    unsigned char   lfo_waveform;   // LFO waveform
+  };
+
+  SonantProgram();
+  virtual ~SonantProgram();
+
+  InstrumentData* NewInstrumentData() {
+    return new SonantProgramData();
   }
   int Load();
   int Unload();
-  InstrumentData* NewInstrumentData() {
-    return new PianoData();
-  }
   real_t Tick(InstrumentData* data, int note_index);
+  void Update(InstrumentData* data, int note_index);
   int SetFrequency(real_t freq, InstrumentData* data, int note_index);
   int NoteOn(InstrumentData* data, int note_index);
   int NoteOff(InstrumentData* data, int note_index);
- protected:
-  oscillators::SineOscillator osc1;
-  oscillators::SineOscillator osc2;
-  oscillators::SawtoothOscillator osc3;
-  oscillators::TriangleOscillator osc4;
-  virtual void CalculateHarmonics(real_t freq);
+
+  Data data;
 };
 
 }
 }
 }
-
 
 #endif

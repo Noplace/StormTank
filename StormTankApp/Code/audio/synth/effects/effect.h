@@ -16,21 +16,18 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
 *****************************************************************************************************************/
-#ifndef AUDIO_SYNTH_OSCILLATORS_EXP_OSCILLATOR_H
-#define AUDIO_SYNTH_OSCILLATORS_EXP_OSCILLATOR_H
+#ifndef AUDIO_SYNTH_EFFECTS_EFFECT_H
+#define AUDIO_SYNTH_EFFECTS_EFFECT_H
 
-#include "oscillator.h"
+#include "effect.h"
 
 namespace audio {
 namespace synth {
-namespace oscillators {
+namespace effects {
 
-class ExpOscillator : public Oscillator {
+class Effect : public Component {
  public:
-  ExpOscillator();
-  ~ExpOscillator();
- private:
-
+  virtual void ProcessStereo(real_t* output_buffer, real_t* input_buffer, uint32_t count) = 0;
 };
 
 }

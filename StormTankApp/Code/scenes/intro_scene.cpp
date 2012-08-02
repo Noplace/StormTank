@@ -4,15 +4,32 @@
 pgt::generators::SimplexNoise sn;
 XMCOLOR* tex_data0;
 XMMATRIX world_mat;
-
-
 double main_time_span;
+
+
+graphics::Texture render_texture;
+graphics::ResourceView render_surface;
+LPDIRECT3DSURFACE9 pBackBuffer = NULL;
 
 int IntroScene::Initialize(MainWindow* win) {
   graphics::Scene::Initialize(win->gfx());
   BaseScene::Initialize(win);
   gfx = (graphics::ContextD3D9*)context_;
+  
+  //gfx->CreateTexture(640,480,0,0,render_texture);
+  gfx->device()->CreateTexture(640,
+                                 480,
+                                 1,
+                                 D3DUSAGE_RENDERTARGET,
+                                 D3DFMT_A8R8G8B8,
+                                 D3DPOOL_DEFAULT,
+                                 (IDirect3DTexture9**)&render_texture.data_pointer,
+                                 NULL);
 
+
+  gfx->CreateResourceView(render_texture,render_surface);
+  
+  gfx->device()->GetRenderTarget(0,&pBackBuffer);
 
   camera_.Initialize(gfx);
   camera_.Ortho2D(0,0,640,480);
@@ -25,7 +42,7 @@ int IntroScene::Initialize(MainWindow* win) {
 	gfx->device()->SetRenderState(D3DRS_ZENABLE,  D3DZB_TRUE );
 	gfx->device()->SetRenderState(D3DRS_LIGHTING, 0 );
 	gfx->device()->SetRenderState(D3DRS_ALPHABLENDENABLE,1);
-
+  
 	gfx->device()->SetTextureStageState(0,D3DTSS_COLORARG1, D3DTA_TEXTURE );
 	gfx->device()->SetTextureStageState(0,D3DTSS_COLORARG2, D3DTA_DIFFUSE );  
 	gfx->device()->SetTextureStageState(0,D3DTSS_COLOROP, D3DTOP_MODULATE );
@@ -82,7 +99,7 @@ int IntroScene::Initialize(MainWindow* win) {
       gfx->CreateEffectInterface((uint8_t*)data,size,(void**)&effect);
     }
 
-    delete []data;
+    core::io::DestroyFileBuffer(&data);
   }
   arc1.Initialize(gfx);
   arc1.SetTopLeft(200,200);
@@ -99,9 +116,9 @@ int IntroScene::Initialize(MainWindow* win) {
   {
     static graphics::shape::Vertex v[8] = {
       graphics::shape::Vertex(XMFLOAT3(0,0,1),XMFLOAT2(0,0),XMCOLOR(1,1,1,1),0),
-      graphics::shape::Vertex(XMFLOAT3(256,0,1),XMFLOAT2(1,0),XMCOLOR(1,1,1,1),0),
-      graphics::shape::Vertex(XMFLOAT3(0,256,1),XMFLOAT2(0,1),XMCOLOR(1,1,1,1),0),
-      graphics::shape::Vertex(XMFLOAT3(256,256,1),XMFLOAT2(1,1),XMCOLOR(1,1,1,1),0),
+      graphics::shape::Vertex(XMFLOAT3(640,0,1),XMFLOAT2(1,0),XMCOLOR(1,1,1,1),0),
+      graphics::shape::Vertex(XMFLOAT3(0,480,1),XMFLOAT2(0,1),XMCOLOR(1,1,1,1),0),
+      graphics::shape::Vertex(XMFLOAT3(640,480,1),XMFLOAT2(1,1),XMCOLOR(1,1,1,1),0),
 
       graphics::shape::Vertex(XMFLOAT3(200+0,0,0),XMFLOAT2(0,0),XMCOLOR(1,1,1,0),0),
       graphics::shape::Vertex(XMFLOAT3(200+100,0,0),XMFLOAT2(0,0),XMCOLOR(1,1,0,0),0),
@@ -196,26 +213,14 @@ int IntroScene::Update(double dt) {
 }
 
 int IntroScene::Draw() {
+  UINT passes;
+  effect->Begin(&passes,0);
   //gfx->SetShader(vertex_shader_);
   //gfx->SetShader(pixel_shader_);
-  UINT passes;
-  gfx->device()->SetTexture(0,(IDirect3DBaseTexture9*)texture.data_pointer);
-  effect->Begin(&passes,0);
-  effect->BeginPass(0);
-  //uint32_t offsets[1] = {0};
-  //uint32_t strides[1] = {sizeof(graphics::shape::Vertex)};
-  //gfx->SetVertexBuffers(0,1,&vb,strides,offsets);
-  //gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
-  //effect->SetMatrix(world,(D3DXMATRIX*)&world_mat);
-  //effect->CommitChanges();
-  //gfx->Draw(4,0);
-  effect->EndPass();
 
-  effect->BeginPass(1);
-  effect->SetMatrix(world,(D3DXMATRIX*)&arc1.world());
-  effect->CommitChanges();
-  //arc1.Draw();
-  effect->EndPass();
+  gfx->device()->SetRenderTarget(0,(IDirect3DSurface9*)render_surface.data_pointer);
+  //gfx->ClearTarget();
+
 
   effect->BeginPass(3);
   effect->SetFloatArray(effect->GetParameterByName(0,"spec_pow"),sa.freq_pow,128);
@@ -223,9 +228,50 @@ int IntroScene::Draw() {
   effect->CommitChanges();
   sa.Draw();
   effect->EndPass();
-  effect->End();
+  
 
-  {
+ 
+
+  
+
+  uint32_t offsets[1] = {0};
+  uint32_t strides[1] = {sizeof(graphics::shape::Vertex)};
+
+  
+  //gfx->device()->SetRenderTarget(0,(IDirect3DSurface9*)render_surface.data_pointer);
+  effect->BeginPass(4);
+  effect->SetTexture(effect->GetParameterByName(0,"tex1"),(IDirect3DBaseTexture9*)render_texture.data_pointer);
+  gfx->SetVertexBuffers(0,1,&vb,strides,offsets);
+  gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
+  effect->SetMatrix(world,(D3DXMATRIX*)&world_mat);
+  effect->CommitChanges();
+  gfx->Draw(4,0);
+  effect->EndPass();
+
+
+  gfx->device()->SetRenderTarget(0,pBackBuffer);
+  //gfx->device()->SetTexture(0,(IDirect3DBaseTexture9*)render_texture.data_pointer);
+  
+  effect->BeginPass(0);
+  effect->SetTexture(effect->GetParameterByName(0,"tex1"),(IDirect3DBaseTexture9*)render_texture.data_pointer);
+  gfx->SetVertexBuffers(0,1,&vb,strides,offsets);
+  gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
+  effect->SetMatrix(world,(D3DXMATRIX*)&world_mat);
+  effect->CommitChanges();
+  gfx->Draw(4,0);
+  effect->EndPass();
+
+
+  effect->SetMatrix(world,(D3DXMATRIX*)&arc1.world());
+  //effect->CommitChanges();
+  effect->BeginPass(1);
+
+ // arc1.Draw();
+  effect->EndPass();
+
+
+
+{
     char song_info[512];
     double song_time_secs = win->player2().GetPlaybackSeconds();
     auto song_time_mins = song_time_secs / 60.0 ;
@@ -251,5 +297,6 @@ int IntroScene::Draw() {
     font.Draw(song_info,-1,DT_LEFT);
   }
 
+  effect->End();
   return S_OK;
 }

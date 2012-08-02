@@ -74,10 +74,11 @@ void MainWindow::Initialize() {
   //player_.set_audio_interface(audio_interface_);
   //player_.Initialize();
   midi_synth_ = new audio::synth::MidiSynth();
-  midi_synth_->set_mode(audio::synth::kModeSequencer);
+  midi_synth_->set_mode(audio::synth::MidiSynth::kModeSequencer);
   synth_player_ = new audio::synth::Player();
   synth_player_->set_audio_interface(audio_interface_);
   synth_player_->set_synth(midi_synth_);
+  //synth_player_->set_mode(audio::synth::Player::kModeLoop);
   synth_player_->Initialize();
   delay = 400.0f;
   midi_synth_->delay_unit.set_delay_ms(delay);
@@ -92,6 +93,7 @@ void MainWindow::Initialize() {
 }
 
 void MainWindow::Step() {
+  //synth_player_->Tick();
   //Sleep(100);
   const double dt =  1000.0 / 60.0;//16.667f;
   timing.current_cycles = timer_.GetCurrentCycles();
@@ -119,7 +121,7 @@ void MainWindow::Step() {
       midi_event->track = 0;
       midi_event->deltaTime = 0;
       midi_synth_->EndPrepareNextEvent();
-      synth_player_->Tick();
+      //synth_player_->Tick();
       OutputDebugString("sent note on\n");
       key_state[key_maps[i]] = 1;
     } else if (key_down[key_maps[i]] == false && key_state[key_maps[i]] == 1) {
@@ -132,7 +134,7 @@ void MainWindow::Step() {
       midi_event->track = 0;
       midi_event->deltaTime = 0;
       midi_synth_->EndPrepareNextEvent();
-      synth_player_->Tick();
+      //synth_player_->Tick();
       OutputDebugString("sent note off\n");
       key_state[key_maps[i]] = 0;
     }
@@ -143,7 +145,6 @@ void MainWindow::Step() {
 
    
   if (timing.render_time_span >= 16.667) {
-    gfx_->ClearTarget();
     gfx_->Begin();
     current_scene->Draw();
     gfx_->End();

@@ -40,6 +40,7 @@
     <ClCompile Include="Code\audio\synth\instruments\pad.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\percussion.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\piano.cpp" />
+    <ClCompile Include="Code\audio\synth\instruments\sonant_program.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\violin.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\exp_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\oscillators\sawtooth_oscillator.cpp" />
@@ -55,6 +56,7 @@
     <ClCompile Include="Code\audio\output\directsound.cpp" />
     <ClCompile Include="Code\audio\synth\midi_synth.cpp" />
     <ClCompile Include="Code\gfx\spectrum_analyzer.cpp" />
+    <ClCompile Include="Code\test.cpp" />
     <ClCompile Include="Code\winmain.cpp" />
     <ClCompile Include="Code\scenes\loading_scene.cpp" />
   </ItemGroup>
@@ -65,18 +67,22 @@
     <ClInclude Include="Code\audio\synth\channel.h" />
     <ClInclude Include="Code\audio\synth\component.h" />
     <ClInclude Include="Code\audio\synth\effects\delay.h" />
+    <ClInclude Include="Code\audio\synth\effects\effect.h" />
     <ClInclude Include="Code\audio\synth\filters\chebyshev_filter.h" />
     <ClInclude Include="Code\audio\synth\filters\lowpass.h" />
     <ClInclude Include="Code\audio\synth\instruments\blit.h" />
     <ClInclude Include="Code\audio\synth\instruments\instrument.h" />
+    <ClInclude Include="Code\audio\synth\instruments\karplusstrong.h" />
     <ClInclude Include="Code\audio\synth\instruments\osc_wave.h" />
     <ClInclude Include="Code\audio\synth\instruments\pad.h" />
     <ClInclude Include="Code\audio\synth\instruments\percussion.h" />
     <ClInclude Include="Code\audio\synth\instruments\piano.h" />
+    <ClInclude Include="Code\audio\synth\instruments\sonant_program.h" />
     <ClInclude Include="Code\audio\synth\instruments\violin.h" />
     <ClInclude Include="Code\audio\synth\midi_synth.h" />
     <ClInclude Include="Code\audio\synth\oscillators\exp_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\oscillator.h" />
+    <ClInclude Include="Code\audio\synth\wavetable.h" />
     <ClInclude Include="Code\audio\synth\oscillators\sawtooth_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\sine_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\square_oscillator.h" />
@@ -262,7 +268,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <Profile>false</Profile>
+      <Profile>true</Profile>
       <StackReserveSize>
       </StackReserveSize>
       <HeapReserveSize>
