@@ -221,6 +221,12 @@
     <ClInclude Include="Code\audio\synth\instruments\karplusstrong.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Code\audio\synth\misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\filters\iir_filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <BIN2H Include="Content\MoonLte3.mid" />

@@ -66,6 +66,8 @@
     <ClInclude Include="Code\audio\synth\base.h" />
     <ClInclude Include="Code\audio\synth\channel.h" />
     <ClInclude Include="Code\audio\synth\component.h" />
+    <ClInclude Include="Code\audio\synth\filters\iir_filter.h" />
+    <ClInclude Include="Code\audio\synth\misc.h" />
     <ClInclude Include="Code\audio\synth\effects\delay.h" />
     <ClInclude Include="Code\audio\synth\effects\effect.h" />
     <ClInclude Include="Code\audio\synth\filters\chebyshev_filter.h" />

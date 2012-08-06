@@ -16,21 +16,69 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
 *****************************************************************************************************************/
-#ifndef AUDIO_SYNTH_EFFECTS_EFFECT_H
-#define AUDIO_SYNTH_EFFECTS_EFFECT_H
-
-#include "../base.h"
+#ifndef AUDIO_SYNTH_MISC_H
+#define AUDIO_SYNTH_MISC_H
 
 namespace audio {
 namespace synth {
-namespace effects {
 
-class Effect : public Component {
- public:
-  virtual void ProcessStereo(real_t* output_buffer, real_t* input_buffer, uint32_t count) = 0;
+template<typename T1,typename T2>
+union AnyCast{
+  T1 in;
+  T2 out;
 };
 
+typedef AnyCast<uint32_t,real_t> UIntToFloatCast;
+
+
+real_t bits2float(uint32_t u) {
+  UIntToFloatCast x;
+  x.in = u;
+  return x.out;
 }
+
+inline uint32_t RandomInt(uint32_t* seed) {
+  *seed = *seed * 196314165 + 907633515;
+  return *seed;
+}
+
+// uniform random float in [-1,1)
+inline real_t RandomFloat(uint32_t* seed) {
+  uint32_t bits = RandomInt(seed); // random 32-bit value
+  real_t f = bits2float((bits >> 9) | 0x40000000); // random float in [2,4)
+  return f - 3.0f; // uniform random float in [-1,1)
+}
+
+inline real_t Noise(uint32_t* seed) {
+  float r1 = (1+RandomFloat(seed))*0.5f;
+  float r2 = (1+RandomFloat(seed))*0.5f;
+  return (float) sqrt( -2.0f * log(r1)) * cos( 2.0f * XM_PI *r2);//white noise
+}
+
+static real_t HardClip(real_t x) {
+  if (x < -1.0f)
+    return -1.0f;
+  else if (x > 1.0f)
+    return 1.0f;
+  else
+    return x;
+}
+
+static real_t SoftClip(real_t x) {
+  static const real_t lim = 0.6666666666f;
+  if (x < -lim)
+    return -lim;
+  else if (x > lim)
+    return lim;
+  else
+    return x-((x*x*x)/3.0f);
+}
+
+__forceinline real_t EnhanceHarmonics(real_t x,real_t a,real_t b,real_t c,real_t d) {
+  return ((x*x*x)*a)+((x*x)*b)+(x*c)+(d);
+}
+
+
 }
 }
 

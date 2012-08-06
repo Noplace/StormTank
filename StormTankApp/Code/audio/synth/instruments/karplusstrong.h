@@ -21,6 +21,8 @@
 
 #include "instrument.h"
 #include "../filters/lowpass.h"
+#include "../misc.h"
+#include "../filters/iir_filter.h"
 
 namespace audio {
 namespace synth {
@@ -51,6 +53,52 @@ class DelayLine {
    
 };
 
+class PickDirectionLowPassFilter : public filters::IIRFilter<1,2> {
+ public:
+  void Update(float p) {
+    a[0] = 1.0f-p;
+    b[0] = 1.0f;
+    b[1] = -p;
+  }
+};
+
+class PickPositionCombFilter : public filters::IIRFilter<100,1> {
+ public:
+  void Update(real_t B,real_t N) {
+    memset(a,0,sizeof(a));
+    a[0] = 1.0f;
+    int n = int(B*N+0.5f);
+    if (n>=0&&n<40)
+      a[n] = 1.0f;
+
+    b[0] = 1.0f;
+  }
+};
+
+
+class FirstStringTuningAllPassFilter : public filters::IIRFilter<2,2> {
+ public:
+  void Update() {
+    real_t n = 0.2f;
+    a[0] = -n;
+    a[1] = 1.0f;
+    b[0] = 1.0f;
+    b[1] = -n;
+  }
+};
+
+class DynamicLevelLowPassFilter : public filters::IIRFilter<1,2> {
+ public:
+  void Update(real_t bw) {
+    real_t L = bw;//bandwidth
+    real_t T = 1.0f/sample_rate_;
+    real_t x = exp(-XM_PI*L*T);
+    a[0] = 1.0f-x;
+    b[0] = 1.0f;
+    b[1] = -x;
+
+  }
+};
 
 class KarplusStrongData : public InstrumentData {
  public:
@@ -79,9 +127,21 @@ class KarplusStrong : public InstrumentProcessor {
       wavetables[i].count = (sample_rate_/8)+10;
       wavetables[i].buf = new real_t[wavetables[i].count]; //lowest freq = 8
       memset(wavetables[i].buf,0,sizeof(real_t)*wavetables[i].count);
-      lpf[i].set_sample_rate(sample_rate_);
-      lpf[i].set_cutoff_freq(8000.0f);
-      lpf[i].Initialize();
+
+      Hp[i].set_sample_rate(sample_rate_);
+      Hp[i].Update(0.1f);
+
+
+      Hd[i].set_sample_rate(sample_rate_);
+      Hd[i].set_cutoff_freq(8000.0f);
+      Hd[i].Initialize();
+
+
+      Hn[i].set_sample_rate(sample_rate_);
+      Hn[i].Update();
+      HL[i].set_sample_rate(sample_rate_);
+      HL[i].Update(22100.0f);
+
       //delay[i].set_sample_rate(sample_rate_);
       //delay[i].set_delay_ms(40.0f);
       //delay[i].set_feedback(0.7f);
@@ -127,10 +187,12 @@ class KarplusStrong : public InstrumentProcessor {
     nd.phase = ((nd.phase + 1) % wavetable.count);
     real_t	out = wavetable.buf[nd.phase];
     auto previous = wavetable.buf[prev_phase];
-    wavetable.buf[prev_phase] = lpf[note_index].Tick(wavetable.buf[nd.phase]);
-
- 
+    wavetable.buf[prev_phase] = Hn[note_index].Tick(Hd[note_index].Tick(wavetable.buf[nd.phase]));
     
+    out = HL[note_index].Tick(out);
+
+    //out = effects::HardClip(out*5);
+    //out = effects::EnhanceHarmonics(out,);
     out *= adsr[note_index].Tick();
     return out;
   }
@@ -139,6 +201,8 @@ class KarplusStrong : public InstrumentProcessor {
     cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
     cdata->table[note_index].phase = 0;
     delay[note_index].M = wavetables[note_index].count = int(ceil(sample_rate_ / cdata->note_data_array[note_index].freq));
+
+    //HB[note_index].Update(0.2,sample_rate_/freq);
     FillNoise(note_index);//cdata->note_data_array[note_index].note);
 
     return S_OK;
@@ -154,50 +218,27 @@ class KarplusStrong : public InstrumentProcessor {
     return S_OK;
   }
  protected:
-  union FloatBits
-  {
-    real_t f;
-    uint32_t u;
-  };
-
   struct {
     int count;
     real_t* buf;
-  }wavetables[Polyphony];
+  } wavetables[Polyphony];
 
-  filters::LowPassFilter lpf[Polyphony];
+  PickDirectionLowPassFilter Hp[Polyphony];
+  PickPositionCombFilter     HB[Polyphony];
+  FirstStringTuningAllPassFilter Hn[Polyphony];
+  DynamicLevelLowPassFilter HL[Polyphony];
+  filters::LowPassFilter Hd[Polyphony];
+  
   //effects::Delay delay[Polyphony];
   DelayLine delay[Polyphony];
   uint32_t randseed;
-  real_t bits2float(uint32_t u) {
-    FloatBits x;
-    x.u = u;
-    return x.f;
-  }
-
-  inline uint32_t urandom(uint32_t *seed)
-  {
-    *seed = *seed * 196314165 + 907633515;
-    return *seed;
-  }
-
-  // uniform random float in [-1,1)
-  inline real_t Random() {
-    uint32_t bits = urandom(&randseed); // random 32-bit value
-    real_t f = bits2float((bits >> 9) | 0x40000000); // random float in [2,4)
-    return f - 3.0f; // uniform random float in [-1,1)
-  }
-
-  inline real_t Noise() {
-    float r1 = (1+Random())*0.5f;
-    float r2 = (1+Random())*0.5f;
-    return (float) sqrt( -2.0f * log(r1)) * cos( 2.0f * XM_PI *r2);//white noise
-  }
+  
 
   inline void FillNoise(int index) {
     memset(wavetables[index].buf,0,sizeof(real_t)*sample_rate_/8);
     for (int i=0;i<wavetables[index].count;++i) {
-      wavetables[index].buf[i] = Noise();
+      wavetables[index].buf[i] = Noise(&randseed);
+      //wavetables[index].buf[i] = HB[index].Tick(Hp[index].Tick(Noise(&randseed)));
     }
   }
 };

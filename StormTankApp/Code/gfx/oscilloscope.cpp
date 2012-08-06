@@ -64,7 +64,8 @@ void Oscilloscope::AddPCMData256(float* samples, uint32_t channels, double time_
   time_counter += time_ms;
   //if (time_counter >= 100.0) {
     for (uint32_t i=0;i<nBins;++i) {
-      freq_pow[i] = samples[i<<1];//((20 * log10(1+samples[i<<1])));
+      float a = samples[i<<1];
+      freq_pow[i] = a;//(20*log10((a+1.001f)*0.5f));//((20 * log10(1+samples[i<<1])));
     }
     time_counter = 0;
   //}
