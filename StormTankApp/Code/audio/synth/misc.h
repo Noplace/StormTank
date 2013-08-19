@@ -50,9 +50,15 @@ inline real_t RandomFloat(uint32_t* seed) {
 }
 
 inline real_t Noise(uint32_t* seed) {
-  float r1 = (1+RandomFloat(seed))*0.5f;
-  float r2 = (1+RandomFloat(seed))*0.5f;
-  return (float) sqrt( -2.0f * log(r1)) * cos( 2.0f * XM_PI *r2);//white noise
+  real_t r1 = (1+RandomFloat(seed))*0.5f;
+  real_t r2 = (1+RandomFloat(seed))*0.5f;
+  return (real_t) sqrt( -2.0f * log(r1)) * cos( 2.0f * XM_PI *r2);//white noise
+}
+
+inline real_t GussianWhiteNoise() {
+  real_t R1 = (real_t) rand() / (real_t) RAND_MAX;
+  real_t R2 = (real_t) rand() / (real_t) RAND_MAX;
+  return (real_t) sqrt( -2.0f * log( R1 )) * cos( 2.0f * XM_PI * R2 );
 }
 
 static real_t HardClip(real_t x) {

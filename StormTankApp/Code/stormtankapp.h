@@ -9,9 +9,11 @@ class MainWindow;
 #include <WinCore/windows/windows.h>
 #include <WinCore/timer/timer2.h>
 #include <VisualEssence/Code/ve.h>
+#include <time.h>
 #include "ptg/pgt.h"
 #include "audio/output/output.h"
 #include "audio/synth/midi_synth.h"
+#include "audio/synth/sonant_synth.h"
 #include "gfx/font_draw.h"
 #include "gfx/spectrum_analyzer.h"
 #include "gfx/oscilloscope.h"

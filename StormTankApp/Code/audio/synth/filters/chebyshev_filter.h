@@ -111,7 +111,7 @@ class ChebyshevFilter {
     real_t rp = -cos(XM_PI/(np*2) + (p-1)*XM_PI/np);
     real_t ip = sin(XM_PI/(np*2) + (p-1)*XM_PI/np);
     if (pr != 0) {
-      real_t es = sqrt( pow(100 / (100-pr),2.0f) -1 );
+      real_t es = sqrt( pow(100.0f / (100.0f-pr),2.0f) -1 );
       real_t vx = (1/np) * log( (1/es) + sqrt( (1/(es*es)) + 1) );
       real_t kx = (1/np) * log( (1/es) + sqrt( (1/(es*es)) - 1) );
       real_t KX = (exp(kx) + exp(-kx))/2;

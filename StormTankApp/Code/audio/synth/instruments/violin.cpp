@@ -54,8 +54,7 @@ int Violin::Unload() {
   return Pad::Unload();
 }
 
-real_t Violin::Tick(InstrumentData* data, int note_index) {
-  auto cdata = (ViolinData*)data;
+real_t Violin::Tick(int note_index) {
   real_t result = 0;
   {
     auto& nd = cdata->pad_table[note_index];
@@ -67,19 +66,18 @@ real_t Violin::Tick(InstrumentData* data, int note_index) {
   return result;
 }
 
-int Violin::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
-  auto cdata = (ViolinData*)data;
+int Violin::SetFrequency(real_t freq, int note_index) {
   cdata->pad_table[note_index].phase = rand() % sample_size_;
   return S_OK;
 }
 
-int Violin::NoteOn(InstrumentData* data, int note_index) {
-  Pad::NoteOn(data,note_index);
+int Violin::NoteOn(int note_index) {
+  Pad::NoteOn(note_index);
   return S_OK;
 }
 
-int Violin::NoteOff(InstrumentData* data, int note_index) {
-  Pad::NoteOff(data,note_index);
+int Violin::NoteOff(int note_index) {
+  Pad::NoteOff(note_index);
   return S_OK;
 }
 

@@ -128,20 +128,20 @@ int Percussion::Unload() {
   return S_OK;
 }
 
-real_t Percussion::Tick(InstrumentData* data, int note_index) {
-  auto& table = ((PercussionData*)data)->table;
+real_t Percussion::Tick(int note_index) {
+  auto& table = cdata->table;
   real_t result = 0;
   
   
   //result = (this->*(ticks[note_index]))((PercussionData*)data,note_index);
-  if (adsr[note_index].stage() != 0 && data->note_data_array[note_index].note == 46) {
+  if (adsr[note_index].stage() != 0 && cdata->note_data_array[note_index].note == 46) {
     real_t value = (real_t)((randseed *= 0x15a4e35) % 255) / 255.0f;
     result = sin(value * 2.0f * XM_PI);
     result *= 0.2f*adsr[note_index].Tick();
   }
 
   if (adsr[note_index].stage() != 0 && 
-    (data->note_data_array[note_index].note == 35 || data->note_data_array[note_index].note == 36)) {
+    (cdata->note_data_array[note_index].note == 35 || cdata->note_data_array[note_index].note == 36)) {
     real_t e = adsr[note_index].Tick();
     real_t f = 180;//getnotefreq(123);
     f *= e*e;
@@ -180,14 +180,12 @@ real_t Percussion::Tick(InstrumentData* data, int note_index) {
   return result;
 }
 
-int Percussion::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
-  auto cdata = (PercussionData*)data;
+int Percussion::SetFrequency(real_t freq, int note_index) {
   cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
   return S_OK;
 }
 
-int Percussion::NoteOn(InstrumentData* data, int note_index) {
-  auto cdata = (PercussionData*)data;
+int Percussion::NoteOn(int note_index) {
   NoteData* nd = &cdata->note_data_array[note_index];
 
   if ((nd->note == 35||nd->note == 36) && nd->on == true) {
@@ -217,8 +215,7 @@ int Percussion::NoteOn(InstrumentData* data, int note_index) {
   return S_OK;
 }
 
-int Percussion::NoteOff(InstrumentData* data, int note_index) {
-  auto cdata = (PercussionData*)data;
+int Percussion::NoteOff(int note_index) {
   NoteData* nd = &cdata->note_data_array[note_index];
 
   if (nd->note == 42 && nd->on == false) {

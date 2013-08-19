@@ -60,13 +60,17 @@ class Percussion : public InstrumentProcessor {
 
     return result;
   }
-  real_t Tick(InstrumentData* data, int note_index);
-  int SetFrequency(real_t freq, InstrumentData* data, int note_index);
-  int NoteOn(InstrumentData* data, int note_index);
-  int NoteOff(InstrumentData* data, int note_index);
+  real_t Tick(int note_index);
+  int SetFrequency(real_t freq, int note_index);
+  int NoteOn( int note_index);
+  int NoteOff(int note_index);
+  void set_instrument_data(InstrumentData* idata) {
+    cdata = (PercussionData*)idata;
+  }
  protected:
   typedef real_t (Percussion::*PercussionPieceTick)(PercussionData* data, int note_index);
   static PercussionPieceTick ticks[Polyphony];
+  PercussionData* cdata;
   real_t inv_sr;
   unsigned int randseed;
   oscillators::SineOscillator bassdrum_osc1,bassdrum_osc2;

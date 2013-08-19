@@ -50,13 +50,16 @@ class BlitWave : public InstrumentProcessor {
   }
   int Load();
   int Unload();
-  real_t Tick(InstrumentData* data, int note_index);
-  void Update(InstrumentData* data, int note_index);
-  int SetFrequency(real_t freq, InstrumentData* data, int note_index);
-  int NoteOn(InstrumentData* data, int note_index);
-  int NoteOff(InstrumentData* data, int note_index);
-
+  real_t Tick(int note_index);
+  void Update(int note_index);
+  int SetFrequency(real_t freq, int note_index);
+  int NoteOn(int note_index);
+  int NoteOff(int note_index);
+  void set_instrument_data(InstrumentData* idata) {
+    cdata = (BlitWaveData*)idata;
+  }
  protected:
+   BlitWaveData* cdata;
    real_t* wavetables[128];
    void GenerateWavetables();
 };

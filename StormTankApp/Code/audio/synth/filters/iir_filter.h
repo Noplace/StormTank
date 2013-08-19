@@ -25,6 +25,7 @@ namespace audio {
 namespace synth {
 namespace filters {
 
+//using notation of the dsp guide book
 template <int P,int Q>
 class IIRFilter : public Component {
  public:
@@ -47,7 +48,7 @@ class IIRFilter : public Component {
     }
 
     for (int j=1;j<Q;++j) {
-      result -= b[j]*y[j];
+      result += b[j]*y[j];
     }
 
     memmove(&y[1],y,sizeof(y)-sizeof(real_t));

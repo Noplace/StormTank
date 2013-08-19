@@ -17,7 +17,6 @@
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
 *****************************************************************************************************************/
 #include "pad.h"
-#include <time.h>
 
 namespace audio {
 namespace synth {
@@ -31,7 +30,6 @@ Pad::Pad() : InstrumentProcessor(),padsynth() {
 int Pad::Load() {
   if (loaded_ == true)
     return S_FALSE;
-  srand(time(0));
 
   /*auto choir3 = [&](real_t freq) {
     padsynth.setharmonic(0,0);
@@ -88,8 +86,7 @@ int Pad::Unload() {
   return S_OK;
 }
 
-real_t Pad::Tick(InstrumentData* data, int note_index) {
-  auto cdata = (PadData*)data;
+real_t Pad::Tick( int note_index) {
   auto& nd = cdata->pad_table[note_index];
 
   real_t result = 0;
@@ -101,20 +98,17 @@ real_t Pad::Tick(InstrumentData* data, int note_index) {
   return result;
 }
 
-int Pad::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
-  auto cdata = (PadData*)data;
+int Pad::SetFrequency(real_t freq, int note_index) {
   cdata->pad_table[note_index].phase = rand() % 30000;
   return S_OK;
 }
 
-int Pad::NoteOn(InstrumentData* data, int note_index) {
-
-  adsr[note_index].NoteOn(data->note_data_array[note_index].velocity);
+int Pad::NoteOn(int note_index) {
+  adsr[note_index].NoteOn(cdata->note_data_array[note_index].velocity);
   return S_OK;
 }
 
-int Pad::NoteOff(InstrumentData* data, int note_index) {
-  auto cdata = (PadData*)data;
+int Pad::NoteOff(int note_index) {
   adsr[note_index].NoteOff(cdata->note_data_array[note_index].velocity);
   return S_OK;
 }

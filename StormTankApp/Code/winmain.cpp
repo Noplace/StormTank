@@ -53,11 +53,13 @@ class StormTankApp : public core::windows::Application {
     #ifdef _DEBUG
     EnableCrashingOnCrashes();
     #endif
-    unsigned old_fp_state;
-    #ifndef _M_X64 
+    #ifndef _WIN64
+      unsigned old_fp_state;
       _controlfp_s(&old_fp_state, _PC_53, _MCW_PC);
       //_controlfp(_RC_NEAR, _MCW_RC);
     #endif
+    srand((unsigned int)time(0));
+    CoInitializeEx(nullptr,COINIT_MULTITHREADED);
     win.Initialize();
    }
   ~StormTankApp() {
@@ -145,7 +147,7 @@ void MulFloat(float x, float y, float* pResult)
 }
 */
 
-
+/*
 void samples_test() {
 
   audio::synth::ADSR adsr;
@@ -167,7 +169,7 @@ void samples_test() {
     if (time > 40.0f)
       adsr.NoteOff(0.5f);
   }
-}
+}*/
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
   //int test_padsynth();

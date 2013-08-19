@@ -4,13 +4,13 @@
    
 
 int LoadingScene::Initialize(MainWindow* win) {
-  graphics::Scene::Initialize(win->gfx());
   BaseScene::Initialize(win);
-  gfx = (graphics::ContextD3D9*)context_;
+  camera_.Initialize(win->gfx());
+  gfx = win->gfx();
 
   camera_.Initialize(gfx);
-  camera_.Ortho2D(0,0,gfx->width(),gfx->height());
-  gfx->SetViewport(0,0,float(gfx->width()),float(gfx->height()),0,1000);
+  camera_.Ortho2D(0,0,float(gfx->width()),float(gfx->height()));
+ // gfx->SetViewport(0,0,float(gfx->width()),float(gfx->height()),0,1000);
   gfx->SetCamera(&camera_);
   
   D3DXMATRIX matIdentity;
@@ -65,6 +65,7 @@ int LoadingScene::Initialize(MainWindow* win) {
 
 int LoadingScene::Deinitialize() {
   CloseHandle(thread_handle);
+  camera_.Deinitialize();
   return S_OK;
 }
 
@@ -77,7 +78,7 @@ int LoadingScene::Update(double dt) {
 
 
   if (WaitForSingleObject(event1,0) == WAIT_OBJECT_0) {
-    win->SwitchScene(&win->intro_scene);
+    win->SwitchScene(&win->scenes.intro);
   }
 
   static float theta =0;

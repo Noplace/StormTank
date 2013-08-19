@@ -48,10 +48,11 @@ class InstrumentProcessor : public Component {
   virtual int Load() = 0;
   virtual int Unload() = 0;
   virtual InstrumentData* NewInstrumentData() = 0;
-  virtual real_t Tick(InstrumentData* data, int note_index) = 0;
-  virtual int SetFrequency(real_t freq, InstrumentData* data, int note_index) = 0;
-  virtual int NoteOn(InstrumentData* data, int note_index) = 0;
-  virtual int NoteOff(InstrumentData* data, int note_index) = 0;
+  virtual real_t Tick(int note_index) = 0;
+  virtual int SetFrequency(real_t freq, int note_index) = 0;
+  virtual int NoteOn(int note_index) = 0;
+  virtual int NoteOff(int note_index) = 0;
+  virtual void set_instrument_data(InstrumentData* idata) = 0;
  protected:
   ADSR adsr[Polyphony];
   bool loaded_;

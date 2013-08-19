@@ -53,11 +53,16 @@ class Piano : public Pad {
   InstrumentData* NewInstrumentData() {
     return new PianoData();
   }
-  real_t Tick(InstrumentData* data, int note_index);
-  int SetFrequency(real_t freq, InstrumentData* data, int note_index);
-  int NoteOn(InstrumentData* data, int note_index);
-  int NoteOff(InstrumentData* data, int note_index);
+  real_t Tick(int note_index);
+  int SetFrequency(real_t freq, int note_index);
+  int NoteOn(int note_index);
+  int NoteOff(int note_index);
+  void set_instrument_data(InstrumentData* idata) {
+    Pad::set_instrument_data(idata);
+    cdata = (PianoData*)idata;
+  }
  protected:
+  PianoData* cdata;
   oscillators::SineOscillator osc1;
   oscillators::SineOscillator osc2;
   oscillators::SawtoothOscillator osc3;

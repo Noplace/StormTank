@@ -43,7 +43,23 @@ PS_INPUT VS( VS_INPUT input )
 	//return input;
     PS_INPUT output = (PS_INPUT)0;
 	
-    output.pos = mul(  float4(input.pos,1), world );
+    output.pos = mul(  float4(input.pos,0), world );
+    output.pos = mul( output.pos, viewprojection );
+	
+	//output.Pos.x -= output.Pos.z;
+    output.uv = input.uv;
+	output.color = input.color;
+	output.page = input.page;
+    return output;
+}
+
+PS_INPUT VS_3D( VS_INPUT input )
+{
+	//PS_INPUT output = (PS_INPUT)0;
+	//return input;
+    PS_INPUT output = (PS_INPUT)0;
+	
+    output.pos = mul(  float4(input.pos,0), world );
     output.pos = mul( output.pos, viewprojection );
 	
 	//output.Pos.x -= output.Pos.z;
@@ -190,6 +206,16 @@ technique t1
 
     pass p2
     {
+		/*AlphaBlendEnable = TRUE;
+		ColorArg1[0] = TEXTURE;
+		ColorArg2[0] = DIFFUSE;  
+		ColorOp[0] = MODULATE;
+		AlphaArg1[0] = TEXTURE;
+		AlphaArg2[0] = DIFFUSE;
+		AlphaOp[0] = MODULATE;
+		ZEnable = TRUE;
+		CullMode = NONE;
+		Lighting = false;*/
         //SetBlendState( NoBlend, float4( 0.0f, 0.0f, 0.0f, 0.0f ), 0xFFFFFFFF );
 		SetVertexShader( CompileShader( vs_3_0, VS() ) );
         SetPixelShader( CompileShader( ps_3_0, PS(false) ) );

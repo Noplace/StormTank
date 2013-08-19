@@ -26,6 +26,7 @@
 #include "instruments/blit.h"
 #include "instruments/karplusstrong.h"
 #include "instruments/sonant_program.h"
+#include "instruments/waveguide_synthesis.h"
 
 //#define OUTPUT_EVENTS
 

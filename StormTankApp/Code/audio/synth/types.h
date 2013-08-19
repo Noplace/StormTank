@@ -23,7 +23,8 @@
 #define _LN_2 0.69314718055994530941723212145818f
 #define _LN_2_DIV_12 0.05776226504666210911810267678818f
 
-typedef float real_t;
+namespace audio {
+namespace synth {
 
 struct NoteData {
     real_t freq,base_freq; //Polyphony note polyphony
@@ -33,16 +34,20 @@ struct NoteData {
 };
 
 const int note_count = 127;
+
 enum Notes {
-  A0=21,Bb0,B0,
-  C1,Db1,D1,Eb1,E1,F1,Gb1,G1,Ab1,A1,Bb1,B1,
-  C2,Db2,D2,Eb2,E2,F2,Gb2,G2,Ab2,A2,Bb2,B2,
-  C3,Db3,D3,Eb3,E3,F3,Gb3,G3,Ab3,A3,Bb3,B3,
-  C4,Db4,D4,Eb4,E4,F4,Gb4,G4,Ab4,A4,Bb4,B4,
-  C5,Db5,D5,Eb5,E5,F5,Gb5,G5,Ab5,A5,Bb5,B5,
-  C6,Db6,D6,Eb6,E6,F6,Gb6,G6,Ab6,A6,Bb6,B6,
-  C7,Db7,D7,Eb7,E7,F7,Gb7,G7,Ab7,A7,Bb7,B7,
-  C8,Db8,D8,Eb8,E8,F8,Gb8,G8,Ab8,A8,Bb8,B8,
+  kNoteA0=21,kNoteBb0,kNoteB0,
+  kNoteC1,kNoteDb1,kNoteD1,kNoteEb1,kNoteE1,kNoteF1,kNoteGb1,kNoteG1,kNoteAb1,kNoteA1,kNoteBb1,kNoteB1,
+  kNoteC2,kNoteDb2,kNoteD2,kNoteEb2,kNoteE2,kNoteF2,kNoteGb2,kNoteG2,kNoteAb2,kNoteA2,kNoteBb2,kNoteB2,
+  kNoteC3,kNoteDb3,kNoteD3,kNoteEb3,kNoteE3,kNoteF3,kNoteGb3,kNoteG3,kNoteAb3,kNoteA3,kNoteBb3,kNoteB3,
+  kNoteC4,kNoteDb4,kNoteD4,kNoteEb4,kNoteE4,kNoteF4,kNoteGb4,kNoteG4,kNoteAb4,kNoteA4,kNoteBb4,kNoteB4,
+  kNoteC5,kNoteDb5,kNoteD5,kNoteEb5,kNoteE5,kNoteF5,kNoteGb5,kNoteG5,kNoteAb5,kNoteA5,kNoteBb5,kNoteB5,
+  kNoteC6,kNoteDb6,kNoteD6,kNoteEb6,kNoteE6,kNoteF6,kNoteGb6,kNoteG6,kNoteAb6,kNoteA6,kNoteBb6,kNoteB6,
+  kNoteC7,kNoteDb7,kNoteD7,kNoteEb7,kNoteE7,kNoteF7,kNoteGb7,kNoteG7,kNoteAb7,kNoteA7,kNoteBb7,kNoteB7,
+  kNoteC8,kNoteDb8,kNoteD8,kNoteEb8,kNoteE8,kNoteF8,kNoteGb8,kNoteG8,kNoteAb8,kNoteA8,kNoteBb8,kNoteB8,
 };
+
+}
+}
 
 #endif

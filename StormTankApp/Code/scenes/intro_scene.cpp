@@ -7,14 +7,11 @@ XMMATRIX world_mat;
 double main_time_span;
 
 
-graphics::Texture render_texture;
-graphics::ResourceView render_surface;
-LPDIRECT3DSURFACE9 pBackBuffer = NULL;
 
 int IntroScene::Initialize(MainWindow* win) {
-  graphics::Scene::Initialize(win->gfx());
   BaseScene::Initialize(win);
-  gfx = (graphics::ContextD3D9*)context_;
+  camera_.Initialize(win->gfx());  
+  gfx = (graphics::ContextD3D9*)win->gfx();
   
   //gfx->CreateTexture(640,480,0,0,render_texture);
   gfx->device()->CreateTexture(640,
@@ -28,13 +25,12 @@ int IntroScene::Initialize(MainWindow* win) {
 
 
   gfx->CreateResourceView(render_texture,render_surface);
-  
-  gfx->device()->GetRenderTarget(0,&pBackBuffer);
+  gfx->GetRenderTarget(old_surface);
 
   camera_.Initialize(gfx);
   camera_.Ortho2D(0,0,640,480);
   gfx->SetViewport(0,0,640,480,-1000,1000);
-  gfx->SetCamera(&camera_);
+
   
   D3DXMATRIX matIdentity;
 	D3DXMatrixIdentity(&matIdentity);
@@ -57,50 +53,7 @@ int IntroScene::Initialize(MainWindow* win) {
 	gfx->device()->SetTextureStageState(1,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
 	gfx->device()->SetTextureStageState(1,D3DTSS_ALPHAOP,D3DTOP_MODULATE );
 
-  {
-    //uint8_t* data;
-    //ReadWholeFileBinary("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.o",&data;
-    /*FILE* fp = fopen("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.o","rb");
-    fseek(fp,0,SEEK_END);
-    auto size = ftell(fp);
-    fseek(fp,0,SEEK_SET);
-    char* data = new char[size];
-    fread(data,1,size,fp);
-    fclose(fp);*/
-    /*
-    std::ios::openmode mode = std::ios::beg | std::ios::in;
-    std::ifstream ifs("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.fx",mode);
-    const std::string file_content( (std::istreambuf_iterator<char>( ifs )), std::istreambuf_iterator<char>() );
-    auto size = file_content.length();
-    char* data = new char[size];
-    memcpy(data,file_content.c_str(),size);
-    ifs.close();
 
-
-    LPD3DXBUFFER buffer=nullptr,parser_errors=nullptr;
-    LPD3DXEFFECTCOMPILER compiler;
-    D3DXCreateEffectCompiler(data,size,nullptr,nullptr,0,&compiler,&parser_errors);
-    if (parser_errors != nullptr) {
-      OutputDebugString((LPCSTR)parser_errors->GetBufferPointer());
-      parser_errors->Release();
-    }
-    compiler->CompileEffect(0,&buffer,&parser_errors);
-    if (parser_errors != nullptr) {
-      OutputDebugString((LPCSTR)parser_errors->GetBufferPointer());
-      parser_errors->Release();
-    }
-    compiler->Release();
-    */
-    uint8_t* data;
-    size_t size;
-    core::io::ReadWholeFileBinary("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.o",&data,size);
-
-    if (data != nullptr) {
-      gfx->CreateEffectInterface((uint8_t*)data,size,(void**)&effect);
-    }
-
-    core::io::DestroyFileBuffer(&data);
-  }
   arc1.Initialize(gfx);
   arc1.SetTopLeft(200,200);
   arc1.SetColor0(0xffffffff);
@@ -154,16 +107,15 @@ int IntroScene::Initialize(MainWindow* win) {
     sa.Construct();
     win->player2().set_visual_addon(&sa);
 
-    camera_.UpdateConstantBuffer();
-    camera_.SetConstantBuffer(0);
-    
-    viewprojection = effect->GetParameterByName(0,"viewprojection");
-    world = effect->GetParameterByName(0,"world");
+    //camera_.UpdateConstantBuffer();
+    //camera_.SetConstantBuffer(0);
+    auto effect = win->resources.gfx.effect;
+
 
     effect->SetTechnique(effect->GetTechnique(0));
-    effect->SetMatrix(viewprojection,(D3DXMATRIX*)&(camera_.view()*camera_.projection()));
+    //effect->SetMatrix(viewprojection,(D3DXMATRIX*)&(camera_.viewprojection()));
     world_mat = XMMatrixIdentity();
-    effect->SetMatrix(world,(D3DXMATRIX*)&world_mat);
+    effect->SetMatrix(win->resources.gfx.world,(D3DXMATRIX*)&world_mat);
 
   }
 
@@ -173,19 +125,21 @@ int IntroScene::Initialize(MainWindow* win) {
 }
 
 int IntroScene::Deinitialize() {
-  gfx->DestroyEffectInterface((void**)&effect);
   win->player2().set_visual_addon(nullptr);
   sa.Deinitialize();
   gfx->DestroyBuffer(vb);
   arc1.Deinitialize();
+  gfx->DestroyResourceView(old_surface);
+  gfx->DestroyResourceView(render_surface);
   gfx->DestroyTexture(texture);
   gfx->DestroyShader(vertex_shader_);
+  camera_.Deinitialize();
   delete [] tex_data0;
   return S_OK;
 }
 
 int IntroScene::Update(double dt) {
-  
+  auto effect = win->resources.gfx.effect;
   
   static float theta =0;
   float y = 0;//100+sin(theta)*100;
@@ -206,25 +160,31 @@ int IntroScene::Update(double dt) {
 
   font.Update();
 
+  float x = -(100+sin(theta)*100);
+    camera_.Ortho2D(x,0,640.0f+x,480.0f);
+    effect->SetMatrix(win->resources.gfx.viewprojection,(D3DXMATRIX*)&(camera_.viewprojection()));
 
-  theta += 0.3f;
+
+  theta += 0.03f;
   main_time_span += dt;
   return S_OK;
 }
 
 int IntroScene::Draw() {
+  auto effect = win->resources.gfx.effect;
   UINT passes;
   effect->Begin(&passes,0);
   //gfx->SetShader(vertex_shader_);
   //gfx->SetShader(pixel_shader_);
-
-  gfx->device()->SetRenderTarget(0,(IDirect3DSurface9*)render_surface.data_pointer);
+  gfx->Clear(0,1);
+  gfx->SetRenderTarget(render_surface);
+  
   //gfx->ClearTarget();
 
 
   effect->BeginPass(3);
   effect->SetFloatArray(effect->GetParameterByName(0,"spec_pow"),sa.freq_pow,128);
-  effect->SetMatrix(world,(D3DXMATRIX*)&sa.world());
+  effect->SetMatrix(win->resources.gfx.world,(D3DXMATRIX*)&sa.world());
   effect->CommitChanges();
   sa.Draw();
   effect->EndPass();
@@ -232,7 +192,8 @@ int IntroScene::Draw() {
 
  
 
-  
+      camera_.Ortho2D(0,0,640.0f,480.0f);
+    effect->SetMatrix(win->resources.gfx.viewprojection,(D3DXMATRIX*)&(camera_.viewprojection()));  
 
   uint32_t offsets[1] = {0};
   uint32_t strides[1] = {sizeof(graphics::shape::Vertex)};
@@ -243,30 +204,31 @@ int IntroScene::Draw() {
   effect->SetTexture(effect->GetParameterByName(0,"tex1"),(IDirect3DBaseTexture9*)render_texture.data_pointer);
   gfx->SetVertexBuffers(0,1,&vb,strides,offsets);
   gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
-  effect->SetMatrix(world,(D3DXMATRIX*)&world_mat);
+  effect->SetMatrix(win->resources.gfx.world,(D3DXMATRIX*)&world_mat);
   effect->CommitChanges();
   gfx->Draw(4,0);
   effect->EndPass();
 
-
-  gfx->device()->SetRenderTarget(0,pBackBuffer);
+  gfx->SetRenderTarget(old_surface);
+  
   //gfx->device()->SetTexture(0,(IDirect3DBaseTexture9*)render_texture.data_pointer);
   
+
   effect->BeginPass(0);
   effect->SetTexture(effect->GetParameterByName(0,"tex1"),(IDirect3DBaseTexture9*)render_texture.data_pointer);
   gfx->SetVertexBuffers(0,1,&vb,strides,offsets);
   gfx->SetPrimitiveTopology(D3DPT_TRIANGLESTRIP);
-  effect->SetMatrix(world,(D3DXMATRIX*)&world_mat);
+  effect->SetMatrix(win->resources.gfx.world,(D3DXMATRIX*)&world_mat);
   effect->CommitChanges();
   gfx->Draw(4,0);
   effect->EndPass();
 
 
-  effect->SetMatrix(world,(D3DXMATRIX*)&arc1.world());
+  effect->SetMatrix(win->resources.gfx.world,(D3DXMATRIX*)&arc1.world());
   //effect->CommitChanges();
   effect->BeginPass(1);
 
- // arc1.Draw();
+  arc1.Draw();
   effect->EndPass();
 
 

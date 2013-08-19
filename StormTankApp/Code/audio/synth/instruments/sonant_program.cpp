@@ -159,8 +159,7 @@ int SonantProgram::Unload() {
 }
 
   
-real_t SonantProgram::Tick(InstrumentData* data, int note_index) {
-  auto cdata = (SonantProgramData*)data;
+real_t SonantProgram::Tick(int note_index) {
   auto& nd = cdata->table[note_index];
   //int note = cdata->note_data_array[note_index].note;
   int n = cdata->note_data_array[note_index].note+75;
@@ -224,16 +223,14 @@ real_t SonantProgram::Tick(InstrumentData* data, int note_index) {
  return 0;
 }
 
-int SonantProgram::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
-  auto cdata = (SonantProgramData*)data;
+int SonantProgram::SetFrequency(real_t freq, int note_index) {
   cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
   //cdata->table[note_index].inc1 = rand() % 4096;
 
   return S_OK;
 }
 
-int SonantProgram::NoteOn(InstrumentData* data, int note_index) {
-  auto cdata = (SonantProgramData*)data;
+int SonantProgram::NoteOn(int note_index) {
   auto& nd = cdata->table[note_index];
 
   nd.attack = this->data.env_attack;
@@ -252,8 +249,7 @@ int SonantProgram::NoteOn(InstrumentData* data, int note_index) {
 }
 
 
-int SonantProgram::NoteOff(InstrumentData* data, int note_index) {
-  auto cdata = (SonantProgramData*)data;
+int SonantProgram::NoteOff(int note_index) {
   auto& nd = cdata->table[note_index];
   nd.i = nd.attack + nd.sustain;
   return S_OK;

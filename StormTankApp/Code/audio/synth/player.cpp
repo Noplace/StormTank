@@ -137,8 +137,7 @@ DWORD Player::InstancePlayThread() {
     if (thread_msg == WM_SP_QUIT) {
         thread_msg = 0;
         break;
-    }
-    if (thread_msg == WM_SP_PLAY) {
+    } else if (thread_msg == WM_SP_PLAY) {
       if (state_ != kStatePlaying) {
         prev_cycles = timer.GetCurrentCycles();
         state_ = kStatePlaying;

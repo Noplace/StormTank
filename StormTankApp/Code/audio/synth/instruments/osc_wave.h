@@ -88,30 +88,30 @@ class OscWave : public InstrumentProcessor {
   InstrumentData* NewInstrumentData() {
     return new OscWaveData();
   }
-  real_t Tick(InstrumentData* data, int note_index) {
-    auto cdata = (OscWaveData*)data;
+  real_t Tick(int note_index) {
     auto result = osc->Tick(cdata->table[note_index].phase,cdata->table[note_index].inc);// + osc->Tick(phase,inc*2);
     result *= adsr[note_index].Tick();
     return result;
   }
-  int SetFrequency(real_t freq, InstrumentData* data, int note_index) {
-    auto cdata = (OscWaveData*)data;
+  int SetFrequency(real_t freq, int note_index) {
     cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
     cdata->table[note_index].inc = osc->get_increment(cdata->note_data_array[note_index].freq);
     return S_OK;
   }
-  int NoteOn(InstrumentData* data, int note_index) {
-    auto cdata = (OscWaveData*)data;
+  int NoteOn(int note_index) {
     adsr[note_index].NoteOn(cdata->note_data_array[note_index].velocity);
     return S_OK;
   }
-  int NoteOff(InstrumentData* data, int note_index) {
-    auto cdata = (OscWaveData*)data;
+  int NoteOff(int note_index) {
     //cdata->table[note_index].inc = osc->get_increment(cdata->note_data_array[note_index].freq);
     adsr[note_index].NoteOff(cdata->note_data_array[note_index].velocity);
     return S_OK;
   }
+  void set_instrument_data(InstrumentData* idata) {
+    cdata = (OscWaveData*)idata;
+  }
  protected:
+  OscWaveData* cdata;
   oscillators::Oscillator* osc;
   WaveType type_;
 };

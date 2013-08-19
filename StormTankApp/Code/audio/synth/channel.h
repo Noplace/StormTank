@@ -38,12 +38,13 @@ class Channel : public Component {
     SafeDelete(&instrument_data_);
   }
   void RenderStereo(uint32_t samples_to_generate) {
+    instrument_->set_instrument_data(instrument_data_);
     auto bufptr = buffer_;
     if (silence_ == false) {
       for (uint32_t i=0;i<samples_to_generate;++i) {
         real_t sample = 0;
         for (int n=0;n<Polyphony;++n) {
-          sample += instrument_->Tick(instrument_data_,n);
+          sample += instrument_->Tick(n);
         }
         *bufptr++ = (amplification_*pan_l*sample);
         *bufptr++ = (amplification_*pan_r*sample);
@@ -56,31 +57,34 @@ class Channel : public Component {
     }
   }
   void AddNote(int note,real_t freq,real_t velocity) {
+    instrument_->set_instrument_data(instrument_data_);
     auto ptr = &instrument_data_->note_data_array[current_note];
     ptr->note = note;
     ptr->velocity = velocity;
     ptr->on = true;
-    instrument_->SetFrequency(freq,instrument_data_,current_note);
-    instrument_->NoteOn(instrument_data_,current_note);
+    instrument_->SetFrequency(freq,current_note);
+    instrument_->NoteOn(current_note);
     current_note = (current_note + 1) % Polyphony;
   }
   void RemoveNote(int note,real_t velocity) {
+    instrument_->set_instrument_data(instrument_data_);
     for (int i=0;i<Polyphony;++i) {
       auto* ptr = &instrument_data_->note_data_array[i];
       if (ptr->note == note && ptr->on == true) {
         ptr->on = false;
         ptr->note = note;
         ptr->velocity = velocity;
-        instrument_->NoteOff(instrument_data_,i);
+        instrument_->NoteOff(i);
         current_note = i;
       }
     }
   }
   void SetPitchBend(real_t amount) {
+    instrument_->set_instrument_data(instrument_data_);
     real_t e = exp(amount * _LN_2_DIV_12);
     for (int i=0;i<Polyphony;++i) {
       auto freq = instrument_data_->note_data_array[i].freq * e;
-      instrument_->SetFrequency(freq,instrument_data_,i);
+      instrument_->SetFrequency(freq,i);
     }
   }
   instruments::InstrumentProcessor* instrument() { return instrument_; }

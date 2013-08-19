@@ -57,8 +57,8 @@ int BlitWave::Unload() {
 }
 
   
-real_t BlitWave::Tick(InstrumentData* data, int note_index) {
-  auto cdata = (BlitWaveData*)data;
+real_t BlitWave::Tick(int note_index) {
+  
   int note = cdata->note_data_array[note_index].note;
   
   real_t result = 0.2f*wavetables[note][cdata->table[note_index].inc1];
@@ -66,21 +66,20 @@ real_t BlitWave::Tick(InstrumentData* data, int note_index) {
   return result*adsr[note_index].Tick();
 }
 
-int BlitWave::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
-  auto cdata = (BlitWaveData*)data;
+int BlitWave::SetFrequency(real_t freq, int note_index) {
   cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
   cdata->table[note_index].inc1 = rand() % 4096;
   return S_OK;
 }
 
-int BlitWave::NoteOn(InstrumentData* data, int note_index) {
-  adsr[note_index].NoteOn(data->note_data_array[note_index].velocity);  
+int BlitWave::NoteOn(int note_index) {
+  adsr[note_index].NoteOn(cdata->note_data_array[note_index].velocity);  
   return S_OK;
 }
 
 
-int BlitWave::NoteOff(InstrumentData* data, int note_index) {
-  adsr[note_index].NoteOff(data->note_data_array[note_index].velocity); 
+int BlitWave::NoteOff(int note_index) {
+  adsr[note_index].NoteOff(cdata->note_data_array[note_index].velocity); 
   return S_OK;
 }
 

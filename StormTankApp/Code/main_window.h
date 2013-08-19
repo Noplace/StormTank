@@ -18,8 +18,18 @@
 *****************************************************************************************************************/
 class MainWindow: public core::windows::Window {
   public:
-    LoadingScene  loading_scene;
-    IntroScene    intro_scene;
+    struct Resources {
+      struct {
+        graphics::InputLayout input_layout;
+        D3DXHANDLE world,viewprojection;
+        LPD3DXEFFECT effect;
+      }gfx;
+    }resources;
+    struct {
+      LoadingScene  loading;
+      IntroScene    intro;
+      DemoScene     demo;
+    }scenes;
     MainWindow();
     ~MainWindow();
     void Initialize();
@@ -35,8 +45,7 @@ class MainWindow: public core::windows::Window {
       }
     }
     graphics::ContextD3D9* gfx() { return gfx_; }
-    audio::output::DirectSound* audio_interface() { return audio_interface_; }
-    //SonantPlayer& player() { return player_; }
+    audio::output::Interface* audio_interface() { return audio_interface_; }
     audio::synth::MidiSynth& midi_synth() { return *midi_synth_; }
     audio::synth::Player& player2() { return *synth_player_; }
     utilities::Timer& timer() { return timer_; }
@@ -48,12 +57,11 @@ class MainWindow: public core::windows::Window {
     int OnActivate(WPARAM wParam,LPARAM lParam);
   private:
     graphics::ContextD3D9*    gfx_;
-    audio::output::DirectSound* audio_interface_;
+    audio::output::Interface* audio_interface_;
     BaseScene*                current_scene;
-    graphics::InputLayout     input_layout;
-    //SonantPlayer              player_;
     audio::synth::Player*      synth_player_;
     audio::synth::MidiSynth*   midi_synth_;
+    audio::synth::SonantSynth*   sonant_synth_;
     utilities::Timer  timer_;
     struct {
       uint64_t extra_cycles;

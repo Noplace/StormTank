@@ -44,11 +44,15 @@ class Violin : public Pad {
   InstrumentData* NewInstrumentData() {
     return new ViolinData();
   }
-  real_t Tick(InstrumentData* data, int note_index);
-  int SetFrequency(real_t freq, InstrumentData* data, int note_index);
-  int NoteOn(InstrumentData* data, int note_index);
-  int NoteOff(InstrumentData* data, int note_index);
+  real_t Tick(int note_index);
+  int SetFrequency(real_t freq, int note_index);
+  int NoteOn(int note_index);
+  int NoteOff(int note_index);
+  void set_instrument_data(InstrumentData* idata) {
+    cdata = (ViolinData*)idata;
+  }
  protected:
+  ViolinData* cdata;
   virtual void CalculateHarmonics(real_t freq);
 };
 

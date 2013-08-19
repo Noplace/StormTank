@@ -16,38 +16,31 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE            *
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
 *****************************************************************************************************************/
-#ifndef AUDIO_SYNTH_INSTRUMENTS_SONANT_PROGRAM_H
-#define AUDIO_SYNTH_INSTRUMENTS_SONANT_PROGRAM_H
+#ifndef AUDIO_SYNTH_SONANT_SYNTH_H
+#define AUDIO_SYNTH_SONANT_SYNTH_H
 
-#include "instrument.h"
+#include <WinCore/io/io.h>
+#include "base.h"
+#include "filters/lowpass.h"
+#include "effects/delay.h"
+#include "channel.h"
+#include "instruments/sonant_program.h"
+#include "synth.h"
+#include "player.h"
 
 namespace audio {
 namespace synth {
-namespace instruments {
 
 
+// Structs
+// Columns
+typedef struct {
+    // Notes
+    unsigned char   n[32];          // Notes (pattern length is 32)
+} SonantColumn;
 
-class SonantProgramData : public InstrumentData {
- public:
-  struct {
-    unsigned int attack;
-    unsigned int sustain;
-    unsigned int release;
-    float c1,c2;
-
-    float q;
-    float low,band;
-
-    unsigned int i,icount,currentpos;
-  } table[Polyphony];
-  SonantProgramData() : InstrumentData() {
-    memset(table,0,sizeof(table));
-  }
-};
-
-class SonantProgram : public InstrumentProcessor {
- public:
-  struct Data {
+// Instrument
+typedef struct {
     // Oscillator 1
     unsigned char   osc1_oct;       // Octave knob
     unsigned char   osc1_det;       // Detune knob
@@ -83,30 +76,82 @@ class SonantProgram : public InstrumentProcessor {
     unsigned char   lfo_freq;       // LFO freq
     unsigned char   lfo_amt;        // LFO amount
     unsigned char   lfo_waveform;   // LFO waveform
+    // Patterns
+             char   p[48];          // Pattern order (Maximum 32 patterns)
+    // Columns
+    SonantColumn          c[10];          // Columns (10 maximum)
+} SonantInstrument;
+
+// Songs
+typedef struct {
+    // Instruments
+    SonantInstrument      i[8];           // Instruments (8 maximum)
+} SonantSong;
+
+
+class SonantSynth : public Synth {
+ public:
+  enum State {
+    kStateStopped=0,kStatePlaying=1,kStatePaused=2
+  };
+  enum Mode {
+    kModeSequencer,
+    kModeTest
+  };
+  SonantSynth() : Synth(),initialized_(false),mode_(kModeSequencer),
+                ticks_per_beat(0),samples_to_next_event(0),bpm(0) {
+    memset(&prog,0,sizeof(prog));
+    memset(&prog_data,0,sizeof(prog_data));
+    memset(&aux_effects,0,sizeof(aux_effects));
+    memset(&main_effects,0,sizeof(main_effects));
+  }
+  ~SonantSynth() {
+    Deinitialize();
+  }
+  void Initialize();
+  void Deinitialize();
+  void LoadSong(SonantSong* song, int endpattern, int rowlen);
+  void RenderSamplesStereo(uint32_t samples_count, real_t* data_out);
+  void Reset() {
+
+  }
+  void set_mode(Mode mode) {
+    mode_ = mode;
+  }
+  effects::Effect* aux_effects[kEffectCount];
+  effects::Effect* main_effects[kEffectCount];
+ private:
+  SonantSong* song_;
+  struct Track {
+
+    uint32_t event_index,event_count,ticks_to_next_event;
+
   };
 
-  SonantProgram();
-  virtual ~SonantProgram();
 
-  InstrumentData* NewInstrumentData() {
-    return new SonantProgramData();
-  }
-  int Load();
-  int Unload();
-  real_t Tick(int note_index);
-  void Update(int note_index);
-  int SetFrequency(real_t freq, int note_index);
-  int NoteOn(int note_index);
-  int NoteOff(int note_index);
-  void set_instrument_data(InstrumentData* idata) {
-    cdata = (SonantProgramData*)idata;
-  }
-  Data data;
- protected:
-  SonantProgramData* cdata;
+  void GenerateIntoBufferStereo(uint32_t samples_to_generate, real_t* data_out, uint32_t& data_offset);
+  void MixChannelsStereo(uint32_t samples_to_generate);
+  
+  
+  struct {
+    real_t* channels[16];
+    real_t* main;
+    real_t* aux;
+    size_t main_size;
+    size_t aux_size;
+  } buffers; 
+  instruments::SonantProgram* prog[8];
+  instruments::InstrumentData* prog_data[8];
+  
+  CRITICAL_SECTION me_lock;
+  double bpm;
+  uint32_t ticks_per_beat;
+  uint32_t samples_to_next_event;
+  int track_count_,endpattern_,rowlen_;
+  Mode mode_;
+  bool initialized_;
 };
 
-}
 }
 }
 

@@ -166,7 +166,7 @@ void  karplus::display(){
 void	karplus::noise(){
 
 		//nahodna cisla budou vzdy jina, pouziva se systemovy cas
-		srand(time(0));
+		srand((unsigned int)time(0));
 
 		//rozptyl hodnot <-7500, 7500>
 		for(int i = 0; i < delka; i++)
@@ -198,7 +198,7 @@ void  karplus::insert_sample(){
 		//printf("\nsoubor sample.raw nejde otevrit\n");
 		//printf("pouziji se nahodna cisla\n");
 
-		while(!kbhit());
+		while(!_kbhit());
 
 		return;
 		}
@@ -215,7 +215,7 @@ void  karplus::insert_sample(){
 			//printf("\nsample.raw nenaplnil celou tabulku!");
 			//printf("\npouziji se nahodna cisla\n");
 
-			while(!kbhit());
+			while(!_kbhit());
 
 			}
 
@@ -232,7 +232,7 @@ void  karplus::insert_sample(){
 
 			//printf("\n\nsoubor sample.raw naplnil tabulku! ok..\n");
 
-			while(!kbhit());
+			while(!_kbhit());
 
 
 			}

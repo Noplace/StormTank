@@ -17,6 +17,7 @@
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                                         *
 *****************************************************************************************************************/
 #include "stormtankapp.h"
+#include "music.h"
 
 float delay;
 bool key_down[256];
@@ -51,6 +52,8 @@ void MainWindow::Initialize() {
   gfx_ = new graphics::ContextD3D9();
   gfx_->Initialize();
   gfx_->CreateDisplay(this);
+
+  //for 2d
   graphics::InputElement gielements[] = 
   {
       {0, 0 , D3DDECLTYPE_FLOAT3  , D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
@@ -60,9 +63,22 @@ void MainWindow::Initialize() {
       D3DDECL_END()
   };
 
-  gfx_->CreateInputLayout(gielements,input_layout);
-  gfx_->SetInputLayout(input_layout);
+  gfx_->CreateInputLayout(gielements,resources.gfx.input_layout);
+  gfx_->SetInputLayout(resources.gfx.input_layout);
 
+  {
+    uint8_t* data;
+    size_t size;
+    core::io::ReadWholeFileBinary("D:\\Personal\\Projects\\StormTank\\StormTankApp\\Shaders\\main2d.o",&data,size);
+    if (data != nullptr) {
+      gfx_->CreateEffectInterface((uint8_t*)data,size,(void**)&resources.gfx.effect);
+    }
+    core::io::DestroyFileBuffer(&data);
+
+    resources.gfx.viewprojection = resources.gfx.effect->GetParameterByName(0,"viewprojection");
+    resources.gfx.world = resources.gfx.effect->GetParameterByName(0,"world");
+
+  }
 
 
   audio_interface_ = new audio::output::DirectSound();
@@ -73,6 +89,9 @@ void MainWindow::Initialize() {
 
   //player_.set_audio_interface(audio_interface_);
   //player_.Initialize();
+
+  sonant_synth_ = new audio::synth::SonantSynth();
+  sonant_synth_->set_mode(audio::synth::SonantSynth::kModeSequencer);
   midi_synth_ = new audio::synth::MidiSynth();
   midi_synth_->set_mode(audio::synth::MidiSynth::kModeSequencer);
   synth_player_ = new audio::synth::Player();
@@ -80,13 +99,16 @@ void MainWindow::Initialize() {
   synth_player_->set_synth(midi_synth_);
   //synth_player_->set_mode(audio::synth::Player::kModeLoop);
   synth_player_->Initialize();
+
+  //sonant_synth_->LoadSong(&songdata,_4K_SONANT_ENDPATTERN_,_4K_SONANT_ROWLEN_);
+
   delay = 400.0f;
   midi_synth_->delay_unit.set_delay_ms(delay);
 
   //loading_scene.Initialize(this);
   //intro_scene.Initialize(this);
   //current_scene = &loading_scene;
-  SwitchScene(&loading_scene);
+  SwitchScene(&scenes.demo);
   Show();
   timing.prev_cycles = timer_.GetCurrentCycles();
   //SetThreadAffinityMask(GetCurrentThread(),
@@ -114,7 +136,7 @@ void MainWindow::Step() {
     if (key_down[key_maps[i]] == true && key_state[key_maps[i]] == 0) {
       auto midi_event = midi_synth_->BeginPrepareNextEvent();
       midi_event->channel = 0;
-      midi_event->data.note.noteNumber = (Notes)(Notes::C3+i);
+      midi_event->data.note.noteNumber = (audio::synth::kNoteC3+i);
       midi_event->data.note.velocity = 127;
       midi_event->type = midi::kEventTypeChannel;
       midi_event->subtype = midi::kEventSubtypeNoteOn;
@@ -127,7 +149,7 @@ void MainWindow::Step() {
     } else if (key_down[key_maps[i]] == false && key_state[key_maps[i]] == 1) {
       auto midi_event = midi_synth_->BeginPrepareNextEvent();
       midi_event->channel = 0;
-      midi_event->data.note.noteNumber = (Notes)(Notes::C3+i);
+      midi_event->data.note.noteNumber = (audio::synth::kNoteC3+i);
       midi_event->data.note.velocity = 127;
       midi_event->type = midi::kEventTypeChannel;
       midi_event->subtype = midi::kEventSubtypeNoteOff;
@@ -184,10 +206,13 @@ int MainWindow::OnDestroy(WPARAM wParam,LPARAM lParam) {
   synth_player_->Deinitialize();
   SafeDelete(&synth_player_);
   SafeDelete(&midi_synth_);
+  SafeDelete(&sonant_synth_);
   //player_.Deinitialize();
   audio_interface_->Deinitialize();
   SafeDelete(&audio_interface_);
-  gfx_->DestoryInputLayout(input_layout);
+
+  gfx_->DestroyEffectInterface((void**)&resources.gfx.effect);
+  gfx_->DestoryInputLayout(resources.gfx.input_layout);
   gfx_->Deinitialize();
   SafeDelete(&gfx_);
   PostQuitMessage(0);

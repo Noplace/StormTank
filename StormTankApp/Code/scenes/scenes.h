@@ -4,7 +4,7 @@ struct GfxVertex {
   float u,v;
 };
 
-class BaseScene : public graphics::Scene {
+class BaseScene {
  public:
   virtual int Initialize(MainWindow* win) {
     this->win = win;
@@ -27,6 +27,9 @@ class LoadingScene : public BaseScene {
   int Draw();
  private:
   static DWORD WINAPI LoadingThread(LPVOID lpThreadParameter);
+  graphics::Camera camera_;
+  graphics::VertexShader vertex_shader_;
+  graphics::PixelShader pixel_shader_;
   graphics::Buffer vb;
   graphics::Texture texture;
   graphics::shape::Arc arc1;
@@ -45,11 +48,38 @@ class IntroScene : public BaseScene {
   int Update(double dt);
   int Draw();
  private:
-  Oscilloscope sa;
+
+  graphics::Texture render_texture;
+  graphics::ResourceView render_surface,old_surface;
+
   FontDraw font;
+  graphics::Camera camera_;
+  graphics::VertexShader vertex_shader_;
+  graphics::PixelShader pixel_shader_;
+  Oscilloscope sa;
   graphics::Buffer vb;
   graphics::Texture texture;
   graphics::shape::Arc arc1;
-  LPD3DXEFFECT effect;
-  D3DXHANDLE world,viewprojection;
+};
+
+
+class DemoScene : public BaseScene {
+ public:
+  int Initialize(MainWindow* win);
+  int Deinitialize();
+  int Update(double dt);
+  int Draw();
+ private:
+  graphics::ContextD3D9* gfx;
+  double main_time_span;
+  struct {
+    char help_str[255];
+    FontDraw font;
+    graphics::Buffer vb;
+    graphics::Texture texture;
+    graphics::shape::Arc arc1;
+    LPD3DXEFFECT effect;
+    D3DXHANDLE world,viewprojection;
+    graphics::Camera cam2d,cam3d;
+  } res;
 };

@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\audio\midi\midi2.cpp" />
+    <ClCompile Include="Code\audio\output\wasapi.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\blit.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\pad.cpp" />
     <ClCompile Include="Code\audio\synth\instruments\percussion.cpp" />
@@ -49,9 +50,11 @@
     <ClCompile Include="Code\audio\synth\oscillators\triangle_oscillator.cpp" />
     <ClCompile Include="Code\audio\synth\padsynth\pad_synth.cpp" />
     <ClCompile Include="Code\audio\synth\player.cpp" />
+    <ClCompile Include="Code\audio\synth\sonant_synth.cpp" />
     <ClCompile Include="Code\gfx\font_draw.cpp" />
     <ClCompile Include="Code\gfx\oscilloscope.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
+    <ClCompile Include="Code\scenes\demo_scene.cpp" />
     <ClCompile Include="Code\scenes\intro_scene.cpp" />
     <ClCompile Include="Code\audio\output\directsound.cpp" />
     <ClCompile Include="Code\audio\synth\midi_synth.cpp" />
@@ -62,11 +65,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\audio\midi\midi2.h" />
+    <ClInclude Include="Code\audio\output\wasapi.h" />
     <ClInclude Include="Code\audio\synth\adsr.h" />
     <ClInclude Include="Code\audio\synth\base.h" />
     <ClInclude Include="Code\audio\synth\channel.h" />
     <ClInclude Include="Code\audio\synth\component.h" />
     <ClInclude Include="Code\audio\synth\filters\iir_filter.h" />
+    <ClInclude Include="Code\audio\synth\instruments\waveguide_synthesis.h" />
     <ClInclude Include="Code\audio\synth\misc.h" />
     <ClInclude Include="Code\audio\synth\effects\delay.h" />
     <ClInclude Include="Code\audio\synth\effects\effect.h" />
@@ -84,18 +89,20 @@
     <ClInclude Include="Code\audio\synth\midi_synth.h" />
     <ClInclude Include="Code\audio\synth\oscillators\exp_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\oscillator.h" />
+    <ClInclude Include="Code\audio\synth\player.h" />
+    <ClInclude Include="Code\audio\synth\sonant_synth.h" />
     <ClInclude Include="Code\audio\synth\wavetable.h" />
     <ClInclude Include="Code\audio\synth\oscillators\sawtooth_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\sine_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\square_oscillator.h" />
     <ClInclude Include="Code\audio\synth\oscillators\triangle_oscillator.h" />
     <ClInclude Include="Code\audio\synth\padsynth\pad_synth.h" />
-    <ClInclude Include="Code\audio\synth\player.h" />
     <ClInclude Include="Code\audio\synth\types.h" />
     <ClInclude Include="Code\audio\synth\util.h" />
     <ClInclude Include="Code\gfx\font_draw.h" />
     <ClInclude Include="Code\gfx\oscilloscope.h" />
     <ClInclude Include="Code\main_window.h" />
+    <ClInclude Include="Code\music.h" />
     <ClInclude Include="Code\ptg\generators.h" />
     <ClInclude Include="Code\ptg\layers.h" />
     <ClInclude Include="Code\ptg\pgt.h" />
@@ -137,11 +144,13 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -149,6 +158,7 @@
     <CharacterSet>NotSet</CharacterSet>
     <UseIntelMKL>No</UseIntelMKL>
     <UseILP64Interfaces>false</UseILP64Interfaces>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -156,24 +166,28 @@
     <CharacterSet>NotSet</CharacterSet>
     <UseIntelMKL>No</UseIntelMKL>
     <UseILP64Interfaces>false</UseILP64Interfaces>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - Intel C++|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -181,6 +195,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
     <InterproceduralOptimization>true</InterproceduralOptimization>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -216,6 +231,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>D:\Personal\Projects\WinCore;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -226,6 +242,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>D:\Personal\Projects\WinCore;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -324,7 +341,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WIN64;_AMD64;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -406,12 +423,13 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_WIN64;_AMD64;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WIN64;_AMD64;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Strict</FloatingPointModel>
       <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -448,7 +466,7 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\FXC.targets" />
-    <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\bin2h\Bin2h.targets" />
+    <Import Project="D:\Personal\Tools\BuildRules\FXC.targets" />
+    <Import Project="D:\Personal\Tools\BuildRules\bin2h\Bin2h.targets" />
   </ImportGroup>
 </Project>

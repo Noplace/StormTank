@@ -64,8 +64,7 @@ int Piano::Unload() {
   return Pad::Unload();
 }
 
-real_t Piano::Tick(InstrumentData* data, int note_index) {
-  auto cdata = (PianoData*)data;
+real_t Piano::Tick(int note_index) {
   real_t result = 0;
   {
     auto& nd = cdata->pad_table[note_index];
@@ -87,8 +86,7 @@ real_t Piano::Tick(InstrumentData* data, int note_index) {
   return result;
 }
 
-int Piano::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
-  auto cdata = (PianoData*)data;
+int Piano::SetFrequency(real_t freq, int note_index) {
   cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
   cdata->piano_table[note_index].inc1 = osc1.get_increment(cdata->note_data_array[note_index].freq);
   cdata->piano_table[note_index].inc2 = osc2.get_increment(cdata->note_data_array[note_index].freq*1.5f);
@@ -97,13 +95,13 @@ int Piano::SetFrequency(real_t freq, InstrumentData* data, int note_index) {
   return S_OK;
 }
 
-int Piano::NoteOn(InstrumentData* data, int note_index) {
-  Pad::NoteOn(data,note_index);
+int Piano::NoteOn(int note_index) {
+  Pad::NoteOn(note_index);
   return S_OK;
 }
 
-int Piano::NoteOff(InstrumentData* data, int note_index) {
-  Pad::NoteOff(data,note_index);
+int Piano::NoteOff(int note_index) {
+  Pad::NoteOff(note_index);
   return S_OK;
 }
 

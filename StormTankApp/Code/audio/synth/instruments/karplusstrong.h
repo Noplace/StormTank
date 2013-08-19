@@ -30,26 +30,27 @@ namespace instruments {
 
 class DelayLine {
  public:
-  DelayLine() :D(nullptr),ptr(0),M(0) {
+  DelayLine() :buffer(nullptr),ptr(0),M(0) {
 
   }
   void Initialize(uint32_t max) {
     this->M = max;
-    D = new real_t[max];
+    buffer = new real_t[max];
   }
   void Deinitialize() {
-    delete [] D;
+    delete [] buffer;
   }
   real_t Tick(real_t x)   {
-    real_t y = D[ptr];
-    D[ptr++] = x;         
+    real_t y = buffer[ptr];
+    buffer[ptr++] = x;         
     if (ptr >= M) { ptr -= M; } 
     return y;
   }
   uint32_t M;
- protected:
-  real_t* D;
+  real_t* buffer;
   intptr_t ptr;
+protected:
+
    
 };
 
@@ -58,7 +59,7 @@ class PickDirectionLowPassFilter : public filters::IIRFilter<1,2> {
   void Update(float p) {
     a[0] = 1.0f-p;
     b[0] = 1.0f;
-    b[1] = -p;
+    b[1] = p;
   }
 };
 
@@ -75,6 +76,30 @@ class PickPositionCombFilter : public filters::IIRFilter<100,1> {
   }
 };
 
+class StringDampingFilter : public filters::IIRFilter<3,1> {
+ public:
+  void Update() {
+    real_t g0 = 0.52f,g1 = 0.8f;
+    a[0] = g0;
+    a[1] = g1;
+    a[2] = g0;
+    b[0] = 2.0f;
+
+  }
+};
+
+class StringStiffnessAllpassFilter : public filters::IIRFilter<3,3> {
+ public:
+  void Update() {
+    real_t c0 = 0.1f,c1 = 0.2f,c2=0.3f;
+    a[0] = c2;
+    a[1] = c1;
+    a[2] = c0;
+    b[0] = c0;
+    b[1] = c1;
+    b[2] = c2;
+  }
+};
 
 class FirstStringTuningAllPassFilter : public filters::IIRFilter<2,2> {
  public:
@@ -83,7 +108,7 @@ class FirstStringTuningAllPassFilter : public filters::IIRFilter<2,2> {
     a[0] = -n;
     a[1] = 1.0f;
     b[0] = 1.0f;
-    b[1] = -n;
+    b[1] = n;
   }
 };
 
@@ -95,10 +120,25 @@ class DynamicLevelLowPassFilter : public filters::IIRFilter<1,2> {
     real_t x = exp(-XM_PI*L*T);
     a[0] = 1.0f-x;
     b[0] = 1.0f;
-    b[1] = -x;
+    b[1] = x;
 
   }
 };
+
+class LowPassFilter : public filters::IIRFilter<1,2> {
+ public:
+  void set_cutoff_freq(real_t cutoff_freq) { cutoff_freq_ = cutoff_freq; }
+  void Update() {
+    real_t fc = (cutoff_freq_)/(sample_rate_);
+    real_t x = exp(-2*XM_PI*fc);
+    a[0] = 1.0f-x;
+    b[0] = 1.0f;
+    b[1] = x;
+  }
+ protected:
+  real_t cutoff_freq_;
+};
+
 
 class KarplusStrongData : public InstrumentData {
  public:
@@ -133,24 +173,27 @@ class KarplusStrong : public InstrumentProcessor {
 
 
       Hd[i].set_sample_rate(sample_rate_);
-      Hd[i].set_cutoff_freq(8000.0f);
-      Hd[i].Initialize();
-
+      Hd[i].Update();
+      Hs[i].set_sample_rate(sample_rate_);
+      Hs[i].Update();
 
       Hn[i].set_sample_rate(sample_rate_);
       Hn[i].Update();
       HL[i].set_sample_rate(sample_rate_);
       HL[i].Update(22100.0f);
-
+      
+      lowpass[i].set_sample_rate(sample_rate_);
+      lowpass[i].set_cutoff_freq(12050.0f);
+      lowpass[i].Update();
       //delay[i].set_sample_rate(sample_rate_);
       //delay[i].set_delay_ms(40.0f);
       //delay[i].set_feedback(0.7f);
       delay[i].Initialize(wavetables[i].count);
       adsr[i].set_sample_rate(sample_rate_);
-      adsr[i].set_attack_amp(0.5f);
-      adsr[i].set_sustain_amp(0.3f);
-      adsr[i].set_attack_time_ms(50.0f);
-      adsr[i].set_decay_time_ms(8.0f);
+      adsr[i].set_attack_amp(0.8f);
+      adsr[i].set_sustain_amp(0.6f);
+      adsr[i].set_attack_time_ms(10.0f);
+      adsr[i].set_decay_time_ms(4.0f);
       adsr[i].set_release_time_ms(20.5f);
     }
 
@@ -179,55 +222,69 @@ class KarplusStrong : public InstrumentProcessor {
   InstrumentData* NewInstrumentData() {
     return new KarplusStrongData();
   }
-  real_t Tick(InstrumentData* data, int note_index) {
-    auto cdata = (KarplusStrongData*)data;
+  real_t Tick(int note_index) {
+    //auto cdata = (KarplusStrongData*)data;
     auto& nd = cdata->table[note_index];
     auto& wavetable = wavetables[note_index];
     auto prev_phase = nd.phase;
     nd.phase = ((nd.phase + 1) % wavetable.count);
-    real_t	out = wavetable.buf[nd.phase];
-    auto previous = wavetable.buf[prev_phase];
-    wavetable.buf[prev_phase] = Hn[note_index].Tick(Hd[note_index].Tick(wavetable.buf[nd.phase]));
+
     
-    out = HL[note_index].Tick(out);
+    real_t	out = wavetable.buf[nd.phase];
+    //auto previous = wavetable.buf[prev_phase];
+    //wavetable.buf[prev_phase] = (wavetable.buf[prev_phase]+wavetable.buf[nd.phase])*0.5f;
+    wavetable.buf[prev_phase] = lowpass[note_index].Tick(wavetable.buf[nd.phase]);
+    //auto s1 = Hd[note_index].Tick(wavetable.buf[nd.phase]);
+    //auto s2 = Hs[note_index].Tick(wavetable.buf[nd.phase]);
+    //wavetable.buf[prev_phase] = Hd[note_index].Tick(wavetable.buf[nd.phase]);
+    
 
     //out = effects::HardClip(out*5);
     //out = effects::EnhanceHarmonics(out,);
     out *= adsr[note_index].Tick();
     return out;
   }
-  int SetFrequency(real_t freq, InstrumentData* data, int note_index) {
-    auto cdata = (KarplusStrongData*)data;
+  int SetFrequency(real_t freq, int note_index) {
     cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
     cdata->table[note_index].phase = 0;
     delay[note_index].M = wavetables[note_index].count = int(ceil(sample_rate_ / cdata->note_data_array[note_index].freq));
+
+     
 
     //HB[note_index].Update(0.2,sample_rate_/freq);
     FillNoise(note_index);//cdata->note_data_array[note_index].note);
 
     return S_OK;
   }
-  int NoteOn(InstrumentData* data, int note_index) {
-    auto cdata = (KarplusStrongData*)data;
+  int NoteOn(int note_index) {
+    //auto cdata = (KarplusStrongData*)data;
+
     adsr[note_index].NoteOn(cdata->note_data_array[note_index].velocity);
     return S_OK;
   }
-  int NoteOff(InstrumentData* data, int note_index) {
-    auto cdata = (KarplusStrongData*)data;
+  int NoteOff(int note_index) {
+    //auto cdata = (KarplusStrongData*)data;
     adsr[note_index].NoteOff(cdata->note_data_array[note_index].velocity);
     return S_OK;
   }
+
+  void set_instrument_data(InstrumentData* idata) {
+    this->cdata = (KarplusStrongData*)idata;
+  }
  protected:
+  KarplusStrongData* cdata;
   struct {
     int count;
     real_t* buf;
   } wavetables[Polyphony];
-
   PickDirectionLowPassFilter Hp[Polyphony];
   PickPositionCombFilter     HB[Polyphony];
   FirstStringTuningAllPassFilter Hn[Polyphony];
   DynamicLevelLowPassFilter HL[Polyphony];
-  filters::LowPassFilter Hd[Polyphony];
+  StringDampingFilter Hd[Polyphony];
+  StringStiffnessAllpassFilter Hs[Polyphony];
+  LowPassFilter lowpass[Polyphony];
+  //filters::LowPassFilter Hd[Polyphony];
   
   //effects::Delay delay[Polyphony];
   DelayLine delay[Polyphony];
@@ -237,7 +294,7 @@ class KarplusStrong : public InstrumentProcessor {
   inline void FillNoise(int index) {
     memset(wavetables[index].buf,0,sizeof(real_t)*sample_rate_/8);
     for (int i=0;i<wavetables[index].count;++i) {
-      wavetables[index].buf[i] = Noise(&randseed);
+      delay[index].buffer[i] = wavetables[index].buf[i] = RandomFloat(&randseed);
       //wavetables[index].buf[i] = HB[index].Tick(Hp[index].Tick(Noise(&randseed)));
     }
   }

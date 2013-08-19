@@ -47,11 +47,15 @@ class Pad : public InstrumentProcessor {
   virtual InstrumentData* NewInstrumentData() {
     return new PadData();
   }
-  virtual real_t Tick(InstrumentData* data, int note_index);
-  virtual int SetFrequency(real_t freq, InstrumentData* data, int note_index);
-  virtual int NoteOn(InstrumentData* data, int note_index);
-  virtual int NoteOff(InstrumentData* data, int note_index);
+  virtual real_t Tick(int note_index);
+  virtual int SetFrequency(real_t freq, int note_index);
+  virtual int NoteOn(int note_index);
+  virtual int NoteOff(int note_index);
+  void set_instrument_data(InstrumentData* idata) {
+    cdata = (PadData*)idata;
+  }
  protected:
+  PadData* cdata;
   PadSynth padsynth;
   float* buffer[128];
   real_t harmonics_array[64];

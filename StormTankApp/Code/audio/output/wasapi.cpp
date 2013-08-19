@@ -1,47 +1,39 @@
-#include <Windows.h>
-#include <WinCore/types.h>
-#include <objbase.h>
-#pragma warning(push)
-#pragma warning(disable : 4201)
-#include <mmdeviceapi.h>
-#include <audiopolicy.h>
-#pragma warning(pop)
+#include "wasapi.h"
 
 
-const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
-const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
-const IID IID_IAudioClient = __uuidof(IAudioClient);
-const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
-
-IMMDeviceEnumerator* device_enumurator = NULL;
-IMMDevice *device = NULL;
-IAudioClient* audio_client = NULL;
-IAudioRenderClient* render_client = NULL;
-WAVEFORMATEX *pwfx = NULL;
-UINT32 bufferFrameCount;
-UINT32 numFramesAvailable;
-UINT32 numFramesPadding;
+namespace audio {
+namespace output {
 
 #define REFTIMES_PER_SEC  10000000
 #define REFTIMES_PER_MILLISEC  10000
-REFERENCE_TIME hnsRequestedDuration = REFTIMES_PER_SEC*3;
-REFERENCE_TIME hnsActualDuration;
-UINT32 written_samples;
-WAVEFORMATEXTENSIBLE fmt;
 
-BYTE* audio_block;
+WASAPI::WASAPI() : device_enumurator(nullptr),device(nullptr),audio_client(nullptr),
+                   render_client(nullptr),pwfx(nullptr),buffer_sample_count(0) {
+  numFramesAvailable=0;
+  numFramesPadding=0;
 
-int WASAPI_GetSampleRate() {
-  return pwfx->nSamplesPerSec;
+  hnsRequestedDuration = REFTIMES_PER_SEC*0.4;
+  hnsActualDuration;
+  written_samples;
+  memset(&fmt,0,sizeof(fmt));
 }
 
-int WASAPI_Initialize(int rate,int channels,int bits) {
-  CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);
+WASAPI::~WASAPI() {
+
+}
+
+int WASAPI::Initialize(uint32_t sample_rate, uint8_t channels, uint8_t bits) {
+  static const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
+  static const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
+  static const IID IID_IAudioClient = __uuidof(IAudioClient);
+  static const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
+
+  CoInitializeEx(nullptr,COINIT_MULTITHREADED);
   //WAVEFORMATEX* closest_fmt = (WAVEFORMATEX*)CoTaskMemAlloc(sizeof(WAVEFORMATEXTENSIBLE));
- // WAVEFORMATEX** pclosest_fmt = &closest_fmt;
+  //WAVEFORMATEX** pclosest_fmt = &closest_fmt;
   fmt.Format.wFormatTag			= WAVE_FORMAT_EXTENSIBLE;
   fmt.Format.nChannels				= channels;
-  fmt.Format.nSamplesPerSec	= rate;
+  fmt.Format.nSamplesPerSec	= sample_rate;
   fmt.Format.wBitsPerSample	= (bits+7)&~7;
   fmt.Format.nBlockAlign			= channels * fmt.Format.wBitsPerSample>>3;
   fmt.Format.nAvgBytesPerSec	= fmt.Format.nBlockAlign * fmt.Format.nSamplesPerSec;
@@ -49,73 +41,109 @@ int WASAPI_Initialize(int rate,int channels,int bits) {
   fmt.Samples.wValidBitsPerSample	= bits;
 	fmt.dwChannelMask					= channels==2 ? 3 : 4;	//Select left & right (stereo) or center (mono)
 	fmt.SubFormat						= KSDATAFORMAT_SUBTYPE_PCM;
-  //pwfx = &fmt.Format;
+  pwfx = &fmt.Format;
+  
   HRESULT hr;
   hr = CoCreateInstance(CLSID_MMDeviceEnumerator,NULL,CLSCTX_ALL,IID_IMMDeviceEnumerator,(void**)&device_enumurator);
   if (FAILED(hr)) return S_FALSE;
   hr = device_enumurator->GetDefaultAudioEndpoint(eRender,eConsole,&device);
-  if (FAILED(hr)) return S_FALSE;
+  if (FAILED(hr)) {
+    SafeRelease(&device_enumurator);
+    return S_FALSE;
+  } 
   hr = device->Activate(IID_IAudioClient, CLSCTX_ALL,NULL, (void**)&audio_client);
-  if (FAILED(hr)) return S_FALSE;
-  hr = audio_client->GetMixFormat(&pwfx);
+  if (FAILED(hr)) {
+    SafeRelease(&device);
+    SafeRelease(&device_enumurator);
+    return S_FALSE;
+  } 
+  //hr = audio_client->GetMixFormat(&pwfx);
   //if (FAILED(hr)) return S_FALSE;
   //hr = audio_client->IsFormatSupported(AUDCLNT_SHAREMODE_SHARED,(WAVEFORMATEX*)&fmt,pclosest_fmt);
-  hr = audio_client->IsFormatSupported(AUDCLNT_SHAREMODE_SHARED,(WAVEFORMATEX*)&fmt,NULL);
+  //hr = audio_client->IsFormatSupported(AUDCLNT_SHAREMODE_SHARED,(WAVEFORMATEX*)&fmt,NULL);
   //CoTaskMemFree(closest_fmt);
-  hr = audio_client->Initialize(AUDCLNT_SHAREMODE_SHARED,0,hnsRequestedDuration,0,pwfx,NULL);
-  if (FAILED(hr)) return S_FALSE;
-  //hr = pMySource->SetFormat(pwfx);
-  //if (FAILED(hr)) return S_FALSE;
+  hr = audio_client->Initialize(AUDCLNT_SHAREMODE_EXCLUSIVE,0,hnsRequestedDuration,0,pwfx,NULL);
+  if (FAILED(hr)) {
+    SafeRelease(&audio_client);
+    SafeRelease(&device);
+    SafeRelease(&device_enumurator);
+    return S_FALSE;
+  } 
+
+  memcpy(&wave_format_,pwfx,sizeof(wave_format_));
 
   // Get the actual size of the allocated buffer.
-  hr = audio_client->GetBufferSize(&bufferFrameCount);
+  hr = audio_client->GetBufferSize(&buffer_sample_count);
   if (FAILED(hr)) return S_FALSE;
 
   hr = audio_client->GetService(IID_IAudioRenderClient,(void**)&render_client);
   if (FAILED(hr)) return S_FALSE;
 
   hnsActualDuration = REFERENCE_TIME((double)REFTIMES_PER_SEC *
-                        bufferFrameCount / fmt.Format.nSamplesPerSec);
+                        buffer_sample_count / fmt.Format.nSamplesPerSec);
 
   written_samples = 0;
 
-  audio_block = new BYTE[bufferFrameCount*pwfx->nBlockAlign];
-
   return S_OK;
 }
-
-int WASAPI_Deinitialize() {
-  CoTaskMemFree(pwfx);
-  SafeRelease(&device_enumurator);
-  SafeRelease(&device);
-  SafeRelease(&audio_client);
+int WASAPI::Deinitialize() {
   SafeRelease(&render_client);
-  delete [] audio_block;
+  SafeRelease(&audio_client);
+  SafeRelease(&device);
+  SafeRelease(&device_enumurator);
+  //CoTaskMemFree(pwfx);
+  return S_OK;
+}
+int WASAPI::Play() {
+   return audio_client->Start();
+
+}
+
+int WASAPI::Stop() {
+  return audio_client->Stop();
+}
+
+uint32_t WASAPI::GetBytesBuffered() {
+  return written_samples;
+}
+
+void WASAPI::GetCursors(uint32_t& play, uint32_t& write) {
+  UINT32* p=nullptr;
+  audio_client->GetCurrentPadding(p);
+  write = buffer_sample_count - *p;
+}
+
+int WASAPI::Write(void* data_pointer, uint32_t size_bytes) {
+  BYTE *dest_buf=nullptr;
+  uint32_t frames = size_bytes >>2; // div by 2 channels, div by sizeof(short)
+  render_client->GetBuffer(frames, &dest_buf);
+  if (dest_buf) {
+    memcpy(dest_buf,data_pointer,size_bytes);
+    written_samples += frames;
+  }
+  render_client->ReleaseBuffer(frames, 0);
+  
   return S_OK;
 }
 
-
-int WASAPI_WriteData(void* data,size_t sample_count) {
-
-
-  
-  memcpy(&audio_block[written_samples*(fmt.Format.wBitsPerSample>>3)],data,sample_count*(fmt.Format.wBitsPerSample>>3));
-  //audio_block += sample_count*fmt.Format.nBlockAlign;
-
-
-  written_samples += sample_count;
-
-  if (written_samples >= bufferFrameCount) {
-    BYTE *pData;
-    render_client->GetBuffer(sample_count, &pData);
-    if (pData)
-    memcpy(pData,audio_block,bufferFrameCount*(fmt.Format.wBitsPerSample>>3));
-    render_client->ReleaseBuffer(sample_count, 0);
-  
-    written_samples = 0;
-    auto hr = audio_client->Start();
-
-    hr = hr;
-  }
+int WASAPI::BeginWrite(uint32_t& samples) {
+  UINT32 p;
+  auto hr = audio_client->GetCurrentPadding(&p);
+  numFramesAvailable = samples = buffer_sample_count - p;
   return S_OK;
+}
+int WASAPI::EndWrite(void* data_pointer)  {
+  return Write(data_pointer,numFramesAvailable<<2);
+}  
+
+
+/*
+int WASAPI_GetSampleRate() {
+  return pwfx->nSamplesPerSec;
+}
+*/
+
+
+
+}
 }
