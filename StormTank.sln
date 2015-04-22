@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StormTankApp", "StormTankApp\StormTankApp.vcxproj", "{C9F2332C-18DE-4679-8D0A-B5F6ED285D3B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E} = {B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}
@@ -62,18 +64,18 @@ Global
 		{43AC74E9-A89D-4E31-8C01-FA2CCE27F5C2}.Release - VSC++|Win32.Build.0 = Release|Win32
 		{43AC74E9-A89D-4E31-8C01-FA2CCE27F5C2}.Release - VSC++|x64.ActiveCfg = Release|x64
 		{43AC74E9-A89D-4E31-8C01-FA2CCE27F5C2}.Release - VSC++|x64.Build.0 = Release|x64
-		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - Intel C++|Win32.ActiveCfg = Debug - Intel C++|Win32
-		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - Intel C++|Win32.Build.0 = Debug - Intel C++|Win32
-		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - Intel C++|x64.ActiveCfg = Debug - Intel C++|x64
-		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - Intel C++|x64.Build.0 = Debug - Intel C++|x64
+		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - Intel C++|Win32.ActiveCfg = Debug|Win32
+		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - Intel C++|Win32.Build.0 = Debug|Win32
+		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - Intel C++|x64.ActiveCfg = Debug|x64
+		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - Intel C++|x64.Build.0 = Debug|x64
 		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - VSC++|Win32.ActiveCfg = Debug|Win32
 		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - VSC++|Win32.Build.0 = Debug|Win32
 		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - VSC++|x64.ActiveCfg = Debug|x64
 		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Debug - VSC++|x64.Build.0 = Debug|x64
-		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - Intel C++|Win32.ActiveCfg = Release - Intel C++|Win32
-		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - Intel C++|Win32.Build.0 = Release - Intel C++|Win32
-		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - Intel C++|x64.ActiveCfg = Release - Intel C++|x64
-		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - Intel C++|x64.Build.0 = Release - Intel C++|x64
+		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - Intel C++|Win32.ActiveCfg = Release|Win32
+		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - Intel C++|Win32.Build.0 = Release|Win32
+		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - Intel C++|x64.ActiveCfg = Release|x64
+		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - Intel C++|x64.Build.0 = Release|x64
 		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - VSC++|Win32.ActiveCfg = Release|Win32
 		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - VSC++|Win32.Build.0 = Release|Win32
 		{B5FDA7C1-8125-4E2F-BA95-8A7E7CCE635E}.Release - VSC++|x64.ActiveCfg = Release|x64

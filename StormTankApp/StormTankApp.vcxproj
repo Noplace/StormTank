@@ -128,12 +128,6 @@
       <FileType>Document</FileType>
     </BIN2H>
   </ItemGroup>
-  <ItemGroup>
-    <FXC Include="Shaders\main2d.fx">
-      <target Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">2</target>
-      <target Condition="'$(Configuration)|$(Platform)'=='Release|x64'">2</target>
-    </FXC>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C9F2332C-18DE-4679-8D0A-B5F6ED285D3B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -342,7 +336,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WIN64;_AMD64;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Strict</FloatingPointModel>

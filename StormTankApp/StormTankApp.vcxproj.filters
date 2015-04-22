@@ -252,7 +252,4 @@
   <ItemGroup>
     <BIN2H Include="Content\MoonLte3.mid" />
   </ItemGroup>
-  <ItemGroup>
-    <FXC Include="Shaders\main2d.fx" />
-  </ItemGroup>
 </Project>
