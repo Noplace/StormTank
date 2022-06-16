@@ -111,8 +111,8 @@ class Channel : public Component {
   }
   void set_panning(real_t panning) {
     panning_ = panning;
-    pan_l = sqrt(1.0f-panning_);
-    pan_r = sqrt(panning_);
+    pan_l = sqrtf(1.0f - panning_);
+    pan_r = sqrtf(panning_);
   }
   bool silence() { return silence_;  }
   void set_silence(bool silence) {    

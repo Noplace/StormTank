@@ -23,10 +23,10 @@ namespace generators {
 class Generator {
  protected:
   template<typename Op>
-    static XMCOLOR* Generate(XMCOLOR* dest_data, uint32_t width, uint32_t height,Op line_op) {
+    static dxp::XMCOLOR* Generate(dxp::XMCOLOR* dest_data, uint32_t width, uint32_t height,Op line_op) {
       auto data = dest_data;
       for (uint32_t y=0;y<height;++y) {
-        auto dest_line = (XMCOLOR*)&data[y*width];
+        auto dest_line = (dxp::XMCOLOR*)&data[y*width];
         for (uint32_t x=0;x<width;++x) {
           line_op(dest_line,x,y);
         }
@@ -39,9 +39,9 @@ class Generator {
 
 class Random : public Generator {
  public:
-  static XMCOLOR* Generate(XMCOLOR* dest_data, uint32_t width, uint32_t height) {
+  static dxp::XMCOLOR* Generate(dxp::XMCOLOR* dest_data, uint32_t width, uint32_t height) {
     srand(rand());
-    return Generator::Generate(dest_data,width,height,[](XMCOLOR* dest_line,uint32_t x,uint32_t y) {
+    return Generator::Generate(dest_data,width,height,[](dxp::XMCOLOR* dest_line,uint32_t x,uint32_t y) {
       dest_line[x].r = (rand() % 255) & 0xff;
       dest_line[x].g = (rand() % 255) & 0xff;
       dest_line[x].b = (rand() % 255) & 0xff;
@@ -52,8 +52,8 @@ class Random : public Generator {
 
 class XOR : public Generator {
  public:
-  static XMCOLOR* Generate(XMCOLOR* dest_data, uint32_t width, uint32_t height) {
-    return Generator::Generate(dest_data,width,height,[](XMCOLOR* dest_line,uint32_t x,uint32_t y) {
+  static dxp::XMCOLOR* Generate(dxp::XMCOLOR* dest_data, uint32_t width, uint32_t height) {
+    return Generator::Generate(dest_data,width,height,[](dxp::XMCOLOR* dest_line,uint32_t x,uint32_t y) {
       dest_line[x].r = (x ^ y) & 0xff;
       dest_line[x].g = (x ^ y) & 0xff;
       dest_line[x].b = (x ^ y) & 0xff;
@@ -64,10 +64,10 @@ class XOR : public Generator {
 
 class SinePlasma : public Generator {
  public:
-  static XMCOLOR* Generate(XMCOLOR* dest_data, uint32_t width, uint32_t height,float ph_x,float ph_y,float amp_x,float amp_y) {
-    return Generator::Generate(dest_data,width,height,[ph_x,ph_y,amp_x,amp_y,width,height](XMCOLOR* dest_line,uint32_t x,uint32_t y) {
-        auto x2 = 63.5*( sin( (ph_x+x) * ((XM_PI / (width>>1))*amp_x)) );
-        auto y2 = 63.5*( cos( (ph_y+y) * ((XM_PI / (height>>1))*amp_y)) );
+  static dxp::XMCOLOR* Generate(dxp::XMCOLOR* dest_data, uint32_t width, uint32_t height,float ph_x,float ph_y,float amp_x,float amp_y) {
+    return Generator::Generate(dest_data,width,height,[ph_x,ph_y,amp_x,amp_y,width,height](dxp::XMCOLOR* dest_line,uint32_t x,uint32_t y) {
+        auto x2 = 63.5*( sin( (ph_x+x) * ((dx::XM_PI / (width>>1))*amp_x)) );
+        auto y2 = 63.5*( cos( (ph_y+y) * ((dx::XM_PI / (height>>1))*amp_y)) );
         auto color = (uint32_t)(127+(x2+y2));
         dest_line[x].r = (color) & 0xff;
         dest_line[x].g = (color) & 0xff;
@@ -79,14 +79,14 @@ class SinePlasma : public Generator {
 
 class ChaldniPlates : public Generator {
  public:
-  static XMCOLOR* Generate(XMCOLOR* dest_data, uint32_t width, uint32_t height) {
-    return Generator::Generate(dest_data,width,height,[width,height](XMCOLOR* dest_line,uint32_t x,uint32_t y) {
-      XMCOLOR color = 0xffffffff;
+  static dxp::XMCOLOR* Generate(dxp::XMCOLOR* dest_data, uint32_t width, uint32_t height) {
+    return Generator::Generate(dest_data,width,height,[width,height](dxp::XMCOLOR* dest_line,uint32_t x,uint32_t y) {
+      dxp::XMCOLOR color = 0xffffffff;
       switch (pick(width,height,x,y)) {
-        case 0: color = XMCOLOR(235,0,95,255);		break;
-        case 1: color = XMCOLOR(255,255,255,255);		break;
-        case 2: color = XMCOLOR(255,0,05,255);		break;
-        case 3: color = XMCOLOR(0,0,0,255);			break;
+        case 0: color = dxp::XMCOLOR(235,0,95,255);		break;
+        case 1: color = dxp::XMCOLOR(255,255,255,255);		break;
+        case 2: color = dxp::XMCOLOR(255,0,05,255);		break;
+        case 3: color = dxp::XMCOLOR(0,0,0,255);			break;
 	    }
 		
         

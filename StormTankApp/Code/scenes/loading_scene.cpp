@@ -9,7 +9,7 @@ int LoadingScene::Initialize(MainWindow* win) {
   gfx = win->gfx();
 
   camera_.Initialize(gfx);
-  camera_.Ortho2D(0,0,float(gfx->width()),float(gfx->height()));
+  /*camera_.Ortho2D(0, 0, float(gfx->width()), float(gfx->height()));
  // gfx->SetViewport(0,0,float(gfx->width()),float(gfx->height()),0,1000);
   gfx->SetCamera(&camera_);
   
@@ -32,21 +32,21 @@ int LoadingScene::Initialize(MainWindow* win) {
 
   //gfx->CompileShaderFromMemory(
 
-
+  */
 
   arc1.Initialize(gfx);
   arc1.SetTopLeft(200,200);
   arc1.SetColor0(0xffffffff);
   arc1.SetColor1(0x000000ff);
   arc1.SetParams(50,0,2,10);
-  arc1.Construct();
+  //arc1.Construct();
 
 
   loading_bar.Initialize(gfx);
   loading_bar.SetTopLeft(0,0);
   loading_bar.SetParams(200,20);
-  loading_bar.SetColors(XMCOLOR(0xff00ff00),XMCOLOR(0xff00ff00),XMCOLOR(0xff00ff00),XMCOLOR(0xff00ff00));
-  loading_bar.Construct();
+  loading_bar.SetColors(dxp::XMCOLOR(0xff00ff00), dxp::XMCOLOR(0xff00ff00), dxp::XMCOLOR(0xff00ff00), dxp::XMCOLOR(0xff00ff00));
+  //loading_bar.Construct();
 
 
 
@@ -93,14 +93,14 @@ int LoadingScene::Update(double dt) {
     //sn.Generate(tex_data0,256,256,theta,0,5);
     //gfx->CopyToTexture(texture,tex_data0,0,256,graphics::TexturePoint(0,0),graphics::TexturePoint(0,0),256,256);
 
-  
+  /*
   arc1.SetRotate(theta);
   arc1.Update();
   int w = gfx->width();
   loading_bar.SetParams((loading_progress*(float)w)/100.0f,20);
   loading_bar.Construct();
   loading_bar.Update();
-
+  */
   return S_OK;
 }
 
@@ -116,10 +116,10 @@ int LoadingScene::Draw() {
   //gfx->device()->SetTexture(0,nullptr);
   //gfx->Draw(4,4);
   
-  gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&arc1.world());
-  arc1.Draw();
-  gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&loading_bar.world());
-  loading_bar.Draw();
+ // gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&arc1.world());
+ // arc1.Draw();
+  //gfx->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&loading_bar.world());
+  //loading_bar.Draw();
 
   return S_OK;
 }

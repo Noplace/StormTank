@@ -48,13 +48,14 @@ void MainWindow::Initialize() {
   memset(&timing,0,sizeof(timing));
   timer_.Calibrate();
 
-  
-  gfx_ = new graphics::ContextD3D9();
+  gfx_ = new ve::ContextD3D11();
   gfx_->Initialize();
-  gfx_->CreateDisplay(this);
+  gfx_->CreateDisplay(handle());
 
+
+  /*
   //for 2d
-  graphics::InputElement gielements[] = 
+  ve::InputElement gielements[] = 
   {
       {0, 0 , D3DDECLTYPE_FLOAT3  , D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
       {0, 12, D3DDECLTYPE_FLOAT2  , D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0},
@@ -66,6 +67,9 @@ void MainWindow::Initialize() {
   gfx_->CreateInputLayout(gielements,resources.gfx.input_layout);
   gfx_->SetInputLayout(resources.gfx.input_layout);
 
+
+  */
+  /*
   {
     uint8_t* data;
     size_t size;
@@ -78,7 +82,7 @@ void MainWindow::Initialize() {
     resources.gfx.viewprojection = resources.gfx.effect->GetParameterByName(0,"viewprojection");
     resources.gfx.world = resources.gfx.effect->GetParameterByName(0,"world");
 
-  }
+  }*/
 
 
   audio_interface_ = new audio::output::DirectSound();
@@ -108,7 +112,7 @@ void MainWindow::Initialize() {
   //loading_scene.Initialize(this);
   //intro_scene.Initialize(this);
   //current_scene = &loading_scene;
-  SwitchScene(&scenes.demo);
+  SwitchScene(&scenes.loading);//demo
   Show();
   timing.prev_cycles = timer_.GetCurrentCycles();
   //SetThreadAffinityMask(GetCurrentThread(),
@@ -167,10 +171,10 @@ void MainWindow::Step() {
 
    
   if (timing.render_time_span >= 16.667) {
-    gfx_->Begin();
-    current_scene->Draw();
-    gfx_->End();
-    gfx_->Render();
+    //gfx_->Begin();
+  //  current_scene->Draw();
+   // gfx_->End();
+   // gfx_->Render();
     timing.render_time_span = 0;
   }
 
@@ -211,8 +215,8 @@ int MainWindow::OnDestroy(WPARAM wParam,LPARAM lParam) {
   audio_interface_->Deinitialize();
   SafeDelete(&audio_interface_);
 
-  gfx_->DestroyEffectInterface((void**)&resources.gfx.effect);
-  gfx_->DestoryInputLayout(resources.gfx.input_layout);
+  //gfx_->DestroyEffectInterface((void**)&resources.gfx.effect);
+  //gfx_->DestoryInputLayout(resources.gfx.input_layout);
   gfx_->Deinitialize();
   SafeDelete(&gfx_);
   PostQuitMessage(0);

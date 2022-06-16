@@ -130,7 +130,7 @@ class LowPassFilter : public filters::IIRFilter<1,2> {
   void set_cutoff_freq(real_t cutoff_freq) { cutoff_freq_ = cutoff_freq; }
   void Update() {
     real_t fc = (cutoff_freq_)/(sample_rate_);
-    real_t x = exp(-2*XM_PI*fc);
+    real_t x = exp(-2* XM_PI*fc);
     a[0] = 1.0f-x;
     b[0] = 1.0f;
     b[1] = x;

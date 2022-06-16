@@ -15,7 +15,7 @@ class BaseScene {
   virtual int Draw() = 0;
  protected:
   MainWindow* win;
-  graphics::ContextD3D9* gfx;
+  ve::ContextD3D11* gfx;
 };
 
 
@@ -27,14 +27,14 @@ class LoadingScene : public BaseScene {
   int Draw();
  private:
   static DWORD WINAPI LoadingThread(LPVOID lpThreadParameter);
-  graphics::Camera camera_;
-  graphics::VertexShader vertex_shader_;
-  graphics::PixelShader pixel_shader_;
-  graphics::Buffer vb;
-  graphics::Texture texture;
-  graphics::shape::Arc arc1;
-  graphics::shape::Rectangle loading_bar;
-  graphics::shape::Rectangle loading_bg;
+  ve::Camera camera_;
+  ve::VertexShader vertex_shader_;
+  ve::PixelShader pixel_shader_;
+  ve::Buffer vb;
+  ve::Texture texture;
+  ve::shape::Arc arc1;
+  ve::shape::Rectangle loading_bar;
+  ve::shape::Rectangle loading_bg;
   HANDLE thread_handle,event1;
   DWORD thread_id;
   int loading_progress;
@@ -49,17 +49,17 @@ class IntroScene : public BaseScene {
   int Draw();
  private:
 
-  graphics::Texture render_texture;
-  graphics::ResourceView render_surface,old_surface;
+  ve::Texture render_texture;
+  ve::ResourceView render_surface,old_surface;
 
-  FontDraw font;
-  graphics::Camera camera_;
-  graphics::VertexShader vertex_shader_;
-  graphics::PixelShader pixel_shader_;
+ // FontDraw font;
+  ve::Camera camera_;
+  ve::VertexShader vertex_shader_;
+  ve::PixelShader pixel_shader_;
   Oscilloscope sa;
-  graphics::Buffer vb;
-  graphics::Texture texture;
-  graphics::shape::Arc arc1;
+  ve::Buffer vb;
+  ve::Texture texture;
+  ve::shape::Arc arc1;
 };
 
 
@@ -70,16 +70,16 @@ class DemoScene : public BaseScene {
   int Update(double dt);
   int Draw();
  private:
-  graphics::ContextD3D9* gfx;
+  ve::ContextD3D11* gfx;
   double main_time_span;
   struct {
     char help_str[255];
-    FontDraw font;
-    graphics::Buffer vb;
-    graphics::Texture texture;
-    graphics::shape::Arc arc1;
-    LPD3DXEFFECT effect;
-    D3DXHANDLE world,viewprojection;
-    graphics::Camera cam2d,cam3d;
+    //FontDraw font;
+    ve::Buffer vb;
+    ve::Texture texture;
+    ve::shape::Arc arc1;
+    //LPD3DXEFFECT effect;
+    //D3DXHANDLE world,viewprojection;
+    ve::Camera cam2d,cam3d;
   } res;
 };

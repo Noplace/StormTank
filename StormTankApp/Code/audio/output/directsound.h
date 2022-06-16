@@ -18,7 +18,7 @@
 *****************************************************************************************************************/
 #include <WinCore/windows/windows.h>
 #include <WinCore/types.h>
-#include <audiodefs.h>
+#include <mmreg.h>
 #include <dsound.h>
 #include "interface.h"
 

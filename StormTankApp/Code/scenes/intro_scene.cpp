@@ -2,8 +2,8 @@
 #include <fstream>
 #include <time.h>
 pgt::generators::SimplexNoise sn;
-XMCOLOR* tex_data0;
-XMMATRIX world_mat;
+dxp::XMCOLOR* tex_data0;
+dx::XMMATRIX world_mat;
 double main_time_span;
 
 
@@ -11,7 +11,7 @@ double main_time_span;
 int IntroScene::Initialize(MainWindow* win) {
   BaseScene::Initialize(win);
   camera_.Initialize(win->gfx());  
-  gfx = (graphics::ContextD3D9*)win->gfx();
+  /*gfx = (graphics::ContextD3D9*)win->gfx();
   
   //gfx->CreateTexture(640,480,0,0,render_texture);
   gfx->device()->CreateTexture(640,
@@ -119,27 +119,27 @@ int IntroScene::Initialize(MainWindow* win) {
 
   }
 
-  main_time_span = 0;
+  main_time_span = 0;*/
   win->player2().Play();
   return S_OK;
 }
 
 int IntroScene::Deinitialize() {
   win->player2().set_visual_addon(nullptr);
-  sa.Deinitialize();
-  gfx->DestroyBuffer(vb);
+//  sa.Deinitialize();
+  /*gfx->DestroyBuffer(vb);
   arc1.Deinitialize();
   gfx->DestroyResourceView(old_surface);
   gfx->DestroyResourceView(render_surface);
   gfx->DestroyTexture(texture);
   gfx->DestroyShader(vertex_shader_);
   camera_.Deinitialize();
-  delete [] tex_data0;
+  delete [] tex_data0;*/
   return S_OK;
 }
 
 int IntroScene::Update(double dt) {
-  auto effect = win->resources.gfx.effect;
+ /* auto effect = win->resources.gfx.effect;
   
   static float theta =0;
   float y = 0;//100+sin(theta)*100;
@@ -165,13 +165,13 @@ int IntroScene::Update(double dt) {
     effect->SetMatrix(win->resources.gfx.viewprojection,(D3DXMATRIX*)&(camera_.viewprojection()));
 
 
-  theta += 0.03f;
+  theta += 0.03f;*/
   main_time_span += dt;
   return S_OK;
 }
 
 int IntroScene::Draw() {
-  auto effect = win->resources.gfx.effect;
+  /*auto effect = win->resources.gfx.effect;
   UINT passes;
   effect->Begin(&passes,0);
   //gfx->SetShader(vertex_shader_);
@@ -259,6 +259,6 @@ int IntroScene::Draw() {
     font.Draw(song_info,-1,DT_LEFT);
   }
 
-  effect->End();
+  effect->End();*/
   return S_OK;
 }

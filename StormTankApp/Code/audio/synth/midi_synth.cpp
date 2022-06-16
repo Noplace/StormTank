@@ -27,7 +27,7 @@
 #include "instruments/karplusstrong.h"
 #include "instruments/sonant_program.h"
 #include "instruments/waveguide_synthesis.h"
-
+#include "instruments/white_noise.h"
 //#define OUTPUT_EVENTS
 
 namespace audio {
@@ -152,6 +152,8 @@ void MidiSynth::Initialize() {
   }
   instr[2] = new instruments::OscWave(instruments::OscWave::Triangle);
 
+  instr[3] = new instruments::WhiteNoise(instruments::WhiteNoise::Triangle);
+
   instr[40] = new instruments::Violin();
 
   instr[48] = new instruments::Pad();//strings1
@@ -167,7 +169,9 @@ void MidiSynth::Initialize() {
 
 
   instr[0]->Load();
-  
+  instr[2]->Load();
+  instr[3]->Load();
+  instr[81]->Load();
   for (int i=0;i<kChannelCount;++i) {
     buffers.channels[i] = new real_t[buffers.main_size];
     memset(buffers.channels[i],0,sizeof(real_t)*buffers.main_size);

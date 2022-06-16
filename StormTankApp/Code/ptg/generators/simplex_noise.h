@@ -81,10 +81,10 @@ class SimplexNoise : public Generator {
     }
   
   }
-  XMCOLOR* Generate(XMCOLOR* dest_data, uint32_t width, uint32_t height,double x0,double y0,double zoom) {
+  dxp::XMCOLOR* Generate(dxp::XMCOLOR* dest_data, uint32_t width, uint32_t height,double x0,double y0,double zoom) {
     double zx = zoom/width;
     double zy = zoom/height;
-    return Generator::Generate(dest_data,width,height,[&](XMCOLOR* dest_line,uint32_t x,uint32_t y) {
+    return Generator::Generate(dest_data,width,height,[&](dxp::XMCOLOR* dest_line,uint32_t x,uint32_t y) {
       auto r = noise((x0+x)*zx,(y0+y)*zy);
       r = 127.5 + r*127.5;
       dest_line[x].r = UINT(r) & 0xff;

@@ -20,9 +20,9 @@ class MainWindow: public core::windows::Window {
   public:
     struct Resources {
       struct {
-        graphics::InputLayout input_layout;
-        D3DXHANDLE world,viewprojection;
-        LPD3DXEFFECT effect;
+        ve::InputLayout input_layout;
+        //D3DXHANDLE world,viewprojection;
+       // LPD3DXEFFECT effect;
       }gfx;
     }resources;
     struct {
@@ -44,7 +44,7 @@ class MainWindow: public core::windows::Window {
         current_scene->Initialize(this);
       }
     }
-    graphics::ContextD3D9* gfx() { return gfx_; }
+    ve::ContextD3D11* gfx() { return gfx_; }
     audio::output::Interface* audio_interface() { return audio_interface_; }
     audio::synth::MidiSynth& midi_synth() { return *midi_synth_; }
     audio::synth::Player& player2() { return *synth_player_; }
@@ -56,7 +56,7 @@ class MainWindow: public core::windows::Window {
     int OnKeyUp(WPARAM wParam,LPARAM lParam);
     int OnActivate(WPARAM wParam,LPARAM lParam);
   private:
-    graphics::ContextD3D9*    gfx_;
+    ve::ContextD3D11*    gfx_;
     audio::output::Interface* audio_interface_;
     BaseScene*                current_scene;
     audio::synth::Player*      synth_player_;

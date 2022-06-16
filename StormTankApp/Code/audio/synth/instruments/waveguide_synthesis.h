@@ -213,7 +213,7 @@ class  WaveguideSynthesis : public InstrumentProcessor {
     memset(wavetables[index].right,0,sizeof(real_t)*sample_rate_/8);
     for (int i=0;i<wavetables[index].count;++i) {
       real_t t = (real_t(i)/(wavetables[index].count-1));
-      real_t A = sin(t*2*XM_PI)*0.3f;
+      real_t A = sin(t*2* XM_PI)*0.3f;
       wavetables[index].left[i] = A+0.5f*RandomFloat(&randseed);
       wavetables[index].right[i] = A+0.5f*RandomFloat(&randseed);
     }

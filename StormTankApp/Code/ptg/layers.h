@@ -23,9 +23,9 @@ namespace layers {
 
 class Blend {
  public:
-   static XMCOLOR* Additive(XMCOLOR* dest, XMCOLOR* layer1, XMCOLOR* layer2, uint32_t width, uint32_t height, double t) {
+   static dxp::XMCOLOR* Additive(dxp::XMCOLOR* dest, dxp::XMCOLOR* layer1, dxp::XMCOLOR* layer2, uint32_t width, uint32_t height, double t) {
      t = t < 0 ? 0 : (t > 1 ? 1 : t);
-     return Operation(dest, layer1,layer2,width,height,[t](XMCOLOR* dest_line,XMCOLOR* line1,XMCOLOR* line2,uint32_t x,uint32_t y)
+     return Operation(dest, layer1,layer2,width,height,[t](dxp::XMCOLOR* dest_line,dxp::XMCOLOR* line1,dxp::XMCOLOR* line2,uint32_t x,uint32_t y)
      {
         dest_line[x].r = (UINT((1-t)*line1[x].r + t*line2[x].r) & 0xFF);
         dest_line[x].g = (UINT((1-t)*line1[x].g + t*line2[x].g) & 0xFF);
@@ -33,8 +33,8 @@ class Blend {
         dest_line[x].a = (UINT((1-t)*line1[x].a + t*line2[x].a) & 0xFF); 
      });
    }
-   static XMCOLOR* Sub(XMCOLOR* dest, XMCOLOR* layer1, XMCOLOR* layer2, uint32_t width, uint32_t height) {
-     return Operation(dest,layer1,layer2,width,height,[](XMCOLOR* dest_line,XMCOLOR* line1,XMCOLOR* line2,uint32_t x,uint32_t y)
+   static dxp::XMCOLOR* Sub(dxp::XMCOLOR* dest, dxp::XMCOLOR* layer1, dxp::XMCOLOR* layer2, uint32_t width, uint32_t height) {
+     return Operation(dest,layer1,layer2,width,height,[](dxp::XMCOLOR* dest_line,dxp::XMCOLOR* line1,dxp::XMCOLOR* line2,uint32_t x,uint32_t y)
      {
         dest_line[x].r = (line1[x].r - line2[x].r) & 0xFF;
         dest_line[x].g = (line1[x].g - line2[x].g) & 0xFF;
@@ -42,8 +42,8 @@ class Blend {
         dest_line[x].a = (line1[x].a - line2[x].a) & 0xFF; 
      });
    }
-   static XMCOLOR* Mul(XMCOLOR* dest, XMCOLOR* layer1, XMCOLOR* layer2, uint32_t width, uint32_t height) {
-     return Operation(dest,layer1,layer2,width,height,[](XMCOLOR* dest_line,XMCOLOR* line1,XMCOLOR* line2,uint32_t x,uint32_t y)
+   static dxp::XMCOLOR* Mul(dxp::XMCOLOR* dest, dxp::XMCOLOR* layer1, dxp::XMCOLOR* layer2, uint32_t width, uint32_t height) {
+     return Operation(dest,layer1,layer2,width,height,[](dxp::XMCOLOR* dest_line,dxp::XMCOLOR* line1,dxp::XMCOLOR* line2,uint32_t x,uint32_t y)
      {
         dest_line[x].r = (line1[x].r * line2[x].r) & 0xFF;
         dest_line[x].g = (line1[x].g * line2[x].g) & 0xFF;
@@ -51,8 +51,8 @@ class Blend {
         dest_line[x].a = (line1[x].a * line2[x].a) & 0xFF; 
      });
    }
-   static XMCOLOR* Div(XMCOLOR* dest, XMCOLOR* layer1, XMCOLOR* layer2, uint32_t width, uint32_t height) {
-     return Operation(dest,layer1,layer2,width,height,[](XMCOLOR* dest_line,XMCOLOR* line1,XMCOLOR* line2,uint32_t x,uint32_t y)
+   static dxp::XMCOLOR* Div(dxp::XMCOLOR* dest, dxp::XMCOLOR* layer1, dxp::XMCOLOR* layer2, uint32_t width, uint32_t height) {
+     return Operation(dest,layer1,layer2,width,height,[](dxp::XMCOLOR* dest_line,dxp::XMCOLOR* line1,dxp::XMCOLOR* line2,uint32_t x,uint32_t y)
      {
         dest_line[x].r = (line1[x].r / (line2[x].r+1)) & 0xFF;
         dest_line[x].g = (line1[x].g / (line2[x].g+1)) & 0xFF;
@@ -63,12 +63,12 @@ class Blend {
  private:
 
   template<typename Op>
-  static XMCOLOR* Operation(XMCOLOR* dest, XMCOLOR* layer1, XMCOLOR* layer2, uint32_t width, uint32_t height,Op op) {
+  static dxp::XMCOLOR* Operation(dxp::XMCOLOR* dest, dxp::XMCOLOR* layer1, dxp::XMCOLOR* layer2, uint32_t width, uint32_t height,Op op) {
     auto data = dest;
     for (uint32_t y=0;y<height;++y) {
-      auto dest_line = (XMCOLOR*)&data[y*width];
-      auto line1 = (XMCOLOR*)&layer1[y*width];
-      auto line2 = (XMCOLOR*)&layer2[y*width];
+      auto dest_line = (dxp::XMCOLOR*)&data[y*width];
+      auto line1 = (dxp::XMCOLOR*)&layer1[y*width];
+      auto line2 = (dxp::XMCOLOR*)&layer2[y*width];
       for (uint32_t x=0;x<width;++x) {
         op(dest_line,line1,line2,x,y);
       }

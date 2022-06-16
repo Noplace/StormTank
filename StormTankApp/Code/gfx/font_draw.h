@@ -1,6 +1,6 @@
-class FontDraw : public graphics::shape::Shape {
+class FontDraw : public ve::shape::Shape {
  public:
-  int Initialize(graphics::Context* context);
+  int Initialize(ve::Context* context);
   int Deinitialize();
   int Construct(uint32_t height, const char* facename);
   int SetSize(uint32_t w,uint32_t h) {

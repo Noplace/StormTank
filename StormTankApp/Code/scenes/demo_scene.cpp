@@ -1,13 +1,13 @@
 #include "../stormtankapp.h"
 
 struct {
-  graphics::Buffer vb;
-  XMMATRIX world;
+  //graphics::Buffer vb;
+  //XMMATRIX world;
 }object;
 
 int DemoScene::Initialize(MainWindow* win) {
   BaseScene::Initialize(win);
-  gfx = (graphics::ContextD3D9*)win->gfx();
+ /* gfx = (graphics::ContextD3D9*)win->gfx();
   res.cam2d.Initialize(gfx);
   res.cam2d.Ortho2D(0,0,640,480);
   
@@ -46,13 +46,13 @@ int DemoScene::Initialize(MainWindow* win) {
   }
 
   win->resources.gfx.effect->SetTechnique(win->resources.gfx.effect->GetTechnique(0));
-
+  */
   main_time_span = 0;
   return S_OK;
 }
 
 int DemoScene::Deinitialize() {
-  res.font.Deinitialize();
+ // res.font.Deinitialize();
   res.cam2d.Deinitialize();
   res.cam3d.Deinitialize();
   return S_OK;
@@ -60,7 +60,7 @@ int DemoScene::Deinitialize() {
 
 int DemoScene::Update(double dt) {
   
-
+    /*
   win->resources.gfx.effect->SetMatrix(win->resources.gfx.world,(D3DXMATRIX*)&(object.world));
 
 
@@ -80,12 +80,13 @@ int DemoScene::Update(double dt) {
 
     res.font.Update();
   }
-
+  */
   main_time_span += dt;
   return S_OK;
 }
 
 int DemoScene::Draw() {
+    /**
   gfx->Clear(1,1);
   {
     auto effect = win->resources.gfx.effect;
@@ -104,6 +105,6 @@ int DemoScene::Draw() {
   }
   {
     res.font.Draw(res.help_str,-1,DT_LEFT);
-  }
+  }*/
   return S_OK;
 }

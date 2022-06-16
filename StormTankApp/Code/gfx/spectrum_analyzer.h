@@ -2,13 +2,13 @@
 #define SPECTRUM_ANALYZER_H
 
 #include <x3daudio.h>
-#include <XDSP.h>
+#include "..\XDSP.h"
 
-class SpectrumAnalyzer : public graphics::shape::Shape, public audio::synth::VisualAddon {
+class SpectrumAnalyzer : public ve::shape::Shape, public audio::synth::VisualAddon {
  public:
   SpectrumAnalyzer();
   ~SpectrumAnalyzer();
-  int Initialize(graphics::Context* context);
+  int Initialize(ve::Context* context);
   int Deinitialize();
   int Construct() {
     return S_OK;
@@ -20,9 +20,9 @@ class SpectrumAnalyzer : public graphics::shape::Shape, public audio::synth::Vis
  private:
   const static int nBinsLog2 = 8;
   const static int nBins = 1 << nBinsLog2;
-  XDSP::XVECTOR* real_samples;
-  XDSP::XVECTOR* img_samples;
-  XDSP::XVECTOR* unity;
+  XDSP::XMVECTOR* real_samples;
+  XDSP::XMVECTOR* img_samples;
+  XDSP::XMVECTOR* unity;
   float* scratch;
 
   double time_counter;

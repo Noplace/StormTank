@@ -10,33 +10,33 @@ Oscilloscope::~Oscilloscope() {
 
 }
 
-int Oscilloscope::Initialize(graphics::Context* context) {
-  graphics::shape::Shape::Initialize(context);
+int Oscilloscope::Initialize(ve::Context* context) {
+  ve::shape::Shape::Initialize(context);
 
-  graphics::shape::Vertex v[LINE_COUNT];
+  ve::shape::Vertex v[LINE_COUNT];
   float xinc = 0;
   for (int i=0;i<LINE_COUNT;++i){
     float w = 1;
-    v[i] = graphics::shape::Vertex(XMFLOAT3(xinc,0,0),XMFLOAT2(0,0),XMCOLOR(1,1,1,1),i);
+    v[i] = ve::shape::Vertex(dx::XMFLOAT3(xinc,0,0), dx::XMFLOAT2(0,0), dxp::XMCOLOR(1,1,1,1),i);
     xinc += 1.0f;
   }
     
   memset(&vertex_buffer_,0,sizeof(vertex_buffer_));
-  vertex_buffer_.description.byte_width = sizeof(graphics::shape::Vertex)*LINE_COUNT;
+  vertex_buffer_.description.byte_width = sizeof(ve::shape::Vertex)*LINE_COUNT;
   vertex_buffer_.description.bind_flags = D3D11_BIND_VERTEX_BUFFER;
   vertex_buffer_.description.usage = 0;//D3DUSAGE_WRITEONLY | D3DUSAGE_DYNAMIC;
-  context_->CreateBuffer(vertex_buffer_,v);
+ // context_->CreateBuffer(vertex_buffer_,v,0);
   
   Update();
 
 
 
   scratch = new float[nBins];
-  unity = new XDSP::XVECTOR[nBins];
-  real_samples = new XDSP::XVECTOR[nBins>>2];
-  img_samples = new XDSP::XVECTOR[nBins>>2];
-  memset(img_samples,0,(nBins>>2)*sizeof(XDSP::XVECTOR));
-  memset(real_samples,0,(nBins>>2)*sizeof(XDSP::XVECTOR));
+  unity = new XDSP::XMVECTOR[nBins];
+  real_samples = new XDSP::XMVECTOR[nBins>>2];
+  img_samples = new XDSP::XMVECTOR[nBins>>2];
+  memset(img_samples,0,(nBins>>2)*sizeof(XDSP::XMVECTOR));
+  memset(real_samples,0,(nBins>>2)*sizeof(XDSP::XMVECTOR));
   memset(freq_pow,0,sizeof(freq_pow));
   
 
@@ -50,7 +50,7 @@ int Oscilloscope::Initialize(graphics::Context* context) {
 
 int Oscilloscope::Deinitialize() {
   //EnterCriticalSection(&cs);
-  context_->DestroyBuffer(vertex_buffer_);
+ // context_->DestroyBuffer(vertex_buffer_);
   delete [] real_samples;
   delete [] img_samples;
   delete [] scratch;
@@ -74,16 +74,16 @@ void Oscilloscope::AddPCMData256(float* samples, uint32_t channels, double time_
 int Oscilloscope::Update() {
   //world_ = XMMatrixAffineTransformation2D(XMVectorSet(1,1,0,0),XMVectorSet(0,0,0,0),0,XMVectorSet(0,0.0f,0,0));
   
-  return graphics::shape::Shape::Update();
+  return ve::shape::Shape::Update();
 }
 
 int Oscilloscope::Draw() {
   //EnterCriticalSection(&cs);
   uint32_t offsets[1] = {0};
-  uint32_t strides[1] = {sizeof(graphics::shape::Vertex)};
-  context_->SetVertexBuffers(0,1,&vertex_buffer_,strides,offsets);
+  uint32_t strides[1] = {sizeof(ve::shape::Vertex)};
+ // context_->SetVertexBuffers(0,1,&vertex_buffer_,strides,offsets);
   //context_->SetIndexBuffer(index_buffer_,0);
-  context_->SetPrimitiveTopology(D3DPT_POINTLIST);
+  //context_->SetPrimitiveTopology(D3DPT_POINTLIST);
   //((graphics::ContextD3D9*)context_)->device()->SetTransform(D3DTS_WORLD,(D3DMATRIX*)&world_);
   //((graphics::ContextD3D9*)context_)->DrawIndexed(64*6,0,0);
   for (int i=0;i<LINE_COUNT;++i) {

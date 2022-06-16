@@ -60,9 +60,6 @@
     <ClCompile Include="Code\gfx\spectrum_analyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\gfx\font_draw.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Code\gfx\oscilloscope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -185,9 +182,6 @@
     <ClInclude Include="Code\gfx\spectrum_analyzer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\gfx\font_draw.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Code\gfx\oscilloscope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -246,6 +240,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\synth\player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\XDSP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\instruments\white_noise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

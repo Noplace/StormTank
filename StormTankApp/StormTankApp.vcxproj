@@ -51,7 +51,6 @@
     <ClCompile Include="Code\audio\synth\padsynth\pad_synth.cpp" />
     <ClCompile Include="Code\audio\synth\player.cpp" />
     <ClCompile Include="Code\audio\synth\sonant_synth.cpp" />
-    <ClCompile Include="Code\gfx\font_draw.cpp" />
     <ClCompile Include="Code\gfx\oscilloscope.cpp" />
     <ClCompile Include="Code\main_window.cpp" />
     <ClCompile Include="Code\scenes\demo_scene.cpp" />
@@ -72,6 +71,7 @@
     <ClInclude Include="Code\audio\synth\component.h" />
     <ClInclude Include="Code\audio\synth\filters\iir_filter.h" />
     <ClInclude Include="Code\audio\synth\instruments\waveguide_synthesis.h" />
+    <ClInclude Include="Code\audio\synth\instruments\white_noise.h" />
     <ClInclude Include="Code\audio\synth\misc.h" />
     <ClInclude Include="Code\audio\synth\effects\delay.h" />
     <ClInclude Include="Code\audio\synth\effects\effect.h" />
@@ -99,7 +99,6 @@
     <ClInclude Include="Code\audio\synth\padsynth\pad_synth.h" />
     <ClInclude Include="Code\audio\synth\types.h" />
     <ClInclude Include="Code\audio\synth\util.h" />
-    <ClInclude Include="Code\gfx\font_draw.h" />
     <ClInclude Include="Code\gfx\oscilloscope.h" />
     <ClInclude Include="Code\main_window.h" />
     <ClInclude Include="Code\music.h" />
@@ -114,6 +113,7 @@
     <ClInclude Include="Code\audio\output\interface.h" />
     <ClInclude Include="Code\audio\output\directsound.h" />
     <ClInclude Include="Code\audio\synth\synth.h" />
+    <ClInclude Include="Code\XDSP.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\VisualEssence\VisualEssence.vcxproj">
@@ -132,6 +132,7 @@
     <ProjectGuid>{C9F2332C-18DE-4679-8D0A-B5F6ED285D3B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>StormTankApp</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -152,7 +153,7 @@
     <CharacterSet>NotSet</CharacterSet>
     <UseIntelMKL>No</UseIntelMKL>
     <UseILP64Interfaces>false</UseILP64Interfaces>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -192,10 +193,10 @@
     <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
+  <!--<ImportGroup Label="ExtensionSettings">
     <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\FXC.props" />
     <Import Project="C:\Users\u11111\Documents\Visual Studio 2010\BuildRules\bin2h\Bin2h.props" />
-  </ImportGroup>
+  </ImportGroup>-->
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -234,9 +235,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>D:\Personal\ProjectOutputs\$(SolutionName)\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>D:\Personal\Projects\WinCore;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSDK_IncludePath);</IncludePath>
+    <OutDir>$(SolutionDir)..\Output\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\Output\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>C:\Users\Khalid Alkooheji\source\repos\Noplace;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Intel C++|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -336,12 +337,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WIN64;_AMD64;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExceptionHandling>false</ExceptionHandling>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Strict</FloatingPointModel>
       <AdditionalOptions>-D_HAS_EXCEPTIONS=0 -D_STATIC_CPPLIB  -D_DISABLE_DEPRECATE_STATIC_CPPLIB %(AdditionalOptions)</AdditionalOptions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -459,8 +461,8 @@
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
+  <!--<ImportGroup Label="ExtensionTargets">
     <Import Project="D:\Personal\Tools\BuildRules\FXC.targets" />
     <Import Project="D:\Personal\Tools\BuildRules\bin2h\Bin2h.targets" />
-  </ImportGroup>
+  </ImportGroup>-->
 </Project>

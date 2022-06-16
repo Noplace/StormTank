@@ -1,10 +1,10 @@
 #include "../stormtankapp.h"
 
-int FontDraw::Initialize(graphics::Context* context) {
+int FontDraw::Initialize(ve::Context* context) {
   Component::Initialize(context);
   font = nullptr;
   sprite = nullptr;
-  graphics::ContextD3D9* ctxt = (graphics::ContextD3D9*)context_;
+  ve::ContextD3D9* ctxt = (graphics::ContextD3D9*)context_;
   D3DXCreateSprite(ctxt->device(),&sprite);
   color_ = 0xFFFFFFFF;
   return S_OK;
@@ -26,7 +26,7 @@ int FontDraw::Construct(uint32_t height, const char* facename) {
 
 int FontDraw::Update() {
   if (changed_ == true) {
-    graphics::shape::Shape::Update();
+    ve::shape::Shape::Update();
     sprite->SetTransform((D3DXMATRIX*)&world_);
   }
   return S_OK;

@@ -28,7 +28,7 @@
 #include <WinCore/timer/timer2.h>
 #include <WinCore/math/math.h>
 #include <WinCore/math/fft/kiss_fft.h>
-#include <xnamath.h>
+#include <DirectXMath.h>
 #include "types.h"
 #include "component.h"
 
