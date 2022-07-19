@@ -21,7 +21,7 @@
 
 #include <WinCore/io/io.h>
 #include "base.h"
-#include "filters/lowpass.h"
+#include "filters/all.h"
 #include "effects/delay.h"
 #include "channel.h"
 #include "instruments/sonant_program.h"

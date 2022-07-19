@@ -81,7 +81,7 @@ class Channel : public Component {
   }
   void SetPitchBend(real_t amount) {
     instrument_->set_instrument_data(instrument_data_);
-    real_t e = exp(amount * _LN_2_DIV_12);
+    real_t e = expf(amount * _LN_2_DIV_12);
     for (int i=0;i<Polyphony;++i) {
       auto freq = instrument_data_->note_data_array[i].freq * e;
       instrument_->SetFrequency(freq,i);

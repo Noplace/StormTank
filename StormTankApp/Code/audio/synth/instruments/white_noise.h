@@ -18,7 +18,7 @@
 *****************************************************************************************************************/
 #pragma once
 
-#include "../filters/lowpass.h"
+#include "../filters/all.h"
 #include "instrument.h"
 #include "../oscillators/sine_oscillator.h"
 #include "../oscillators/triangle_oscillator.h"
@@ -43,10 +43,8 @@ public:
 class WhiteNoise : public InstrumentProcessor {
 public:
     LowPassFilter lowpass[Polyphony];
-    enum  WaveType {
-        Sine, Square, Triangle, Sawtooth, Exponent
-    };
-    WhiteNoise(WaveType type) : InstrumentProcessor(), osc(nullptr), type_(type) {
+
+    WhiteNoise() : InstrumentProcessor()  {
 
     }
     virtual ~WhiteNoise() {
@@ -55,17 +53,7 @@ public:
     int Load() {
         if (loaded_ == true)
             return S_FALSE;
-        switch (type_) {
-        case Sine:      osc = new oscillators::SineOscillator();    break;
-        case Square:    osc = new oscillators::SquareOscillator();    break;
-        case Triangle:  osc = new oscillators::TriangleOscillator();    break;
-        case Sawtooth:  osc = new oscillators::SawtoothOscillator();    break;
-        case Exponent:  osc = new oscillators::ExpOscillator();    break;
-        default:
-            osc = new oscillators::SineOscillator();
-            break;
-        }
-        osc->set_sample_rate(sample_rate_);
+      
         //default adsr, should be instrument specific
       //default adsr, should be instrument specific
         for (int i = 0;i < Polyphony;++i) {
@@ -83,16 +71,18 @@ public:
         loaded_ = true;
         return S_OK;
     }
+
     int Unload() {
         if (loaded_ == false)
             return S_FALSE;
-        SafeDelete(&osc);
         loaded_ = false;
         return S_OK;
     }
+
     InstrumentData* NewInstrumentData() {
         return new WhiteNoiseData();
     }
+
     real_t Tick(int note_index) {
         //auto result = osc->Tick(cdata->table[note_index].phase, cdata->table[note_index].inc);// + osc->Tick(phase,inc*2);
         //result *= adsr[note_index].Tick();
@@ -113,27 +103,29 @@ public:
         noise=0.5f*lowpass[note_index].Tick(noise);
         return noise;
     }
+
     int SetFrequency(real_t freq, int note_index) {
         cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
-        cdata->table[note_index].inc = osc->get_increment(cdata->note_data_array[note_index].freq);
+        //cdata->table[note_index].inc = osc->get_increment(cdata->note_data_array[note_index].freq);
         return S_OK;
     }
+
     int NoteOn(int note_index) {
         adsr[note_index].NoteOn(cdata->note_data_array[note_index].velocity);
         return S_OK;
     }
+
     int NoteOff(int note_index) {
         //cdata->table[note_index].inc = osc->get_increment(cdata->note_data_array[note_index].freq);
         adsr[note_index].NoteOff(cdata->note_data_array[note_index].velocity);
         return S_OK;
     }
+
     void set_instrument_data(InstrumentData* idata) {
         cdata = (WhiteNoiseData*)idata;
     }
 protected:
     WhiteNoiseData* cdata;
-    oscillators::Oscillator* osc;
-    WaveType type_;
 };
 
 }

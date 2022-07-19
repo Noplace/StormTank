@@ -155,7 +155,7 @@
     <ClInclude Include="Code\audio\synth\instruments\osc_wave.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\audio\synth\filters\lowpass.h">
+    <ClInclude Include="Code\audio\synth\filters\all.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\midi\midi2.h">
@@ -246,6 +246,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Code\audio\synth\instruments\white_noise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\filters\filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\filters\moog_filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\filters\lowpass_filter1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\audio\synth\filters\lowpass_filter2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

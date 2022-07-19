@@ -91,7 +91,7 @@ void MidiSynth::Initialize() {
   {
     static const real_t A4_freq = 440;
     for (int i=0;i<note_count;++i) {
-      chromatic_scale_freq[i] = A4_freq * pow(_2_POW_12TH,i-69);//45 = index of A4
+      chromatic_scale_freq[i] = A4_freq * powf(_2_POW_12TH,i-69);//45 = index of A4
     }
   }
 
@@ -108,7 +108,7 @@ void MidiSynth::Initialize() {
   //initialize all available instruments
   
   {
-    auto inst = new instruments::KarplusStrong();//instruments::Piano();
+      auto inst = new instruments::KarplusStrong();//KarplusStrong();//instruments::Piano();
     /*decltype(inst->data) data = { // 0
 			// Oscillator 1
 			7, // Octave knob
@@ -148,11 +148,11 @@ void MidiSynth::Initialize() {
 			
 		};
     memcpy(&inst->data,&data,sizeof(data));*/
-    instr[0] = inst;
+      instr[0] = nullptr;//inst;
   }
   instr[2] = new instruments::OscWave(instruments::OscWave::Triangle);
 
-  instr[3] = new instruments::WhiteNoise(instruments::WhiteNoise::Triangle);
+  instr[3] = new instruments::WhiteNoise();
 
   instr[40] = new instruments::Violin();
 

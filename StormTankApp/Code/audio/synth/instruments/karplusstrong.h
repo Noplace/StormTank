@@ -20,9 +20,9 @@
 #define AUDIO_SYNTH_INSTRUMENTS_KARPLUSSTRONG_H
 
 #include "instrument.h"
-#include "../filters/lowpass.h"
+
 #include "../misc.h"
-#include "../filters/iir_filter.h"
+#include "../filters/all.h"
 
 namespace audio {
 namespace synth {
@@ -117,7 +117,7 @@ class DynamicLevelLowPassFilter : public filters::IIRFilter<1,2> {
   void Update(real_t bw) {
     real_t L = bw;//bandwidth
     real_t T = 1.0f/sample_rate_;
-    real_t x = exp(-XM_PI*L*T);
+    real_t x = expf(-XM_PI*L*T);
     a[0] = 1.0f-x;
     b[0] = 1.0f;
     b[1] = x;
@@ -130,7 +130,7 @@ class LowPassFilter : public filters::IIRFilter<1,2> {
   void set_cutoff_freq(real_t cutoff_freq) { cutoff_freq_ = cutoff_freq; }
   void Update() {
     real_t fc = (cutoff_freq_)/(sample_rate_);
-    real_t x = exp(-2* XM_PI*fc);
+    real_t x = expf(-2* XM_PI*fc);
     a[0] = 1.0f-x;
     b[0] = 1.0f;
     b[1] = x;
@@ -154,6 +154,7 @@ class KarplusStrong : public InstrumentProcessor {
  public:
   KarplusStrong() : InstrumentProcessor() {
     randseed = 1;
+    cdata = null;
   }
   virtual ~KarplusStrong() {
     Unload();
@@ -219,9 +220,11 @@ class KarplusStrong : public InstrumentProcessor {
     loaded_ = false;
     return S_OK;
   }
+
   InstrumentData* NewInstrumentData() {
     return new KarplusStrongData();
   }
+
   real_t Tick(int note_index) {
     //auto cdata = (KarplusStrongData*)data;
     auto& nd = cdata->table[note_index];
@@ -244,6 +247,7 @@ class KarplusStrong : public InstrumentProcessor {
     out *= adsr[note_index].Tick();
     return out;
   }
+
   int SetFrequency(real_t freq, int note_index) {
     cdata->note_data_array[note_index].freq = cdata->note_data_array[note_index].base_freq = freq;
     cdata->table[note_index].phase = 0;
@@ -256,12 +260,14 @@ class KarplusStrong : public InstrumentProcessor {
 
     return S_OK;
   }
+
   int NoteOn(int note_index) {
     //auto cdata = (KarplusStrongData*)data;
 
     adsr[note_index].NoteOn(cdata->note_data_array[note_index].velocity);
     return S_OK;
   }
+
   int NoteOff(int note_index) {
     //auto cdata = (KarplusStrongData*)data;
     adsr[note_index].NoteOff(cdata->note_data_array[note_index].velocity);

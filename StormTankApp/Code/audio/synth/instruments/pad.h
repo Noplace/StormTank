@@ -62,7 +62,7 @@ class Pad : public InstrumentProcessor {
   uint32_t sample_size_;
   virtual void CalculateHarmonics(real_t freq) {
     for (int i=0;i<64;++i) {
-      harmonics_array[i] = cos(2* XM_PI*i/64.0f);
+      harmonics_array[i] = cosf(2* XM_PI*i/64.0f);
     }
   }
 };

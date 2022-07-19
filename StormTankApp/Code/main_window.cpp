@@ -32,6 +32,7 @@ MainWindow::MainWindow() : core::windows::Window() {
   current_scene = nullptr;
   memset(&key_down,0,sizeof(key_down));
   memset(&key_state,0,sizeof(key_state));
+  sonant_synth_ = null;
 }
 
 MainWindow::~MainWindow() {
@@ -93,9 +94,11 @@ void MainWindow::Initialize() {
 
   //player_.set_audio_interface(audio_interface_);
   //player_.Initialize();
+  
+  //sonant_synth_ = new audio::synth::SonantSynth();
+ // sonant_synth_->set_mode(audio::synth::SonantSynth::kModeSequencer);
 
-  sonant_synth_ = new audio::synth::SonantSynth();
-  sonant_synth_->set_mode(audio::synth::SonantSynth::kModeSequencer);
+ 
   midi_synth_ = new audio::synth::MidiSynth();
   midi_synth_->set_mode(audio::synth::MidiSynth::kModeSequencer);
   synth_player_ = new audio::synth::Player();
@@ -104,11 +107,12 @@ void MainWindow::Initialize() {
   //synth_player_->set_mode(audio::synth::Player::kModeLoop);
   synth_player_->Initialize();
 
-  //sonant_synth_->LoadSong(&songdata,_4K_SONANT_ENDPATTERN_,_4K_SONANT_ROWLEN_);
+  //sonant_synth_->LoadSong(&songdata, _4K_SONANT_ENDPATTERN_, _4K_SONANT_ROWLEN_);
 
+  
   delay = 400.0f;
   midi_synth_->delay_unit.set_delay_ms(delay);
-
+  
   //loading_scene.Initialize(this);
   //intro_scene.Initialize(this);
   //current_scene = &loading_scene;

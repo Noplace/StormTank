@@ -40,6 +40,7 @@ class Wavetable : public Component {
   const real_t kPrecisionRangeInv;
 
   Wavetable() : Component(),
+    table(nullptr),
     kPrecisionMask((1<<kPrecision)-1),
     kIndexRange(1<<kIndex),
     kPrecisionRange((real_t)(1<<kPrecision)),
@@ -62,9 +63,11 @@ class Wavetable : public Component {
     phase += inc; // the phase overflow itself
     return (table[i]*(1.0f-frac) + table[i+1]*frac); // linear interpolation
   }
+
   virtual uint32_t get_increment(real_t frequency) {
     return (uint32_t)((kIndexRange * frequency / sample_rate_) * kPrecisionRange);
   }
+
  protected:
   real_t* table;
 };
